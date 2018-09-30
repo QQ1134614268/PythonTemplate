@@ -1,10 +1,13 @@
-import poplib
+from email.header import decode_header
 from email.parser import Parser 
+from email.utils import parseaddr
+import poplib
+
 # 输入邮件地址, 口令和POP3服务器地址:
 email = input('Email: ')
 password = input('Password: ')
 pop3_server = input('POP3 server: ')
- 
+  
 # 连接到POP3服务器:
 server = poplib.POP3(pop3_server)
 # 可以打开或关闭调试信息:
@@ -38,20 +41,16 @@ msg = Parser().parsestr(msg_content)
 # 关闭连接:
 server.quit()
 
-from email.parser import Parser
-from email.header import decode_header
-from email.utils import parseaddr
- 
-import poplib
-
 msg = Parser().parsestr(msg_content)
+
+
 # indent用于缩进显示:
 def print_info(msg, indent=0):
     if indent == 0:
         for header in ['From', 'To', 'Subject']:
             value = msg.get(header, '')
             if value:
-                if header=='Subject':
+                if header == 'Subject':
                     value = decode_str(value)
                 else:
                     hdr, addr = parseaddr(value)
@@ -66,7 +65,7 @@ def print_info(msg, indent=0):
             print_info(part, indent + 1)
     else:
         content_type = msg.get_content_type()
-        if content_type=='text/plain' or content_type=='text/html':
+        if content_type == 'text/plain' or content_type == 'text/html':
             content = msg.get_payload(decode=True)
             charset = guess_charset(msg)
             if charset:
@@ -75,11 +74,13 @@ def print_info(msg, indent=0):
         else:
             print('%sAttachment: %s' % ('  ' * indent, content_type))
 
+
 def decode_str(s):
     value, charset = decode_header(s)[0]
     if charset:
         value = value.decode(charset)
     return value
+
 
 def guess_charset(msg):
     charset = msg.get_charset()

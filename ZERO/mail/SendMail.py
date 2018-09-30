@@ -1,16 +1,18 @@
-import smtplib
-from email.mime.text import MIMEText
 from email.header import Header
-def sendEmail(mail_content,mail_to,subject="master,your mail"):
+from email.mime.text import MIMEText
+import smtplib
+
+
+def sendEmail(mail_content, mail_to, subject="master,your mail"):
     # 第三方 SMTP 服务
-    mail_host="smtp.qq.com"  #设置服务器
-    mail_sender="839238852@qq.com"    #用户名
-    mail_pass="ypeiornvjkjxbedc"   #口令 
+    mail_host = "smtp.qq.com"  # 设置服务器
+    mail_sender = "1134614268@qq.com"  # 用户名
+    mail_pass = "ragrmyytlnsuibih"  # 口令 
     
     message = MIMEText(mail_content, 'plain', 'utf-8')
     message['Subject'] = Header(subject, 'utf-8')
     message['From'] = Header("明宇致和", 'utf-8')
-    message['To'] =  Header("天任", 'utf-8') 
+    message['To'] = Header("天任", 'utf-8') 
     
 #     # 添加附件就是加上一个MIMEBase，从本地读取一个图片:
 #     with open('''D:\\py\\www\\img\\android-icon.png''', 'rb') as f:
@@ -31,31 +33,32 @@ def sendEmail(mail_content,mail_to,subject="master,your mail"):
     try:
         smtpObj = smtplib.SMTP_SSL(mail_host, 465) 
         smtpObj.set_debuglevel(1)
-        smtpObj.login(mail_sender,mail_pass)
+        smtpObj.login(mail_sender, mail_pass)
         smtpObj.sendmail(mail_sender, mail_to, message.as_string())
         print ("邮件发送成功")
     except smtplib.SMTPException:
         print ("Error: 无法发送邮件")
     finally:
         smtpObj.quit() 
+
         
 sendEmail("hello world", '1134614268@qq.com')
 
-def sendEmail2(sendMail,token_password,receiveMail,host,port,message,subject,nickname,frinds_nickname,slave):
+
+def sendEmail2(sendMail, token_password, receiveMail, host, port, message, subject, nickname, frinds_nickname, slave):
     mail = MIMEText(message, 'plain', 'utf-8')
     mail['Subject'] = Header(subject, 'utf-8')
     mail['From'] = Header(nickname, 'utf-8')
-    mail['To'] =  Header(frinds_nickname, 'utf-8') 
+    mail['To'] = Header(frinds_nickname, 'utf-8') 
     try:
         smtpObj = smtplib.SMTP_SSL(host, port) 
-        smtpObj.login(sendMail,token_password)
+        smtpObj.login(sendMail, token_password)
         smtpObj.sendmail(sendMail, receiveMail, mail.as_string())
         print ("邮件发送成功")
     except smtplib.SMTPException:
         print ("Error: 无法发送邮件")
     finally:
         smtpObj.quit() 
-        
         
 # #推荐使用html格式的正文内容，这样比较灵活，可以附加图片地址，调整格式等
 # with open('abc.html','r') as f:
