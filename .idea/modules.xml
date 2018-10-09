@@ -2,16 +2,32 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://E:/Python/聊天机器人资源合集：项目，语聊，论文，教程/Awesome-Chatbot/.idea/Awesome-Chatbot.iml" filepath="E:/Python/聊天机器人资源合集：项目，语聊，论文，教程/Awesome-Chatbot/.idea/Awesome-Chatbot.iml" />
-      <module fileurl="file://E:/Python/DoubanAuto-master/.idea/DoubanAuto-master.iml" filepath="E:/Python/DoubanAuto-master/.idea/DoubanAuto-master.iml" />
-      <module fileurl="file://E:/Python/打游戏AI/SerpentAI/.idea/SerpentAI.iml" filepath="E:/Python/打游戏AI/SerpentAI/.idea/SerpentAI.iml" />
-      <module fileurl="file://E:/Python/Uncaptcha/.idea/Uncaptcha.iml" filepath="E:/Python/Uncaptcha/.idea/Uncaptcha.iml" />
+      <module fileurl="file://E:/Python/AI迷宫/.idea/AI迷宫.iml" filepath="E:/Python/AI迷宫/.idea/AI迷宫.iml" />
+      <module fileurl="file://E:/Python/豆瓣自动发帖_宇宁/.idea/DoubanAuto-master.iml" filepath="E:/Python/豆瓣自动发帖_宇宁/.idea/DoubanAuto-master.iml" />
+      <module fileurl="file://E:/Python/AI打游戏/.idea/SerpentAI.iml" filepath="E:/Python/AI打游戏/.idea/SerpentAI.iml" />
+      <module fileurl="file://E:/Python/AI语音Uncaptcha/.idea/Uncaptcha.iml" filepath="E:/Python/AI语音Uncaptcha/.idea/Uncaptcha.iml" />
+      <module fileurl="file://E:/Python/Wechat_AutoJump-master/.idea/Wechat_AutoJump-master.iml" filepath="E:/Python/Wechat_AutoJump-master/.idea/Wechat_AutoJump-master.iml" />
+      <module fileurl="file://E:/Python/AI聊天/.idea/breadbot.iml" filepath="E:/Python/AI聊天/.idea/breadbot.iml" />
       <module fileurl="file://E:/Python/hellodjango/.idea/hellodjango.iml" filepath="E:/Python/hellodjango/.idea/hellodjango.iml" />
-      <module fileurl="file://E:/Python/全球最大成人网站PornHub爬虫/pornhubbot/.idea/pornhubbot.iml" filepath="E:/Python/全球最大成人网站PornHub爬虫/pornhubbot/.idea/pornhubbot.iml" />
+      <module fileurl="file://E:/Python/my_django/.idea/my_django.iml" filepath="E:/Python/my_django/.idea/my_django.iml" />
+      <module fileurl="file://E:/Python/neural-networks-and-deep-learning-master/.idea/neural-networks-and-deep-learning-master.iml" filepath="E:/Python/neural-networks-and-deep-learning-master/.idea/neural-networks-and-deep-learning-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/python.iml" filepath="$PROJECT_DIR$/.idea/python.iml" />
       <module fileurl="file://$PROJECT_DIR$/../python-deep-learning/.idea/python-deep-learning.iml" filepath="$PROJECT_DIR$/../python-deep-learning/.idea/python-deep-learning.iml" />
+      <module fileurl="file://E:/Python/quicklib-Quicklib-master/.idea/quicklib-Quicklib-master.iml" filepath="E:/Python/quicklib-Quicklib-master/.idea/quicklib-Quicklib-master.iml" />
       <module fileurl="file://E:/Python/贪吃蛇游戏的人工智能/snake-ai/.idea/snake-ai.iml" filepath="E:/Python/贪吃蛇游戏的人工智能/snake-ai/.idea/snake-ai.iml" />
+      <module fileurl="file://E:/Python/spaCy-master/.idea/spaCy-master.iml" filepath="E:/Python/spaCy-master/.idea/spaCy-master.iml" />
+      <module fileurl="file://E:/Python/stock-master/.idea/stock-master.iml" filepath="E:/Python/stock-master/.idea/stock-master.iml" />
       <module fileurl="file://E:/Python/web/.idea/web.iml" filepath="E:/Python/web/.idea/web.iml" />
+      <module fileurl="file://E:/Python/web2/.idea/web2.iml" filepath="E:/Python/web2/.idea/web2.iml" />
+      <module fileurl="file://E:/Python/AI人脸识别/.idea/人脸.iml" filepath="E:/Python/AI人脸识别/.idea/人脸.iml" />
+      <module fileurl="file://E:/Python/AI人脸识别标记2/.idea/人脸检测、人脸标记，人脸识别以及换脸技术.iml" filepath="E:/Python/AI人脸识别标记2/.idea/人脸检测、人脸标记，人脸识别以及换脸技术.iml" />
+      <module fileurl="file://E:/Python/内存可视化/.idea/内存可视化.iml" filepath="E:/Python/内存可视化/.idea/内存可视化.iml" />
+      <module fileurl="file://E:/Python/微信机器人/.idea/微信机器人.iml" filepath="E:/Python/微信机器人/.idea/微信机器人.iml" />
+      <module fileurl="file://E:/Python/文本区域检测/.idea/文本区域检测.iml" filepath="E:/Python/文本区域检测/.idea/文本区域检测.iml" />
+      <module fileurl="file://E:/Python/朴素贝叶斯初步把他预测出来准确/.idea/朴素贝叶斯初步把他预测出来准确.iml" filepath="E:/Python/朴素贝叶斯初步把他预测出来准确/.idea/朴素贝叶斯初步把他预测出来准确.iml" />
+      <module fileurl="file://E:/Python/生成对抗网络图像处理工具/.idea/生成对抗网络图像处理工具.iml" filepath="E:/Python/生成对抗网络图像处理工具/.idea/生成对抗网络图像处理工具.iml" />
+      <module fileurl="file://E:/Python/聊天AI/.idea/聊天AI.iml" filepath="E:/Python/聊天AI/.idea/聊天AI.iml" />
+      <module fileurl="file://E:/Python/AI贪吃蛇/.idea/贪吃蛇游戏的人工智能.iml" filepath="E:/Python/AI贪吃蛇/.idea/贪吃蛇游戏的人工智能.iml" />
     </modules>
   </component>
 </project>

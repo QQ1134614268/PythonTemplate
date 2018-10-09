@@ -8,7 +8,7 @@ Created on 2018年2月25日
 import pymysql
  
 # 打开数据库连接
-db = pymysql.connect("127.0.0.1", "root", "123456", "blog_db")
+db = pymysql.connect("127.0.0.1", "root", "123456", "database_student")
  
 # 使用 cursor() 方法创建一个游标对象 cursor
 cursor = db.cursor()
@@ -21,13 +21,11 @@ data = cursor.fetchone()
  
 print ("Database version : %s " % data)
 
-sql = "select * from studentclass"
+sql = "select count(*) from teacher"
 try:
     # 执行sql语句
     data1 = cursor.execute(sql)
-    data1 = cursor.fetchone()  # 获取一个
-    print(data1)
-    data1 = cursor.fetchall()  # 获取所有
+    data1 = cursor.fetchone()
     print(data1)
     # 执行sql语句
     db.commit()

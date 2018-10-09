@@ -84,9 +84,7 @@ def main():
         browser.find_element_by_xpath('//*[@id="login_button"]').click()  #   登录
         browser.get('http://om.tencent.com/attendances/check_out/5575965?from=TAPD')  
         
-        # t=time.time()
         localtime = time.localtime()
-        # print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
         m = time.strftime("%p", localtime)
         mybool = "没有验证码"
         if m == "AM":  # 上午签到

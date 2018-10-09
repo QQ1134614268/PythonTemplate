@@ -9,9 +9,32 @@
     <orderEntry type="module" module-name="hellodjango" />
     <orderEntry type="module" module-name="hellodjango" />
     <orderEntry type="module" module-name="SerpentAI" />
-    <orderEntry type="module" module-name="Awesome-Chatbot" />
     <orderEntry type="module" module-name="python-deep-learning" />
     <orderEntry type="module" module-name="DoubanAuto-master" />
+    <orderEntry type="module" module-name="AI迷宫" />
+    <orderEntry type="module" module-name="web2" />
+    <orderEntry type="module" module-name="my_django" />
+    <orderEntry type="module" module-name="聊天AI" />
+    <orderEntry type="module" module-name="生成对抗网络图像处理工具" />
+    <orderEntry type="module" module-name="neural-networks-and-deep-learning-master" />
+    <orderEntry type="module" module-name="quicklib-Quicklib-master" />
+    <orderEntry type="module" module-name="spaCy-master" />
+    <orderEntry type="module" module-name="stock-master" />
+    <orderEntry type="module" module-name="web2" />
+    <orderEntry type="module" module-name="Wechat_AutoJump-master" />
+    <orderEntry type="module" module-name="人脸" />
+    <orderEntry type="module" module-name="内存可视化" />
+    <orderEntry type="module" module-name="微信机器人" />
+    <orderEntry type="module" module-name="文本区域检测" />
+    <orderEntry type="module" module-name="朴素贝叶斯初步把他预测出来准确" />
+    <orderEntry type="module" module-name="聊天AI" />
+    <orderEntry type="module" module-name="贪吃蛇游戏的人工智能" />
+    <orderEntry type="module" module-name="AI迷宫" />
+    <orderEntry type="module" module-name="DoubanAuto-master" />
+    <orderEntry type="module" module-name="贪吃蛇游戏的人工智能" />
+    <orderEntry type="module" module-name="SerpentAI" />
+    <orderEntry type="module" module-name="breadbot" />
+    <orderEntry type="module" module-name="人脸检测、人脸标记，人脸识别以及换脸技术" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />
