@@ -3,13 +3,13 @@
 # File Name: HiddenLayer.py
 # Author: Jiezhong Qiu
 # Create Time: 2014/11/22 13:46
-# TODO: implemetn HiddenLayer
 
 import numpy as np
 import util
 
 
 class InputLayer(object):
+
     def __init__(self, rng, n_in, n_out, activation, activationPrime,
                  nxt, Lambda=0., alpha=.001):
         W = np.asarray(
@@ -49,6 +49,7 @@ class InputLayer(object):
 
 
 class OutputLayer(object):
+
     def __init__(self, n_in, activation, activationPrime, errorFunc, costFunc):
         self.n_in = n_in
         self.activation, self.activationPrime = activation, activationPrime
@@ -78,6 +79,7 @@ class OutputLayer(object):
 
 
 class HiddenLayer(object):
+
     def __init__(self, rng, n_in, n_out, activation, activationPrime,
                  nxt, Lambda=0., alpha=.001):
         W = np.asarray(
@@ -120,6 +122,7 @@ class HiddenLayer(object):
 
 
 class SoftmaxLayer(HiddenLayer):
+
     def process(self, a_in, bp=True):
         m = a_in.shape[1]
         z = np.dot(self.W, a_in) + np.tile(self.b, (1, m))
