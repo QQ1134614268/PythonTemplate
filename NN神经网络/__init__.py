@@ -1,8 +1,8 @@
 
 
 import numpy as np
-X=[0,1,2]
+X = [0, 1, 2]
 
-X = np.array(X)
+X = np.array([X, X])
 
 print(X)

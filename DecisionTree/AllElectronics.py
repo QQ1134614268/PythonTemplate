@@ -1,11 +1,11 @@
-from sklearn.feature_extraction import DictVectorizer
 import csv
-from sklearn import tree
+
 from sklearn import preprocessing
-from sklearn.externals.six import StringIO
+from sklearn import tree
+from sklearn.feature_extraction import DictVectorizer
 
 # 去读数据文件  以 'rt'
-allElectronicsData = open(r'E:/Java/python/DecisionTree/AllElectronics.csv', 'rt')
+allElectronicsData = open(r'./AllElectronics.csv', 'rt')  # E:/Java/python/DecisionTree/
 reader = csv.reader(allElectronicsData)
 headers = next(reader)
 print("表格头: " + str(headers))
