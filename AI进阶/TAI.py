@@ -6,7 +6,7 @@ Created on 2019年1月14日
 from sklearn.cross_validation import train_test_split
 from tensorflow.examples.tutorials.mnist import input_data
 
-import tensorflowdemo as tf
+import tensorflow as tf
 
 # 数据集路径
 data_dir = '/home/roger/data/work/tensortensorflowdemomnist'
