@@ -6,10 +6,10 @@ import time
 import numpy as np
 import tensorflow as tf
 
-from capt.cfg import MAX_CAPTCHA, CHAR_SET_LEN, model_path
-from capt.cnn_sys import crack_captcha_cnn, X, keep_prob
-from capt.gen_captcha import wrap_gen_captcha_text_and_image
-from capt.utils import convert2gray, vec2text
+from  .cfg import MAX_CAPTCHA, CHAR_SET_LEN, model_path
+from  .cnn_sys import crack_captcha_cnn, X, keep_prob
+from  .gen_captcha import wrap_gen_captcha_text_and_image
+from  .utils import convert2gray, vec2text
 
 
 def hack_function(sess, predict, captcha_image):

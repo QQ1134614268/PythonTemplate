@@ -6,10 +6,10 @@ Created on 2019年1月14日
 from sklearn.cross_validation import train_test_split
 from tensorflow.examples.tutorials.mnist import input_data
 
-import tensorflow as tf  
+import tensorflowdemo as tf
 
 # 数据集路径
-data_dir = '/home/roger/data/work/tensorflow/data/mnist'
+data_dir = '/home/roger/data/work/tensortensorflowdemomnist'
 
 # 自动下载 MNIST 数据集
 mnist = input_data.read_data_sets(data_dir, one_hot=True)

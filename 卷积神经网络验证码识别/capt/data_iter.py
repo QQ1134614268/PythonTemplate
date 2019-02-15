@@ -4,9 +4,9 @@
 
 import numpy as np
 
-from capt.cfg import IMAGE_HEIGHT, IMAGE_WIDTH, CHAR_SET_LEN, MAX_CAPTCHA
-from capt.gen_captcha import wrap_gen_captcha_text_and_image
-from capt.utils import convert2gray, text2vec
+from  .cfg import IMAGE_HEIGHT, IMAGE_WIDTH, CHAR_SET_LEN, MAX_CAPTCHA
+from  .gen_captcha import wrap_gen_captcha_text_and_image
+from  .utils import convert2gray, text2vec
 
 
 def get_next_batch(batch_size=128):

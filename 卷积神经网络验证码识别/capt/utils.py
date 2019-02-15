@@ -1,6 +1,6 @@
 import numpy as np
 
-from capt.cfg import MAX_CAPTCHA, CHAR_SET_LEN
+from  .cfg import MAX_CAPTCHA, CHAR_SET_LEN
 
 
 def char2pos(c):
@@ -87,7 +87,6 @@ def vec2text(vec):
 
         text.append(chr(char_code))
     return "".join(text)
-
 
 """
 #向量（大小MAX_CAPTCHA*CHAR_SET_LEN）用0,1编码 每63个编码一个字符，这样顺利有，字符也有

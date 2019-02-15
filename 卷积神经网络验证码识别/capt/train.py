@@ -3,9 +3,9 @@
 """
 import tensorflow as tf
 
-from capt.cfg import MAX_CAPTCHA, CHAR_SET_LEN, tb_log_path, save_model
-from capt.cnn_sys import crack_captcha_cnn, Y, keep_prob, X
-from capt.data_iter import get_next_batch
+from  .cfg import MAX_CAPTCHA, CHAR_SET_LEN, tb_log_path, save_model
+from  .cnn_sys import crack_captcha_cnn, Y, keep_prob, X
+from  .data_iter import get_next_batch
 
 
 def train_crack_captcha_cnn():
