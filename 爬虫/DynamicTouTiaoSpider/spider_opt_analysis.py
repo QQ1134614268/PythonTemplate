@@ -1,15 +1,18 @@
 # coding=utf-8
-import json
-import os
-import re
-import urllib
-from urllib import request
 '''
 Python3.X 动态页面爬取（逆向解析）实例
 爬取今日头条关键词搜索结果的所有详细页面大图片并按照关键词及文章标题分类存储图片
 '''
+from builtins import type
+import json
+import os
+import re
+from urllib import request
+import urllib
+
 
 class CrawlOptAnalysis(object):
+
     def __init__(self, search_word="美女"):
         self.search_word = search_word
         self.headers = {
@@ -31,7 +34,7 @@ class CrawlOptAnalysis(object):
                 content = response.read()
         except Exception as e:
             content = None
-            print('crawl MNIST_data exception.'+str(e))
+            print('crawl MNIST_data exception.' + str(e))
         return content
 
     def _parse_data(self, content):
@@ -44,9 +47,14 @@ class CrawlOptAnalysis(object):
         '''
         if content is None:
             return None
+        content = str(content, encoding="utf8")  
+        print(type(content))
+        print(content)
         result_list = list()
         try:
+            print(8)
             data_list = json.loads(content)['MNIST_data']
+            print(88)
             print(data_list)
             
             for item in data_list:
@@ -57,7 +65,7 @@ class CrawlOptAnalysis(object):
                 result_dict['article_image_detail'] = url_list
                 result_list.append(result_dict)
         except Exception as e:
-            print('parse MNIST_data exception.'+str(e))
+            print('parse MNIST_data exception.' + str(e))
         return result_list
 
     def _save_picture(self, page_title, url):
@@ -68,7 +76,7 @@ class CrawlOptAnalysis(object):
         if url is None or page_title is None:
             print('save picture params is None!')
             return
-        reg_str = r"[\/\\\:\*\?\"\<\>\|]"  #For Windows File filter: '/\:*?"<>|'
+        reg_str = r"[\/\\\:\*\?\"\<\>\|]"  # For Windows File filter: '/\:*?"<>|'
         page_title = re.sub(reg_str, "", page_title)
         save_dir = './output/{0}/{1}/'.format(self.search_word, page_title)
         if os.path.exists(save_dir) is False:
@@ -81,7 +89,7 @@ class CrawlOptAnalysis(object):
                 f_save.write(response.read())
             print('Image is saved! search_word={0}, page_title={1}, save_file={2}'.format(self.search_word, page_title, save_file))
         except Exception as e:
-            print('save picture exception.'+str(e))
+            print('save picture exception.' + str(e))
 
     def go(self):
         offset = 0
@@ -95,7 +103,7 @@ class CrawlOptAnalysis(object):
                     for img in page['article_image_detail']:
                         self._save_picture(article_title, img)
             except Exception as e:
-                print('go exception.'+str(e))
+                print('go exception.' + str(e))
             finally:
                 offset += 20
 

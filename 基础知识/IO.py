@@ -1,4 +1,12 @@
-# 打开一个文件
+f = open("data.txt", "r")  # 设置文件对象
+str = f.read()
+f.close()  # 关闭文件
+
+# 为了方便，避免忘记close掉这个文件对象，可以用下面这种方式替代
+with open('data.txt', "r") as f:  # 设置文件对象
+    str = f.read()  # 可以是随便对文件的操作
+    
+    # 打开一个文件
 fo = open("foo.txt", "wb")
 print ("文件名: ", fo.name)
 print ("是否已关闭 : ", fo.closed)
@@ -8,10 +16,9 @@ print ("访问模式 : ", fo.mode)
 # 关闭打开的文件
 fo.close()
 
-
 # 打开一个文件
 fo = open("foo.txt", "w")
-fo.write( "www.runoob.com!\nVery good site!\n")
+fo.write("www.runoob.com!\nVery good site!\n")
  
 # 关闭打开的文件
 fo.close()
@@ -40,12 +47,11 @@ print ("重新读取字符串 : ", str)
 # 关闭打开的文件
 fo.close()
 
-
 import os
 
 # 重命名文件test1.txt到test2.txt。
-open("test1.txt",'w')
-os.rename( "test1.txt", "test2.txt" )
+open("test1.txt", 'w')
+os.rename("test1.txt", "test2.txt")
 # 删除一个已经存在的文件test2.txt
 os.remove("test2.txt")
 # 创建目录test
@@ -55,7 +61,7 @@ os.remove("test2.txt")
 # os.chdir("/test")
 # 
 # # 给出当前的目录
-print (os.getcwd())
+print (os.getcwd()) 
 # 
 # # 删除”/tmp/test”目录
 # os.rmdir( "/test"  )
