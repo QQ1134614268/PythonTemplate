@@ -1,0 +1,274 @@
+<html>
+ <head> 
+  <title>Evernote Export</title> 
+  <basefont face="Tahoma" size="2" /> 
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" /> 
+  <meta name="exporter-version" content="Evernote Windows/274507; Windows/6.1.7601 Service Pack 1;" /> 
+  <style>
+    body, td {
+      font-family: Tahoma;
+      font-size: 10pt;
+    }
+  </style> 
+ </head> 
+ <body> 
+  <a name="2329"> 
+   <div> 
+    <div style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;">
+      1. 关于非线性转化方程(non-linear transformation function) 
+     <div>
+      <br />
+     </div>
+     <div>
+      sigmoid函数(S 曲线)用来作为activation function:
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp;1.1 双曲函数(tanh)
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp;1.2 &nbsp;逻辑函数(logistic function)
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      2. 实现一个简单的神经网络算法
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      import numpy as np
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      def tanh(x): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; return np.tanh(x)
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      def tanh_deriv(x): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; return 1.0 - np.tanh(x)*np.tanh(x)
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      def logistic(x): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; return 1/(1 + np.exp(-x))
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      def logistic_derivative(x): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; return logistic(x)*(1-logistic(x))
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      class NeuralNetwork: &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; def __init__(self, layers, activation='tanh'): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &quot;&quot;&quot; &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; :param layers: A list containing the number of units in each layer.
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; Should be at least two values &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; :param activation: The activation function to be used. Can be
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &quot;logistic&quot; or &quot;tanh&quot; &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &quot;&quot;&quot; &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; if activation == 'logistic': &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.activation = logistic &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.activation_deriv = logistic_derivative &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; elif activation == 'tanh': &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.activation = tanh &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.activation_deriv = tanh_deriv
+     </div>
+     <div>
+      &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; self.weights = [] &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; for i in range(1, len(layers) - 1): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.weights.append((2*np.random.random((layers[i - 1] + 1, layers[i] + 1))-1)*0.25) &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.weights.append((2*np.random.random((layers[i] + 1, layers[i + 1]))-1)*0.25)
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; def fit(self, X, y, learning_rate=0.2, epochs=10000): &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; X = np.atleast_2d(X) &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; temp = np.ones([X.shape[0], X.shape[1]+1]) &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; temp[:, 0:-1] = X &nbsp;# adding the bias unit to the input layer &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; X = temp &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; y = np.array(y)
+     </div>
+     <div>
+      &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; for k in range(epochs): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i = np.random.randint(X.shape[0]) &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a = [X[i]]
+     </div>
+     <div>
+      &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; for l in range(len(self.weights)): &nbsp;#going forward network, for each layer
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a.append(self.activation(np.dot(a[l], self.weights[l]))) &nbsp;#Computer the node value for each layer (O_i) using activation function
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; error = y[i] - a[-1] &nbsp;#Computer the error at the top layer
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; deltas = [error * self.activation_deriv(a[-1])] #For output layer, Err calculation (delta is updated error)
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; #Staring backprobagation
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; for l in range(len(a) - 2, 0, -1): # we need to begin at the second to last layer&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; #Compute the updated error (i,e, deltas) for each node going from top layer to input layer&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; deltas.append(deltas[-1].dot(self.weights[l].T)*self.activation_deriv(a[l])) &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; deltas.reverse() &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; for i in range(len(self.weights)): &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; layer = np.atleast_2d(a[i]) &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; delta = np.atleast_2d(deltas[i]) &nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.weights[i] += learning_rate * layer.T.dot(delta)
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; def predict(self, x): &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; x = np.array(x) &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; temp = np.ones(x.shape[0]+1) &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; temp[0:-1] = x &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; a = temp &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; for l in range(0, len(self.weights)): &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; a = self.activation(np.dot(a, self.weights[l])) &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+     </div>
+     <div>
+      &nbsp; &nbsp; &nbsp; &nbsp; return a
+     </div>
+     <div>
+      <br />
+     </div>
+     <div>
+      <br />
+     </div>
+    </div> 
+   </div></a>
+ </body>
+</html>
