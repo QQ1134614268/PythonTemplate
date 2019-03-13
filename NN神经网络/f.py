@@ -80,4 +80,13 @@ class NeuralNetwork:
             a = self.activation(np.dot(a, self.weights[l]))
         return a
 
+
 # print(NeuralNetwork([3,2,1], "tanh").weights[0],NeuralNetwork([3,2,1], "tanh").weights[1])
+def sigmoid(z):
+    return 1.0 / (1.0 + np.exp(-z))
+
+
+def sigmoid_prime(z):
+    """sigmoid函数的导数"""
+    return sigmoid(z) * (1 - sigmoid(z)) 
+

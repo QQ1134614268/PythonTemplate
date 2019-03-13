@@ -19,17 +19,14 @@ class Network(object):
             a = sigmoid(np.dot(w, a) + b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
-            test_data=None):
+    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None):
         """随机梯度下降"""
         if test_data: 
             n_test = len(test_data)
         n = len(training_data)
-        for j in  range(epochs):
+        for j in range(epochs):
             random.shuffle(training_data)
-            mini_batches = [
-                training_data[k:k + mini_batch_size]
-                for k in  range(0, n, mini_batch_size)]
+            mini_batches = [training_data[k:k + mini_batch_size] for k in  range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
@@ -45,10 +42,8 @@ class Network(object):
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w - (eta / len(mini_batch)) * nw
-                        for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b - (eta / len(mini_batch)) * nb
-                       for b, nb in zip(self.biases, nabla_b)]
+        self.weights = [w - (eta / len(mini_batch)) * nw for w, nw in zip(self.weights, nabla_w)]
+        self.biases = [b - (eta / len(mini_batch)) * nb for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
         """返回一个元组(nabla_b, nabla_w)代表目标函数的梯度."""
