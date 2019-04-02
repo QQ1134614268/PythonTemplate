@@ -1,13 +1,5 @@
-'''
-Created on 2018年2月25日
-
-@author: Administrator
-'''
-
-
 # 导入 socket、sys 模块
 import socket
-import sys
 
 # 创建 socket 对象
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 

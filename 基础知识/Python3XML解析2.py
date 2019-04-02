@@ -1,4 +1,3 @@
-from xml.dom.minidom import parse
 import xml.dom.minidom
 
 # 使用minidom解析器打开 XML 文档
@@ -16,10 +15,10 @@ for movie in movies:
     if movie.hasAttribute("title"):
         print ("Title: %s" % movie.getAttribute("title"))
 
-    type = movie.getElementsByTagName('type')[0]
-    print ("Type: %s" % type.childNodes[0].data)
-    format = movie.getElementsByTagName('format')[0]
-    print ("Format: %s" % format.childNodes[0].data)
+    types = movie.getElementsByTagName('type')[0]
+    print ("Type: %s" % types.childNodes[0].data)
+    formats = movie.getElementsByTagName('format')[0]
+    print ("Format: %s" % formats.childNodes[0].data)
     rating = movie.getElementsByTagName('rating')[0]
     print ("Rating: %s" % rating.childNodes[0].data)
     description = movie.getElementsByTagName('description')[0]

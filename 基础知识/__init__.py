@@ -54,18 +54,19 @@
 ''' http://www.runoob.com/python/python-reg-expressions.html  参考网址'''
 import re
 print(re.match('www', 'www.runoob.com').span())  # 在起始位置匹配
-print(re.match('com', 'www.runoob.com'))         # 不在起始位置匹配
+print(re.match('com', 'www.runoob.com'))  # 不在起始位置匹配
 
 
 # 可写函数说明
-def changeme( mylist ):
+def changeme(mylist):
     "修改传入的列表"
-    mylist.append([1,2,3,4]);   
+    mylist.append([1, 2, 3, 4]);   
     print ("函数内取值: ", mylist)
     return
+
  
 # 调用changeme函数  mylist   list ???
-mylist = [10,20,30];
-changeme( mylist );
+mylist = [10, 20, 30];
+changeme(mylist);
 print ("函数外取值: ", mylist)
 

@@ -18,13 +18,9 @@ lr.fit(x, y)
 
 print(lr)
 
-print("coefficients:")
-print(lr.coef_)
-
-print("intercept:")
-print(lr.intercept_)
+print("coefficients:", lr.coef_)
+print("intercept:", lr.intercept_)
 
 xPredict = [102, 6]
 yPredict = lr.predict([xPredict])
-print("predict:")
-print(yPredict)
+print("predict:", yPredict)

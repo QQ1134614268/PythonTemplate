@@ -1,7 +1,7 @@
-from NN神经网络 import NeuralNetwork
+from NN神经网络 import NeuralNetwork 
 import numpy as np
 
-nn = NeuralNetwork([2, 20, 1], "tanh")
+nn = NeuralNetwork.NeuralNetwork([2, 20, 1], "tanh")
 x = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 y = np.array([0, 1, 1, 0])
 nn.fit(x, y)

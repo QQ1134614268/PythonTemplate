@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from tkinter import *
-from tkinter import messagebox
 import time
+from tkinter import *
+from tkinter import messagebox 
 
 root = Tk()
 root.title('五子棋')
@@ -25,8 +25,8 @@ min_y = 0  # 当前棋子最上的范围
 max_x = 0
 max_y = 0
 
-
 # // "来表示整数除法，返回不大于结果的一个最大的整数，而" / " 则单纯的表示浮点数除
+
 
 def fresh_outline_rectangle(x, y):  # 刷新棋子外接矩形范围
     global min_x
@@ -50,8 +50,8 @@ def fresh_outline_rectangle(x, y):  # 刷新棋子外接矩形范围
         elif (y > max_y):
             max_y = y
 
-
 # w.create_rectangle(30*min_x,30*min_y,30*max_x,30*max_y,fill='blue',outline='blue')
+
 
 # 棋型的评估分数
 shape_score = {(0, 1, 0): 5,  # 单子
