@@ -35,6 +35,18 @@
     <orderEntry type="module" module-name="SerpentAI" />
     <orderEntry type="module" module-name="breadbot" />
     <orderEntry type="module" module-name="人脸检测、人脸标记，人脸识别以及换脸技术" />
+    <orderEntry type="module" module-name="breadbot" />
+    <orderEntry type="module" module-name="Wechat_AutoJump-master" />
+    <orderEntry type="module" module-name="web_Django" />
+    <orderEntry type="module" module-name="spaCy-master" />
+    <orderEntry type="module" module-name="Scrapy_Tencent" />
+    <orderEntry type="module" module-name="mzitu" />
+    <orderEntry type="module" module-name="guest" />
+    <orderEntry type="module" module-name="DjangoBlog" />
+    <orderEntry type="module" module-name="django-rest-framework" />
+    <orderEntry type="module" module-name="django" />
+    <orderEntry type="module" module-name="demo" />
+    <orderEntry type="module" module-name="MySpider" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />

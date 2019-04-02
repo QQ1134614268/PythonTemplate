@@ -3,13 +3,21 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://E:/Python/AI迷宫/.idea/AI迷宫.iml" filepath="E:/Python/AI迷宫/.idea/AI迷宫.iml" />
+      <module fileurl="file://E:/Python/DjangoBlog/.idea/DjangoBlog.iml" filepath="E:/Python/DjangoBlog/.idea/DjangoBlog.iml" />
       <module fileurl="file://E:/Python/豆瓣自动发帖_宇宁/.idea/DoubanAuto-master.iml" filepath="E:/Python/豆瓣自动发帖_宇宁/.idea/DoubanAuto-master.iml" />
+      <module fileurl="file://E:/Python/MySpider/.idea/MySpider.iml" filepath="E:/Python/MySpider/.idea/MySpider.iml" />
+      <module fileurl="file://E:/Python/Scrapy_Tencent/.idea/Scrapy_Tencent.iml" filepath="E:/Python/Scrapy_Tencent/.idea/Scrapy_Tencent.iml" />
       <module fileurl="file://E:/Python/AI打游戏/.idea/SerpentAI.iml" filepath="E:/Python/AI打游戏/.idea/SerpentAI.iml" />
       <module fileurl="file://E:/Python/AI语音Uncaptcha/.idea/Uncaptcha.iml" filepath="E:/Python/AI语音Uncaptcha/.idea/Uncaptcha.iml" />
       <module fileurl="file://E:/Python/Wechat_AutoJump-master/.idea/Wechat_AutoJump-master.iml" filepath="E:/Python/Wechat_AutoJump-master/.idea/Wechat_AutoJump-master.iml" />
       <module fileurl="file://E:/Python/AI聊天/.idea/breadbot.iml" filepath="E:/Python/AI聊天/.idea/breadbot.iml" />
+      <module fileurl="file://E:/Python/demo/.idea/demo.iml" filepath="E:/Python/demo/.idea/demo.iml" />
+      <module fileurl="file://E:/Python/django/.idea/django.iml" filepath="E:/Python/django/.idea/django.iml" />
+      <module fileurl="file://E:/Python/django-rest-framework/.idea/django-rest-framework.iml" filepath="E:/Python/django-rest-framework/.idea/django-rest-framework.iml" />
+      <module fileurl="file://E:/Python/guest/.idea/guest.iml" filepath="E:/Python/guest/.idea/guest.iml" />
       <module fileurl="file://E:/Python/hellodjango/.idea/hellodjango.iml" filepath="E:/Python/hellodjango/.idea/hellodjango.iml" />
       <module fileurl="file://E:/Python/my_django/.idea/my_django.iml" filepath="E:/Python/my_django/.idea/my_django.iml" />
+      <module fileurl="file://E:/Python/mzitu/.idea/mzitu.iml" filepath="E:/Python/mzitu/.idea/mzitu.iml" />
       <module fileurl="file://E:/Python/neural-networks-and-deep-learning-master/.idea/neural-networks-and-deep-learning-master.iml" filepath="E:/Python/neural-networks-and-deep-learning-master/.idea/neural-networks-and-deep-learning-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/python.iml" filepath="$PROJECT_DIR$/.idea/python.iml" />
       <module fileurl="file://$PROJECT_DIR$/../python-deep-learning/.idea/python-deep-learning.iml" filepath="$PROJECT_DIR$/../python-deep-learning/.idea/python-deep-learning.iml" />
@@ -19,6 +27,7 @@
       <module fileurl="file://E:/Python/stock-master/.idea/stock-master.iml" filepath="E:/Python/stock-master/.idea/stock-master.iml" />
       <module fileurl="file://E:/Python/web/.idea/web.iml" filepath="E:/Python/web/.idea/web.iml" />
       <module fileurl="file://E:/Python/web2/.idea/web2.iml" filepath="E:/Python/web2/.idea/web2.iml" />
+      <module fileurl="file://E:/Python/web_Django/.idea/web_Django.iml" filepath="E:/Python/web_Django/.idea/web_Django.iml" />
       <module fileurl="file://E:/Python/AI人脸识别/.idea/人脸.iml" filepath="E:/Python/AI人脸识别/.idea/人脸.iml" />
       <module fileurl="file://E:/Python/AI人脸识别标记2/.idea/人脸检测、人脸标记，人脸识别以及换脸技术.iml" filepath="E:/Python/AI人脸识别标记2/.idea/人脸检测、人脸标记，人脸识别以及换脸技术.iml" />
       <module fileurl="file://E:/Python/内存可视化/.idea/内存可视化.iml" filepath="E:/Python/内存可视化/.idea/内存可视化.iml" />

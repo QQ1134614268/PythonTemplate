@@ -8,12 +8,8 @@ Created on 2018年2月25日
 import pymysql
  
 # 打开数据库连接
-<<<<<<< HEAD
 db = pymysql.connect("127.0.0.1", "root", "123456", "blog_db")
-=======
-db = pymysql.connect("127.0.0.1", "root", "123456", "database_student")
->>>>>>> branch 'master' of https://gitee.com/biaozhun/Python.git
- 
+
 # 使用 cursor() 方法创建一个游标对象 cursor
 cursor = db.cursor()
  
@@ -25,21 +21,15 @@ data = cursor.fetchone()
  
 print ("Database version : %s " % data)
 
-<<<<<<< HEAD
 sql = "select * from studentclass"
-=======
-sql = "select count(*) from teacher"
->>>>>>> branch 'master' of https://gitee.com/biaozhun/Python.git
+
 try:
     # 执行sql语句
     data1 = cursor.execute(sql)
-<<<<<<< HEAD
     data1 = cursor.fetchone()  # 获取一个
     print(data1)
     data1 = cursor.fetchall()  # 获取所有
-=======
-    data1 = cursor.fetchone()
->>>>>>> branch 'master' of https://gitee.com/biaozhun/Python.git
+
     print(data1)
     # 执行sql语句
     db.commit()
@@ -50,7 +40,6 @@ except:
 # 关闭数据库连接
 db.close()
 
-<<<<<<< HEAD
 '''
 import pymysql
  
@@ -77,5 +66,3 @@ except:
 # 关闭数据库连接
 db.close()
 '''
-=======
->>>>>>> branch 'master' of https://gitee.com/biaozhun/Python.git
