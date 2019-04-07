@@ -2,7 +2,7 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.5 (python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="web" />
     <orderEntry type="module" module-name="hellodjango" />
@@ -47,6 +47,7 @@
     <orderEntry type="module" module-name="django" />
     <orderEntry type="module" module-name="demo" />
     <orderEntry type="module" module-name="MySpider" />
+    <orderEntry type="module" module-name="ran_zero" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />
