@@ -1,3 +1,5 @@
+# coding:utf-8
+
 from email.header import Header
 from email.mime.text import MIMEText
 import smtplib
@@ -40,9 +42,6 @@ def sendEmail(mail_content, mail_to, subject="master,your mail"):
         print("Error: 无法发送邮件")
     finally:
         smtpObj.quit()
-
-
-sendEmail("hello world", '1134614268@qq.com')
 
 
 def sendEmail2(sendMail, token_password, receiveMail, host, port, message, subject, nickname, frinds_nickname, slave):
