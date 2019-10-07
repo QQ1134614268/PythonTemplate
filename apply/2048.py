@@ -1,7 +1,6 @@
 import curses
-from random import randrange, choice
 from collections import defaultdict
-from pip._vendor.html5lib.html5parser import method_decorator_metaclass
+from random import randrange, choice
 
 letter_codes = [ord(ch) for ch in 'WASDRQwasdrq']
 actions = ['Up', 'Left', 'Down', 'Right', 'Restart', 'Exit']

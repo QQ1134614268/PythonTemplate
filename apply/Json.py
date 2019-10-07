@@ -1,6 +1,6 @@
 import json
 
-data = {"code":10000, "data":0}
+data = {"code": 10000, "data": 0}
 print(type(data))
 data = json.dumps(data)
 print(type(data))

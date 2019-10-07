@@ -1,8 +1,8 @@
 # coding:utf-8
 
+import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
-import smtplib
 
 
 def sendEmail(mail_content, mail_to, subject="master,your mail"):

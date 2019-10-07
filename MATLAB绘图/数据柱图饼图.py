@@ -54,4 +54,3 @@ sigma = 20
 x = mu + sigma * np.random.randn(20000)
 plt.hist(x, bins=100, color='green', normed=False)
 plt.show()
-

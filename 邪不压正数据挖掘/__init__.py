@@ -1,7 +1,8 @@
-import requests
 import json
-import time
 import random
+import time
+
+import requests
 
 
 def get_one_page(url):

@@ -15,9 +15,8 @@ data = json.loads(data)
 code = data['code']
 data = data['data']
 holiday = -1
-if(code == 10000):
+if code == 10000:
     holiday = data
     print(holiday)
 else:
     holiday = "err"
-

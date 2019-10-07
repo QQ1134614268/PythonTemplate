@@ -1,9 +1,8 @@
 # coding:utf-8
 
 import poplib
-
-from email.parser import Parser
 from email.header import decode_header
+from email.parser import Parser
 from email.utils import parseaddr
 
 # 输入邮件地址，口令和 POP3 服务器地址
