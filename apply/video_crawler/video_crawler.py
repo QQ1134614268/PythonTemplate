@@ -10,7 +10,7 @@ logger = log_util.create_logger("F:/log/video_crawler_log.json")
 
 
 def getSeries(url_file, series_name, series_path):
-    # if os.path.exists(series_path):  # 判断文件夹是否存在
+    # if os.path.exists(series_path):  # 判断文件夹是否存在, 删除所有文件
     #     shutil.rmtree(series_path)
     if not os.path.exists(series_path):
         os.makedirs(series_path)
