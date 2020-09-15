@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 
 import requests
+import time
 from requests.adapters import HTTPAdapter
-
 
 
 def getVideo():
@@ -23,6 +23,7 @@ def getVideo():
         if not line.endswith(r"ts"):
             continue
         video_url = m3u6_url.replace("index.m3u8", line.split("/")[-1])
+        time.sleep(2)
         res = retry_get(video_url, timeout=200, headers={
             "Referer": "https://jx.123ku.com/123kudpbfq/?url=https://www.zhuticlub.com:65/20190619/A1pB3p4f/index.m3u8",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36",
@@ -33,6 +34,7 @@ def getVideo():
                 f.flush()
         except Exception:
             print(video_url)
+        count += 1
 
 
 def retry_get(url, timeout, headers, retry_count=3):
