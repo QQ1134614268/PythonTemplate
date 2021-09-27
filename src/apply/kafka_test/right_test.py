@@ -32,7 +32,7 @@ def get_kafka_reviews():
 
 if __name__ == '__main__':
     res = get_kafka_reviews()
-    with open("../../data/kakfa.txt", mode="w+", encoding="utf-8") as f:
+    with open("../../../data/kakfa.txt", mode="w+", encoding="utf-8") as f:
         for line in res:
             f.write(json.dumps(line, ensure_ascii=False))
             f.write("\n")

@@ -5,8 +5,8 @@
 """
 from sqlalchemy import create_engine
 
-from test.t_sqlserver.conf_db2 import oracle_name, password, ip, port, db
-from test.t_sqlserver.conf_db2 import sqlserver_ip, sqlserver_user, sqlserver_password, sqlserver_db
+from src.apply.t_sqlserver.conf_db2 import oracle_name, password, ip, port, db
+from src.apply.t_sqlserver.conf_db2 import sqlserver_ip, sqlserver_user, sqlserver_password, sqlserver_db
 
 sqlserver_url = 'mssql+pymssql://{}:{}@{}/{}'.format(sqlserver_user, sqlserver_password, sqlserver_ip, sqlserver_db)
 oracle_engine = create_engine(sqlserver_url)

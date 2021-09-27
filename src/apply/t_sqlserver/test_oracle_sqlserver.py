@@ -7,7 +7,7 @@
 import cx_Oracle
 import pymssql
 
-from test.t_sqlserver.conf_db2 import oracle_name, password, ip, port, db
+from src.apply.t_sqlserver.conf_db2 import oracle_name, password, ip, port, db
 
 
 def test_oracle():
