@@ -1,29 +1,11 @@
-/target/
-.mvn/wrapper
-.settings
-.project
-.classpath
-mvnw
-mvnw.cmd
-.pydevproject
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
- 
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
-
 __pycache__
-
+!data/log/.gitignore
+data/log
 ### NetBeans ###
 /nbproject/private/
 /build/
@@ -31,3 +13,6 @@ __pycache__
 /dist/
 /nbdist/
 /.nb-gradle/
+
+
+venv/*
