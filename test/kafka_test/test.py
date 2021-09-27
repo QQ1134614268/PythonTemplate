@@ -8,7 +8,7 @@ import json
 
 from kafka import KafkaConsumer
 
-from conf.kafka_conf import IP, PORT, TOPIC, KEY
+from src.conf import IP, PORT, TOPIC, KEY
 
 consumer = KafkaConsumer(TOPIC, group_id=KEY, bootstrap_servers=["{}:{}".format(IP, PORT)])
 for message in consumer:

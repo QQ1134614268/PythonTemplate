@@ -3,7 +3,7 @@
 @Time: 2021/7/30
 @Description:
 """
-from util.log_util import logger
+from src.util.log_util import logger
 
 with open("excel_field_data.txt", encoding="utf-8") as f:
     lines = f.readlines()
