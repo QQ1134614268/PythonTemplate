@@ -10,6 +10,8 @@ import string
 from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
+from src.conf.config import TIME_FMT
+
 
 class MyStrUti:
 
@@ -189,7 +191,7 @@ class SqlUtil:
 
 
 class TimeUtil:
-    def get_time_str(DATE_TIME_FORMAT='%Y-%m-%d %H:%M:%S'):
+    def get_time_str(DATE_TIME_FORMAT=(TIME_FMT)):
         return datetime.datetime.now().strftime(DATE_TIME_FORMAT)
 
 
