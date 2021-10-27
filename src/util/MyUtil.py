@@ -10,7 +10,7 @@ import string
 from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
-from src.conf.config import TIME_FMT
+from conf.config import TIME_FMT
 
 
 class MyStrUti:

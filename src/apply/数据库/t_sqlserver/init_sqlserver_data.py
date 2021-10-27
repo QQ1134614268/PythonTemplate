@@ -8,7 +8,7 @@ import os
 
 import pymssql
 
-from src.util.log_util import logger
+from util.log_util import logger
 
 
 def get_file(path):

@@ -2,7 +2,7 @@
 import os
 import shutil
 
-from src.util import time_util
+from util import time_util
 
 
 def prepare_path(file_path, remove=False):

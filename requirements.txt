@@ -11,3 +11,5 @@ elasticsearch~=7.15.0
 elasticsearch_dsl~=7.4.0
 kafka-python~=2.0.2
 pymysql==0.9.3
+pymssql==2.2.0
+cx_Oracle==8.2.0

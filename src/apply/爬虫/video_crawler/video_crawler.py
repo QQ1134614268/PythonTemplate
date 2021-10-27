@@ -4,7 +4,7 @@ import os
 import requests
 from requests.adapters import HTTPAdapter
 
-from src.util import log_util
+from util import log_util
 
 logger = log_util.create_logger("F:/log/video_crawler_log.json")
 
