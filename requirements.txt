@@ -10,3 +10,4 @@ concurrent_log_handler~=0.9.19
 elasticsearch~=7.15.0
 elasticsearch_dsl~=7.4.0
 kafka-python~=2.0.2
+pymysql==0.9.3
