@@ -5,10 +5,10 @@
 """
 oracle_name = "system"
 password = "oracle"
-ip = "139.9.34.239"
+ip = "127.0.0.1"
 port = "15210"
 db = "helowin"
-# oracle: "db_tns":"139.9.34.239:15210/helowin",
+# oracle: "db_tns":"127.0.0.1:15210/helowin",
 # "user": "system",
 # "password": "oracle",
 
