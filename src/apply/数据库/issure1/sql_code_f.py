@@ -164,7 +164,7 @@ def main():
     logger.info("--------------脚本开始-------------------")
     # mysql_sc()
     tables = get_tables(DB)
-    tables = ["guarantee_bonds"]
+    # tables = ["guarantee_bonds"]
     bt = big_table()
     c = ["sec_config"]
 
