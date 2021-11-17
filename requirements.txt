@@ -14,3 +14,4 @@ pymysql==0.9.3
 # mysql-connector-python==8.0.18
 pymssql==2.2.0
 cx_Oracle==8.2.0
+twisted

@@ -20,14 +20,14 @@ def get_kafka_reviews():
     # start = max_offset - total
     # consumer.seek(partition, start)
     consumer.seek(partition, 0)
-    res = []
+    ret = []
     for message in consumer:
         # print('topic: %s, partition: %d, offset: %d, key: %s, value: %s' % (
         #     message.topic, message.partition, message.offset, message.key, message.value))
-        res.append(json.loads(str(message.value, encoding="utf-8")))
+        ret.append(json.loads(str(message.value, encoding="utf-8")))
         if message.offset + 1 == max_offset:
             break
-    return res
+    return ret
 
 
 if __name__ == '__main__':

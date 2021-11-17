@@ -13,20 +13,24 @@ from elasticsearch import helpers
 from elasticsearch_dsl.connections import connections
 
 
-class TestEs(unittest.TestCase):
+class Es(unittest.TestCase):
 
     def setUp(self) -> None:
+        import os
+        os.system(r"D:\dev\elasticsearch-7.14.0\bin\elasticsearch.bat")
         self.es = connections.create_connection(hosts=['127.0.0.1'])
         self.test_index = "test_index_db"
         self.test_doc_type = "student_table"
         self.test_id = 1
         self.test_data = {'id': 1, 'name': '张三'}
-        self.data = {'_index': self.test_index, '_type': self.test_doc_type, '_id': self.test_id,
-                     '_body': self.test_data}
-        # import os
-        # os.system(r"D:\dev\elasticsearch-7.14.0\bin\elasticsearch.bat")
+        self.data = {
+            '_index': self.test_index,
+            '_type': self.test_doc_type,
+            '_id': self.test_id,
+            '_body': self.test_data
+        }
 
-    def tearDown(self):
+    def tear_down(self):
         self.es.close()
 
     def test_run(self):

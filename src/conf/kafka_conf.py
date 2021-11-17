@@ -8,5 +8,5 @@ PORT = "9857"
 TOPIC = "ai-news.news"
 KEY = "news"
 
-DEV_IP = "192.168.2.61"
+DEV_IP = "127.0.0.1"
 DEV_PORT = "9092"
