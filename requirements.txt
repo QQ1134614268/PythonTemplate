@@ -8,10 +8,10 @@ openpyxl~=3.0.9
 redis~=3.5.3
 concurrent_log_handler~=0.9.19
 elasticsearch~=7.15.0
-elasticsearch_dsl~=7.4.0
 kafka-python~=2.0.2
 pymysql==0.9.3
 # mysql-connector-python==8.0.18
 pymssql==2.2.0
 cx_Oracle==8.2.0
-twisted
+twisted==21.2.0
+pymongo==3.12.0
