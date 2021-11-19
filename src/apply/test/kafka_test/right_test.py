@@ -7,7 +7,10 @@ import json
 
 from kafka import TopicPartition, KafkaConsumer
 
+from util.cache_util import to_file
 
+
+@to_file("kakfa.json")
 def get_kafka_reviews():
     topic = 'credit.guojun.dividends'
     total = 10
@@ -32,7 +35,3 @@ def get_kafka_reviews():
 
 if __name__ == '__main__':
     res = get_kafka_reviews()
-    with open("../../../../data/kakfa.txt", mode="w+", encoding="utf-8") as f:
-        for line in res:
-            f.write(json.dumps(line, ensure_ascii=False))
-            f.write("\n")

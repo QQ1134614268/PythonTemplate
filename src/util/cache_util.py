@@ -5,20 +5,37 @@
 """
 import json
 import os
+import time
 
 
-#  TODO 全局的,,根据参数缓存  hash_key 未实现
-def file_cache(file_path):
+def to_file(file_path, unique=False, load=False, skip_err=False):
+    """
+    存储结果
+    :param file_path: 文件名
+    :param unique: 每次生成新文件
+    :param load: unique=false, 从文件加载
+    :param skip_err:
+    :return:
+    """
+
     def decorator(func):
         def wrapper(*args, **kw):
-            if os.path.exists(file_path):
+            if os.path.exists(file_path) and load:
                 with open(file_path, encoding="utf-8", mode='r') as f:
                     return json.loads(f.readline())
             else:
                 res = func(*args, **kw)
-                with open(file_path, encoding="utf-8", mode='w') as f:
-                    f.write(json.dumps(res))
-                return res
+                if unique:
+                    path = file_path + str(time.time())
+                else:
+                    path = file_path
+                try:
+                    with open(path, encoding="utf-8", mode='w') as f:
+                        f.write(json.dumps(res))
+                except Exception as e:
+                    if not skip_err:
+                        raise e
+            return res
 
         return wrapper
 
@@ -26,7 +43,7 @@ def file_cache(file_path):
 
 
 if __name__ == '__main__':
-    @file_cache("test.txt")
+    @to_file("test.txt")
     def add(d, b):
         return d + b
 
