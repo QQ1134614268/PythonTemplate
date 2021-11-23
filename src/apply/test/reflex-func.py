@@ -6,7 +6,7 @@
 import sys
 
 
-def a():
+def test_get_func_name():
     print(sys._getframe().f_code.co_name)
 
 
@@ -24,5 +24,5 @@ def get_func_varnames(func):
 
 
 if __name__ == "__main__":
-    a()
+    test_get_func_name()
     get_func_varnames(my_func)
