@@ -27,3 +27,21 @@ DEBUG_MODE = True
 url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
 engine = create_engine(url, echo=DEBUG_MODE)
 session = sessionmaker(bind=engine)()
+
+# Oracle db
+ORACLE_NAME = "system"
+ORACLE_PASSWORD = "oracle"
+ORACLE_IP = "127.0.0.1"
+ORACLE_PORT = "15210"
+ORACLE_DB = "helowin"
+oracle_url = "oracle+cx_oracle://{}:{}@{}:{}/?service_name={}".format(
+    ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB)
+oracle_engine = create_engine(oracle_url)
+
+# sqlserver db
+sqlserver_ip = "127.0.0.1"
+sqlserver_db = "WindDB"
+sqlserver_password = "123456"
+sqlserver_user = "sa"
+sqlserver_url = 'mssql+pymssql://{}:{}@{}/{}'.format(sqlserver_user, sqlserver_password, sqlserver_ip, sqlserver_db)
+sqlserver_engine = create_engine(sqlserver_url)

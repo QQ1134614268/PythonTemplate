@@ -1,19 +1,17 @@
 # -*- coding:utf-8 -*-
 """
-@Time: 2021/8/18
+@Time: 2021/11/23
 @Description:
 """
-
 import cx_Oracle
-import pymssql
 
-from apply.数据库.t_sqlserver.conf_db2 import oracle_name, password, ip, port, db
+from conf.config import ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB
 
 
 def test_oracle():
     # 连接数据库，下面括号里内容根据自己实际情况填写
     cx_Oracle.init_oracle_client(lib_dir=r"D:\dev\instantclient_21_3")
-    conn = cx_Oracle.connect('{}/{}@{}:{}/{}'.format(oracle_name, password, ip, port, db))
+    conn = cx_Oracle.connect('{}/{}@{}:{}/{}'.format(ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB))
     # 使用cursor()方法获取操作游标
     cursor = conn.cursor()
     # 使用execute方法执行SQL语句
@@ -28,20 +26,5 @@ def test_oracle():
     conn.close()
 
 
-def test_sqlserver():
-    conn = pymssql.connect(**{
-        'server': "127.0.0.1",
-        'database': "WindDB",
-        'password': '123456',
-        'user': 'sa'
-    })
-    cur = conn.cursor()
-    sql = "select 1"
-    cur.execute(sql)
-    conn.commit()
-    conn.close()
-
-
 if __name__ == '__main__':
-    test_sqlserver()
     test_oracle()
