@@ -2,9 +2,12 @@
 """
 # @Time    : 2019/10/2 23:23
 """
-import time
-from functools import wraps
+import functools
 
+import time
+
+
+# todo
 
 # https://www.jianshu.com/p/30a8e723efdc
 # @functools.wraps
@@ -44,7 +47,7 @@ def timethis(func):
     Decorator that reports the execution time.
     """
 
-    @wraps(func)
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
