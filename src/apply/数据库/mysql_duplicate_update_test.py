@@ -97,6 +97,16 @@ class TestMysql(unittest.TestCase):
         self.session.execute(sql)
         self.session.commit()
 
+    def test_model2(self):
+        data = [{'id': 1, "name2": 363}, {'id': 2, "name2": 3}]
+        insert_stmt = insert(TestTable).values(data)
+        on_duplicate_key_stmt = insert_stmt.on_duplicate_key_update(
+            id=insert_stmt.inserted.id,
+            name2=insert_stmt.inserted.name2,
+        )
+        self.session.execute(on_duplicate_key_stmt)
+        self.session.commit()
+
     def test_model_best(self):
         """
         # on_duplicate_key_update  --最优
