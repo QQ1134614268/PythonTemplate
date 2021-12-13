@@ -6,7 +6,7 @@ requests~=2.26.0
 openpyxl~=3.0.9
 redis~=3.5.3
 concurrent_log_handler~=0.9.19
-elasticsearch~=7.15.0
+elasticsearch==7.6.0
 kafka-python~=2.0.2
 pymysql==0.9.3
 # mysql-connector-python==8.0.18

@@ -7,14 +7,11 @@ import json
 
 from kafka import TopicPartition, KafkaConsumer
 
-from util.cache_util import to_file
 
-
-@to_file("kakfa.json")
 def get_kafka_reviews():
-    topic = 'credit.guojun.dividends'
+    topic = 'credit.csf.rzrq_guarantee_daily'
     total = 10
-    consumer = KafkaConsumer(topic, bootstrap_servers=['182.160.10.221:9857'], auto_offset_reset='earliest',
+    consumer = KafkaConsumer(topic, bootstrap_servers=['120.78.167.19:9092'], auto_offset_reset='earliest',
                              enable_auto_commit=False)  # , group_id="KEY"
     partition = TopicPartition(topic, 0)
     _offsets = consumer.end_offsets([partition])
