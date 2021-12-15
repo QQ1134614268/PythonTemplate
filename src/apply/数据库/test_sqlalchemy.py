@@ -3,9 +3,8 @@
 @Time: 2021/10/9
 @Description:
 """
-from sqlalchemy.dialects.mysql import insert
-
 from sqlalchemy import Column, String, Integer, create_engine, Boolean
+from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -29,9 +28,7 @@ if __name__ == '__main__':
     # Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)()
 
-    vo = TestUser(name="name", uid="address")
-    vo2 = TestUser(name="name", uid="address")
-    r_data = [vo, vo2]
+    r_data = [{"name": "name", "uid": "address"}, {"name": "name", "uid": "address"}]
 
     insert_stmt = insert(TestUser).values(r_data)
     on_duplicate_key_stmt = insert_stmt.on_duplicate_key_update(

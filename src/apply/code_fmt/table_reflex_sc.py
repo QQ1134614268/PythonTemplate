@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
-from util.MyUtil import Data
+from util.my_util import Data
 
 Base = declarative_base()
 

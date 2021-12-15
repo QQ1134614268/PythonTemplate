@@ -9,7 +9,7 @@ concurrent_log_handler~=0.9.19
 elasticsearch==7.6.0
 kafka-python~=2.0.2
 pymysql==0.9.3
-# mysql-connector-python==8.0.18
+mysql-connector-python==8.0.18
 pymssql==2.2.0
 cx_Oracle==8.2.0
 pymongo==3.12.0

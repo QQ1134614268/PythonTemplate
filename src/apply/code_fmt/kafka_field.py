@@ -5,7 +5,7 @@
 """
 import unittest
 
-from util.MyUtil import MyStrUti
+from util.my_util import MyStrUti
 
 
 class TestFieldMain(unittest.TestCase):
