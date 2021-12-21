@@ -127,7 +127,7 @@ class TestMysql(unittest.TestCase):
 
     def test_model3(self):
         stmt = insert(TestTable).on_duplicate_key_update({"name": "some name"})
-        self.session.execute(stmt)  # [SQL: INSERT INTO test_t () VALUES () ON DUPLICATE KEY UPDATE ]
+        self.session.execute(stmt)  # 报错; [SQL: INSERT INTO test_t () VALUES () ON DUPLICATE KEY UPDATE ]
         self.session.commit()
 
     def tearDown(self):
