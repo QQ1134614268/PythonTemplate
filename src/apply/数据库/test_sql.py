@@ -7,6 +7,7 @@ import datetime
 
 from sqlalchemy import Column, DateTime, Date, String, DECIMAL, Integer, UniqueConstraint, func, create_engine, Sequence
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
@@ -98,5 +99,8 @@ class EnumConfig(BaseTable):
 if __name__ == '__main__':
     sqlserver_url = 'mysql+pymysql://{}:{}@{}/{}'.format('root', "123456", "127.0.0.1", 'test')
     engine = create_engine(sqlserver_url, echo=True)
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    # Base.metadata.drop_all(engine)
+    # Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)()
+    sub_query = session.query(func.max(RightManage.biz_date)).scalar_subquery()
+    session.query(RightManage).filter(RightManage.biz_date == sub_query)

@@ -1,28 +1,21 @@
-# -*- coding:utf-8 -*-
-import datetime
+from datetime import datetime
 
-import time
-
-default_time_str = '%Y_%m_%d_%H_%M_%S_%f'
+from conf.config import DEFAULT_TIME_STR
 
 
-def getUtcTimeStr():
-    return datetime.datetime.utcnow().strftime(default_time_str)
+# 字符串转时间
+def get_datetime_by_str(time_str, fmt=DEFAULT_TIME_STR):
+    return datetime.strptime(time_str, fmt)
 
 
-def getDatetimeByStr(time_str):
-    return datetime.datetime.strptime(time_str, default_time_str)
+# 时间转字符串
+def get_str_by_datetime(fmt=DEFAULT_TIME_STR):
+    return datetime.now().strftime(fmt)
 
 
-def utcToLocal():
-    return datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+def get_now_str(fmt=DEFAULT_TIME_STR):
+    return datetime.now().strftime(fmt)
 
 
-def getUtc():
-    return datetime.datetime.utcnow()
-
-
-if __name__ == '__main__':
-    print(datetime.datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f'))
-    print(time.strftime('%Y-%m-%d %H:%M:%S'))
-    print(datetime.datetime.now())
+def get_now():
+    return datetime.now()
