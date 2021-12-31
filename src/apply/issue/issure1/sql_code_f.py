@@ -4,7 +4,7 @@
 @Description:
 """
 
-from apply.数据库.issure1.config import DB, session
+from apply.issue.issure1 import DB, session
 from util.cache_util import to_file
 from util.database_util import exec_sql, get_tables, get_unique_cols, get_cols
 from util.log_util import logger

@@ -5,10 +5,11 @@
 """
 import json
 import os
+
 import time
 
 
-def to_file(file_path, unique=False, load=False, skip_err=False):
+def to_file(file_path='out.json', unique=False, load=False, skip_err=False):
     """
     存储结果
     :param file_path: 文件名
@@ -35,6 +36,21 @@ def to_file(file_path, unique=False, load=False, skip_err=False):
                 except Exception as e:
                     if not skip_err:
                         raise e
+            return res
+
+        return wrapper
+
+    return decorator
+
+
+def list_to_file(file_path='out.json'):
+    def decorator(func):
+        def wrapper(*args, **kw):
+            res = func(*args, **kw)
+            assert isinstance(res, list), "导出到文件异常,结果不是list"
+            text = "\n".join(res)
+            with open(file_path, encoding="utf-8", mode='w') as f:
+                f.write(text)
             return res
 
         return wrapper

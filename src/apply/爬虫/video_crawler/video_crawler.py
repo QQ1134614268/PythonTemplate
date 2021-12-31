@@ -9,7 +9,7 @@ from util import log_util
 logger = log_util.create_logger("F:/log/video_crawler_log.json")
 
 
-def getSeries(url_file, series_name, series_path):
+def get_series(url_file, series_name, series_path):
     # if os.path.exists(series_path):  # 判断文件夹是否存在, 删除所有文件
     #     shutil.rmtree(series_path)
     if not os.path.exists(series_path):
@@ -24,10 +24,10 @@ def getSeries(url_file, series_name, series_path):
             if not url.endswith("m3u8") or not url.startswith("http"):
                 continue
             videoPath = os.path.join(series_path, series_name + "_" + str(count) + ".ts")
-            getVideo(url, videoPath)
+            get_video(url, videoPath)
 
 
-def getVideo(m3u6_url, file_path):
+def get_video(m3u6_url, file_path):
     session = requests.Session()
     session.mount('http://', HTTPAdapter(max_retries=5))
     session.mount('https://', HTTPAdapter(max_retries=5))
@@ -68,7 +68,7 @@ def retry_get(url, timeout, headers, retry_count=3):
 
 
 if __name__ == '__main__':
-    getSeries("url_list.txt", "蜗居", "F:/series")
+    get_series("url_list.txt", "蜗居", "F:/series")
     # series_path="F:/series"
     # if os.path.exists(series_path):  # 判断文件夹是否存在
     #     shutil.rmtree(series_path)
