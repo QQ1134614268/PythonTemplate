@@ -35,7 +35,8 @@ def get_video(m3u6_url, file_path):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36",
         "Connection": "keep-alive",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-        "Accept-Language": "zh-CN,zh;q=0.8"}
+        "Accept-Language": "zh-CN,zh;q=0.8"
+    }
 
     all_content = session.get(m3u6_url, timeout=30, headers=send_headers).text
     file_lines = all_content.split("\n")

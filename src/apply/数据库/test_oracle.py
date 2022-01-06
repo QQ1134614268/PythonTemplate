@@ -7,6 +7,8 @@
 # 获取表名、表注释
 import cx_Oracle
 
+from conf.oracle_config import oracle_name, password, ip, port, db
+
 
 class OracleTable:
     def __init__(self, name, password, ip, port, db, table_name=None, target_table_name=None):
@@ -56,10 +58,5 @@ class OracleTable:
 
 
 if __name__ == '__main__':
-    oracle_name = "system"
-    password = "oracle"
-    ip = "139.9.34.239"
-    port = "15210"
-    db = "helowin"
     ins = OracleTable(oracle_name, password, ip, port, db, "ASHAREIPO", "mysql_ASHAREIPO")
     ins.write_file()

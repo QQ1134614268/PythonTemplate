@@ -6,7 +6,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from apply.issure_ds.issure_api.models import AuthMenu
+from apply.issue.issue_api.models import AuthMenu
+from conf.sw_config import sqlserver_url
 
 text = """UPDATE auth.auth_menu SET serial_no=2 WHERE id=17;
 UPDATE auth.auth_menu SET serial_no=3 WHERE id=20;
@@ -73,8 +74,8 @@ UPDATE auth.auth_menu SET serial_no=1 WHERE id=69;
 # UPDATE auth.auth_menu SET name='质押业务分析',serial_no=8 WHERE id=49;
 # 49 company_risk
 
+
 def main():
-    sqlserver_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format('root', "123456", "8.129.48.72", "30894", 'auth')
     engine = create_engine(sqlserver_url, echo=True)
     session = sessionmaker(bind=engine)()
     lines = text.split("\n")

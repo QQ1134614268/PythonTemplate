@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-
-import time
-from itertools import chain
 from typing import List
 from zipfile import ZipFile
 
+import time
+from itertools import chain
 from tqdm import tqdm
 
 start = time.time()

@@ -45,3 +45,7 @@ sqlserver_password = "123456"
 sqlserver_user = "sa"
 sqlserver_url = 'mssql+pymssql://{}:{}@{}/{}'.format(sqlserver_user, sqlserver_password, sqlserver_ip, sqlserver_db)
 sqlserver_engine = create_engine(sqlserver_url)
+localhost_world_url = "mysql+mysqlconnector://wg:123456@ggok.top:3306/world?charset=utf8"
+localhost_test_url = "mysql+pymysql://root:123456@127.0.0.1:3306/test?charset=utf8"
+time_zone_url = 'mysql+mysqlconnector://{}:{}@{}/{}?time_zone={}'.format(
+    'root', "123456", "127.0.0.1", 'test', "%2B10:00")

@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
+from conf.config import localhost_test_url
 from util.my_util import Data
 
 Base = declarative_base()
@@ -39,8 +40,7 @@ class TestMysql(unittest.TestCase):
     def setUp(self):
         # 创建对象的基类:
         # 初始化数据库连接:
-        dev = "mysql+pymysql://root:123456@127.0.0.1:3306/pledge_risk_01?charset=utf8"
-        self.engine = create_engine(dev, echo=True)
+        self.engine = create_engine(localhost_test_url, echo=True)
         self.session = sessionmaker(bind=self.engine)()
         self.session.execute("select 1")  # 跳过session初始化的一些条件查询,便于后续debug
 

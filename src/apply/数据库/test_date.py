@@ -11,6 +11,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.functions import func
 
+from conf.config import time_zone_url
+
 Base = declarative_base()
 
 
@@ -45,9 +47,7 @@ def exec_sql(sql):
 
 class TestMysql(TestCase):
     def setUp(self):
-        sqlserver_url = 'mysql+mysqlconnector://{}:{}@{}/{}?time_zone={}'.format(
-            'root', "123456", "127.0.0.1", 'test', "%2B10:00")
-        engine = create_engine(sqlserver_url, echo=True)
+        engine = create_engine(time_zone_url, echo=True)
         # Base.metadata.drop_all(engine)
         # Base.metadata.create_all(engine)
         global session;

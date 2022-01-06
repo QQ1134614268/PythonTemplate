@@ -8,6 +8,7 @@ import os
 
 import pymssql
 
+from conf.sqlserver_config import data
 from util.log_util import logger
 
 
@@ -22,7 +23,7 @@ def get_file(path):
 
 
 def run():
-    cxn = pymssql.connect(**{'server': "127.0.0.1", 'database': "WindDB", 'password': '123456', 'user': 'sa'})
+    cxn = pymssql.connect(**data)
     cur = cxn.cursor()
     # file_dir = r'D:\桌面文件夹\万得和巨潮表数据SQL'
     # file_list = get_file(file_dir)

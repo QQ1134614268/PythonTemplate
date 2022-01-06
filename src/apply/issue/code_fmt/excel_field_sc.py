@@ -20,7 +20,7 @@ for index, line in enumerate(lines):
     arr = [i for i in arr if i.strip()]
     if len(arr) == 2:
         ret.append({
-            "index": index - new-1,
+            "index": index - new - 1,
             "value": arr[0],
             "name": arr[1],
         })

@@ -1,5 +1,6 @@
-import select
 import socket
+
+import select
 
 s = socket.socket()
 

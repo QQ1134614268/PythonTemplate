@@ -5,9 +5,9 @@
 """
 import json
 import random
-import time
 
 import requests
+import time
 
 
 def get_one_page(url):

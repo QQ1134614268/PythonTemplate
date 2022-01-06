@@ -17,6 +17,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import Insert
 
+from conf.config import localhost_test_url
+
 Base = declarative_base()
 
 
@@ -33,8 +35,7 @@ class TestMysql(unittest.TestCase):
     def setUp(self):
         # 创建对象的基类:
         # 初始化数据库连接:
-        dev = "mysql+pymysql://root:123456@127.0.0.1:3306/test?charset=utf8"
-        self.engine = create_engine(dev, echo=True)
+        self.engine = create_engine(localhost_test_url, echo=True)
         self.session = sessionmaker(bind=self.engine)()
         self.session.execute("select 1")  # 跳过session初始化的一些条件查询,便于后续debug
 

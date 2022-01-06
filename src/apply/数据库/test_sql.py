@@ -9,6 +9,8 @@ from sqlalchemy import Column, DateTime, Date, String, DECIMAL, Integer, UniqueC
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from conf.config import localhost_test_url
+
 Base = declarative_base()
 
 
@@ -97,8 +99,7 @@ class EnumConfig(BaseTable):
 
 
 if __name__ == '__main__':
-    sqlserver_url = 'mysql+pymysql://{}:{}@{}/{}'.format('root', "123456", "127.0.0.1", 'test')
-    engine = create_engine(sqlserver_url, echo=True)
+    engine = create_engine(localhost_test_url, echo=True)
     # Base.metadata.drop_all(engine)
     # Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)()

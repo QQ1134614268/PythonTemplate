@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 import json
-import time
 from urllib import request
+
+import time
 
 date = time.strftime('%Y%m%d', time.localtime(time.time()))
 url = "http://api.goseek.cn/Tools/holiday?date=" + date

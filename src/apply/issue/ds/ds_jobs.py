@@ -4,8 +4,8 @@
 @Description:
 """
 import json
-import time
 
+import time
 from openpyxl import Workbook
 
 from util.tree_util import tree_to_list

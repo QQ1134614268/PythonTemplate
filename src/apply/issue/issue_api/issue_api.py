@@ -2,7 +2,8 @@ import execjs
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from apply.issure_ds.issure_api.models import AuthMenu
+from apply.issue.issue_api.models import AuthMenu
+from conf.sw_config import sqlserver_url
 from util.cache_util import list_to_file
 
 
@@ -16,9 +17,9 @@ def get_menu_list():
     # res = doc_js.call('createGuid')
     return doc_js.eval('menu_list')
 
+
 @list_to_file("db.out.txt")
 def get_db():
-    sqlserver_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format('root', "123456", "8.129.48.72", "30894", 'auth')
     engine = create_engine(sqlserver_url, echo=True)
     session = sessionmaker(bind=engine)()
     vos = session.query(AuthMenu).all()

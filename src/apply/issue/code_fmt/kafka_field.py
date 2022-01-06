@@ -16,7 +16,7 @@ class TestFieldMain(unittest.TestCase):
         ret = []
         template = '{{"jsonField": "{}", "dbField": "{}"}},'
         for index, line in enumerate(lines):
-            ret.append(template.format(line,line))
+            ret.append(template.format(line, line))
         for i in ret:
             print(i)
 

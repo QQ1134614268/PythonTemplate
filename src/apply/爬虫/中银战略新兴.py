@@ -1,6 +1,6 @@
 import logging
-import time
 
+import time
 from selenium import webdriver
 
 
