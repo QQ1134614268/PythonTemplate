@@ -24,9 +24,9 @@ USERNAME = 'root'
 PASSWORD = "123456"
 DB = "test"
 DEBUG_MODE = True
-url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
-engine = create_engine(url, echo=DEBUG_MODE)
-session = sessionmaker(bind=engine)()
+dev_test_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
+dev_test_engine = create_engine(dev_test_url, echo=DEBUG_MODE)
+dev_test_session = sessionmaker(bind=dev_test_engine)()
 
 # Oracle db
 ORACLE_NAME = "system"

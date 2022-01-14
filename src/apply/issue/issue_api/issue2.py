@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from apply.issue.issue_api.models import AuthMenu
-from conf.sw_config import sqlserver_url
+from conf.sw_config import SHENWAN_AUTH_URL
 
 text = """UPDATE auth.auth_menu SET serial_no=2 WHERE id=17;
 UPDATE auth.auth_menu SET serial_no=3 WHERE id=20;
@@ -76,7 +76,7 @@ UPDATE auth.auth_menu SET serial_no=1 WHERE id=69;
 
 
 def main():
-    engine = create_engine(sqlserver_url, echo=True)
+    engine = create_engine(SHENWAN_AUTH_URL, echo=True)
     session = sessionmaker(bind=engine)()
     lines = text.split("\n")
     ret = []

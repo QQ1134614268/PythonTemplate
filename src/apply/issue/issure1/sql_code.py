@@ -5,8 +5,7 @@
 """
 import json
 
-from apply.issue.issure1.config import DB, session
-
+from conf.gj_config import DB, session
 from util.database_util import get_tables, get_cols
 
 if __name__ == '__main__':
