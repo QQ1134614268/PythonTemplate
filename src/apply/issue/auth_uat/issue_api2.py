@@ -1,5 +1,5 @@
 from apply.issue.issue_api.models import AuthMenu
-from conf.config import dev_test_session
+from conf.config import dev_test_session, pro_test_session
 from conf.sw_config import shenwan_auth_session
 from util.cache_util import list_to_file
 
@@ -24,6 +24,17 @@ def get_uat_db():
     return ret
 
 
+@list_to_file("pro.out.txt")
+def get_pro_db():
+    vos = pro_test_session.query(AuthMenu).all()
+    ret = []
+    for vo in vos:
+        ret.append(f'{vo.name}-{vo.item_en_name}')
+    ret.sort()
+    return ret
+
+
 if __name__ == '__main__':
-    get_uat_db()
-    get_db()
+    # get_uat_db()
+    # get_db()
+    get_pro_db()

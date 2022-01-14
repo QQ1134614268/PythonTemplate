@@ -102,7 +102,7 @@ class AuthMenu(Base):
     name = Column(VARCHAR(255), nullable=False, comment='菜单名称')
     parent_id = Column(Integer, comment='父级ID')
     item_en_name = Column(ForeignKey('auth_item.en_name'), index=True, comment='权限英文名')
-    serial_no = Column(Integer, comment='序号')
+    # serial_no = Column(Integer, comment='序号')
     updated_at = Column(DateTime, comment='更新时间')
     created_at = Column(DateTime, comment='创建时间')
 
