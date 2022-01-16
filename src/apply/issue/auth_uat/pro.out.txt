@@ -16,6 +16,7 @@
 合约监控-fina_secu_risk_contract_monitor
 宏观观测指标-fina_secu_risk_macro_indicators
 客户画像-fina_secu_cus_list
+客户风险等级设置2-scenario_config_manage
 成分股列表-fina_secu_constituent_stock
 折算率定调-fina_secu_suggest_new
 折算率管理-fina_secu_manage
@@ -28,6 +29,7 @@
 新增-user_create
 新增-user_role_create
 方案配置-code_scenario_config
+方案配置-fina_secu_cus_risk_level_config
 智能舆情-ai_news
 机构管理-department_manage
 查询-department_index
@@ -46,7 +48,7 @@
 舆情首页-pledge_news_home
 融资人关注池-financier-attention-pool
 融资人舆情-pledge_financier_news_list
-融资融券业务风险指标生成-fina_secu_risk_business_risk_indicator
+融资融券业务风险指标-fina_secu_risk_business_risk_indicator
 融资融券全市场数据-fina_secu_risk_market_data
 角色权限管理-user_role_manage
 证券列表-fina_secu_securities
