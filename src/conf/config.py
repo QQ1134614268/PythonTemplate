@@ -29,8 +29,8 @@ dev_test_engine = create_engine(dev_test_url, echo=DEBUG_MODE)
 dev_test_session = sessionmaker(bind=dev_test_engine)()
 
 pro_test_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, "auth")
-pro_test_engine = create_engine(dev_test_url, echo=DEBUG_MODE)
-pro_test_session = sessionmaker(bind=dev_test_engine)()
+pro_test_engine = create_engine(pro_test_url, echo=DEBUG_MODE)
+pro_test_session = sessionmaker(bind=pro_test_engine)()
 
 # Oracle db
 ORACLE_NAME = "system"
