@@ -10,8 +10,8 @@ HOST = "42.194.237.10"
 PORT = "30003"
 PASSWORD = "6HOoIAqc22uw7gc2"
 USERNAME = 'root'
-DB = "pledge_risk_02"
+gj_DB = "pledge_risk_02"
 DEBUG_MODE = False
-url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
-engine = create_engine(url, echo=DEBUG_MODE)
-session = sessionmaker(bind=engine)()
+gj_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, gj_DB)
+gj_engine = create_engine(gj_url, echo=DEBUG_MODE)
+gj_session = sessionmaker(bind=gj_engine)()

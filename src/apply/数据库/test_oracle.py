@@ -7,7 +7,7 @@
 # 获取表名、表注释
 import cx_Oracle
 
-from conf.oracle_config import oracle_name, password, ip, port, db
+from conf.config import ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB
 
 
 class OracleTable:
@@ -58,5 +58,5 @@ class OracleTable:
 
 
 if __name__ == '__main__':
-    ins = OracleTable(oracle_name, password, ip, port, db, "ASHAREIPO", "mysql_ASHAREIPO")
+    ins = OracleTable(ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB, "ASHAREIPO", "mysql_ASHAREIPO")
     ins.write_file()

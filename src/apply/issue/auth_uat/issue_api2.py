@@ -1,6 +1,5 @@
 from apply.issue.issue_api.models import AuthMenu
 from conf.config import dev_test_session, pro_test_session
-from conf.sw_config import shenwan_auth_session
 from util.cache_util import list_to_file
 
 

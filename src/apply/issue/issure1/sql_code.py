@@ -5,13 +5,13 @@
 """
 import json
 
-from conf.gj_config import DB, session
+from conf.gj_config import gj_DB, gj_session
 from util.database_util import get_tables, get_cols
 
 if __name__ == '__main__':
     ret = []
     del_ret = []
-    tables = get_tables(session, DB)
+    tables = get_tables(gj_session, gj_DB)
     db_data = {}
     for table_name in tables:
         table_data = {
@@ -20,7 +20,7 @@ if __name__ == '__main__':
             "update_sql": []
         }
         db_data[table_name] = {}
-        res = get_cols(session, DB, table_name)
+        res = get_cols(gj_session, gj_DB, table_name)
         for col_name in res:
             table_data["col"].append(col_name)
             if "_code" in col_name.lower():

@@ -3,12 +3,10 @@
 @Time: 2021/8/17
 @Description:
 """
-
 import os
 
 import pymssql
-
-from conf.sqlserver_config import data
+from conf.config import sqlserver_ip, sqlserver_db, sqlserver_password, sqlserver_username
 from util.log_util import logger
 
 
@@ -23,7 +21,8 @@ def get_file(path):
 
 
 def run():
-    cxn = pymssql.connect(**data)
+    cxn = pymssql.connect(server=sqlserver_ip, database=sqlserver_db, user=sqlserver_username,
+                          password=sqlserver_password)
     cur = cxn.cursor()
     # file_dir = r'D:\桌面文件夹\万得和巨潮表数据SQL'
     # file_list = get_file(file_dir)

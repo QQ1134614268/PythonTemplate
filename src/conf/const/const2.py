@@ -2,7 +2,7 @@
 # 常量值不变,常量名大写
 
 
-class _const:
+class TestConst:
     class ConstError(TypeError):
         pass
 
@@ -17,7 +17,7 @@ class _const:
         self.__dict__[name] = value
 
 
-const = _const()
+const = TestConst()
 const.PI = 3.14
 const.MY_CONST = 'my_const'
 const.LOGFILE = 'D:/bat/log/task.log'

@@ -11,26 +11,21 @@ from sqlalchemy.orm import sessionmaker
 ROOT_DIR = path.abspath(path.dirname(__file__))
 RESOURCE_DIR = path.join(path.dirname(path.dirname(ROOT_DIR)), "resource")
 DATA_DIR = path.join(path.dirname(path.dirname(ROOT_DIR)), "data")
+DEBUG_MODE = True
 
 LOG_PATH = DATA_DIR  # path.join(DATA_DIR, "log")
 
 TIME_FMT = '%Y-%m-%d %H:%M:%S'
 DEFAULT_TIME_STR = '%Y-%m-%d %H:%M:%S'
-DEBUG_MODE = True
 
 HOST = "127.0.0.1"
 PORT = "3306"
 USERNAME = 'root'
 PASSWORD = "123456"
 DB = "test"
-DEBUG_MODE = True
 dev_test_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
 dev_test_engine = create_engine(dev_test_url, echo=DEBUG_MODE)
 dev_test_session = sessionmaker(bind=dev_test_engine)()
-
-pro_test_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, "auth")
-pro_test_engine = create_engine(pro_test_url, echo=DEBUG_MODE)
-pro_test_session = sessionmaker(bind=pro_test_engine)()
 
 # Oracle db
 ORACLE_NAME = "system"
@@ -45,10 +40,11 @@ oracle_engine = create_engine(oracle_url)
 # sqlserver db
 sqlserver_ip = "127.0.0.1"
 sqlserver_db = "WindDB"
+sqlserver_username = "sa"
 sqlserver_password = "123456"
-sqlserver_user = "sa"
-sqlserver_url = 'mssql+pymssql://{}:{}@{}/{}'.format(sqlserver_user, sqlserver_password, sqlserver_ip, sqlserver_db)
+sqlserver_url = 'mssql+pymssql://{}:{}@{}/{}'.format(sqlserver_username, sqlserver_password, sqlserver_ip, sqlserver_db)
 sqlserver_engine = create_engine(sqlserver_url)
+
 localhost_world_url = "mysql+mysqlconnector://wg:123456@ggok.top:3306/world?charset=utf8"
 localhost_test_url = "mysql+pymysql://root:123456@127.0.0.1:3306/test?charset=utf8"
 time_zone_url = 'mysql+mysqlconnector://{}:{}@{}/{}?time_zone={}'.format(
