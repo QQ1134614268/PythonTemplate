@@ -191,8 +191,9 @@ class SqlUtil:
 
 
 class TimeUtil:
-    def get_time_str(DATE_TIME_FORMAT=(TIME_FMT)):
-        return datetime.datetime.now().strftime(DATE_TIME_FORMAT)
+    @staticmethod
+    def get_time_str(date_time_format=TIME_FMT):
+        return datetime.datetime.now().strftime(date_time_format)
 
 
 class PdUtil:
