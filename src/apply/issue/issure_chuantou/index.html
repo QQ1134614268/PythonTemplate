@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>test</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<!--    <link rel="stylesheet" href="vue-virtual-scroller/dist/vue-virtual-scroller.css"/>-->
+<!--    <script src="vue-virtual-scroller/dist/vue-virtual-scroller.min.js"></script>-->
+
+</head>
+<body>
+<div id="app2" style="height: 100vh">
+    <el-tabs v-model="activeName">
+        <el-tab-pane label="配置" name="config">
+            <el-form :data="form">
+                <el-form-item label="token">
+                    <el-input v-model="token" name="token" autocomplete="on"></el-input>
+                </el-form-item>
+                <el-form-item label="url">
+                    <el-input v-model="url" name="url" autocomplete="on"></el-input>
+                </el-form-item>
+                <input type="submit"/>
+            </el-form>
+        </el-tab-pane>
+
+        <el-tab-pane label="sql执行" name="exec">
+            <textarea v-model="sql" style="width: 100%; " rows="10" autocomplete="on">
+            </textarea>
+            <el-button @click="init"> 搜索</el-button>
+            <el-table v-loading="loading" :data="tableData" :render-header="labelHead" style="height: 60%">
+                <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
+                                 :show-overflow-tooltip="true" align="center">
+                </el-table-column>
+            </el-table>
+        </el-tab-pane>
+
+        <el-tab-pane label="kafka" name="kafka">
+            <el-input :data="kafka" id='kafka'></el-input>
+            <!--            <el-table :data="tableData">-->
+            <!--                <el-table-column v-for="(k,v) in tableData[0]" :prop="k" :label="k"></el-table-column>-->
+            <!--            </el-table>-->
+            　
+            <!--            <el-table v-if="wideTable" v-loading="loading" :data="checkLogList" :render-header="labelHead">-->
+
+            <!--            </el-table>-->
+        </el-tab-pane>
+    </el-tabs>
+</div>
+<script>
+    // import axios from "axios";
+    //
+    // Vue.use(axios);
+
+    let t = new Vue(
+        {
+            el: '#app2',
+            data: {
+                form: {},
+                sql: "",
+                activeName: "exec",
+                tableData: [],
+                token: '',
+                url: '',
+                kafka: '',
+                header: [],
+                loading: false,
+            },
+            methods: {
+                post(data, url) {
+                    return new axios({
+                            method: 'POST',
+                            url: url,
+                            data: data,
+                            header: {
+                                Authorization: this.token
+                            }
+                        }
+                    )
+
+                },
+                async init() {
+                    let data = {sql: this.sql}
+                    let res = await this.post(data, this.url)
+                    this.tableData = res.data.data
+                    let obj = this.tableData[0]
+                    this.header = Object.keys(obj)
+                },
+                ok() {
+                },
+                labelHead(h, {column, index}) { //动态表头渲染
+                    //let l = column.label.length;
+                    //let f = 12; //每个字大小,其实是每个字的比例值,大概会比字体大小打差不多大
+                    //column.minWidth = f * l; //字大小乘个数即长度 ,注意不要加px像素，这里minWidth只是一个比例值，不是真正的长度
+                    //然后将列标题放在一个div块中，注意块的宽度一定要100%，否则表格显示不完全
+                    return h('span', {class: 'table-head', style: {width: '100%'}}, [column.label])
+                }
+            },
+        }
+    );
+</script>
+</body>
+
+</html>
