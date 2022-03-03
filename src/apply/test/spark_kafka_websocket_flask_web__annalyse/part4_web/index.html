@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/static/socket.io.js"></script>
+    <script src="/static/jquery.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+    <script type="text/javascript"
+            src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+</head>
+<body style="height: 100%; margin: 0;">
+<h1>火车站-周一到周五人流量实时预警</h1>
+<div id="container" style="height: 100%;min-height: 500px;"></div>
+<script type="text/javascript">
+
+    {#创建socket对象#}
+    let socket = io.connect('http://' + document.domain + ':' + location.port);
+    {#调用后台初始化连接#}
+    socket.on('connect', function () {
+        socket.emit('test_connect', {data: '连接正常!'});
+    });
+    {#后台收到消息将执行这段代码，消息内容在 message 参数中
+     message：格式为   '火车北站,14,28,41,54,66,90,87' 字符串
+     #}
+    socket.on('test_message', function (message) {
+            {#接收后台消息#}
+            console.log(message.data);
+            {#定义chart全局对象#}
+            if (!window.chart_data) {
+                window.chart_data = {};
+            }
+            let msg = message.data.split(",");
+            window.chart_data[msg[0]] = msg.slice(1, 8);
+
+            if (window.myChart) {
+                {#重新绘图#}
+                window.myChart.setOption({
+                    series: [{
+                        type: 'bar',
+                        data: window.chart_data['火车东站'],
+                        coordinateSystem: 'polar',
+                        name: '火车东站',
+                        stack: 'a'
+                    }, {
+                        type: 'bar',
+                        data: window.chart_data['火车南站'],
+                        coordinateSystem: 'polar',
+                        name: '火车南站',
+                        stack: 'a'
+                    }, {
+                        type: 'bar',
+                        data: window.chart_data['火车北站'],
+                        coordinateSystem: 'polar',
+                        name: '火车北站',
+                        stack: 'a'
+                    }]
+                });
+            }
+
+        }
+    );
+
+    socket.on('connected', function () {
+        console.log('connected');
+    });
+
+    socket.on('disconnect', function () {
+        console.log('disconnect');
+    });
+
+    $(function () {
+        {#初始化页面#}
+        chart.paint();
+    });
+
+
+    let chart = {
+        paint: function () {
+            let dom = document.getElementById("container");
+            let myChart = echarts.init(dom);
+            if (!window.myChart) {
+                window.myChart = myChart;
+            }
+
+            let option = {
+                angleAxis: {},
+                radiusAxis: {
+                    type: 'category',
+                    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    z: 10
+                },
+                polar: {},
+                series: [{
+                    type: 'bar',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    coordinateSystem: 'polar',
+                    name: 'A',
+                    stack: 'a'
+                }, {
+                    type: 'bar',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    coordinateSystem: 'polar',
+                    name: 'B',
+                    stack: 'a'
+                }, {
+                    type: 'bar',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    coordinateSystem: 'polar',
+                    name: 'C',
+                    stack: 'a'
+                }],
+                legend: {
+                    show: true,
+                    data: ['火车东站', '火车南站', '火车北站']
+                }
+            };
+            if (option && typeof option === "object") {
+                myChart.setOption(option, true);
+            }
+        }
+    };
+
+</script>
+
+<div id="sse">
+
+</div>
+</body>
+</html>
