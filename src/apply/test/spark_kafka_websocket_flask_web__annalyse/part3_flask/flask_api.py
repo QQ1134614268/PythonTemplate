@@ -7,15 +7,15 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from kafka import KafkaConsumer
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder='.')
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 thread = None
-consumer = KafkaConsumer('result', bootstrap_servers=['192.168.147.128:9092'])
 
 
 # 接收到消息就调用test_message方法，test_message是定义在web_socket对象上的js函数
 def background_thread():
+    consumer = KafkaConsumer('result', bootstrap_servers=['127.0.0.1:9092'])
     for msg in consumer:
         data_json = msg.value.decode('utf8')
         socketio.emit('test_message', {'data': data_json})
@@ -34,7 +34,7 @@ def connect(message):
 # 返回一个html页面
 @app.route("/")
 def handle_mes():
-    return render_template("index.html")
+    return render_template("part4_web_index.html")
 
 
 if __name__ == '__main__':
