@@ -18,7 +18,7 @@
 <div id="app2" style="height: 100vh">
     <el-tabs v-model="activeName">
         <el-tab-pane label="配置" name="config">
-            <el-form :data="form">
+            <el-form :model="form">
                 <el-form-item label="token">
                     <el-input v-model="token" name="token" autocomplete="on"></el-input>
                 </el-form-item>
