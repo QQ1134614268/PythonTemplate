@@ -25,29 +25,44 @@
                 <el-form-item label="url">
                     <el-input v-model="url" name="url" autocomplete="on"></el-input>
                 </el-form-item>
-                <input type="submit"/>
+                <el-form-item label="转换关键字">
+                    <el-checkbox v-model="need_trans">转换关键字</el-checkbox>
+                </el-form-item>
+                <input type="submit" @click="remember" value="保存配置"></input>
             </el-form>
         </el-tab-pane>
         <el-tab-pane label="sql执行" name="exec">
-            <textarea v-model="sql" style="width: 100%; " rows="10" autocomplete="on">
-            </textarea>
-            <el-button @click="init"> 搜索</el-button>
-            <el-table v-loading="loading" :data="tableData" :render-header="labelHead" style="height: 60%">
-                <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
-                                 :show-overflow-tooltip="true" align="center">
-                </el-table-column>
-            </el-table>
+            <div style="display: flex; justify-content: space-around">
+                <div style="width: 20%; ">
+                    <div v-for="sql in sql_history"><a @click="this.sql=sql">{{sql}}</a></div>
+                </div>
+                <div style="width: 50%; display: flex;flex-direction: column">
+                    <textarea v-model="sql" rows="10" autocomplete="on">
+                    </textarea>
+                    <div>
+                        <el-button @click="searchData" type="primary" size="mini" style="float: right"> 确定</el-button>
+                    </div>
+                </div>
+                <div style="width: 20%; ">
+                    <div><span class="span_key">token: </span><span>{{token}}</span></div>
+                    <div><span class="span_key">url: </span><span>{{url}}</span></div>
+                    <div><span class="span_key">need_trans: </span><span>{{need_trans}}</span></div>
+                    <div><span class="span_key">翻译后sql: </span><span>{{trans_sql}}</span></div>
+                </div>
+            </div>
         </el-tab-pane>
         <el-tab-pane label="kafka" name="kafka">
             topic:
             <el-input :data="kafka" id='kafka'></el-input>
-            <el-table v-loading="loading" :data="tableData" :render-header="labelHead" style="height: 60%">
-                <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
-                                 :show-overflow-tooltip="true" align="center">
-                </el-table-column>
-            </el-table>
+
         </el-tab-pane>
     </el-tabs>
+    <el-table v-if="['exec','kafka']. indexOf(activeName)!=-1 " :data="tableData" :render-header="labelHead"
+              style="height: 60%">
+        <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
+                         :show-overflow-tooltip="true" align="center">
+        </el-table-column>
+    </el-table>
 </div>
 <script>
     // import axios from "axios";
@@ -59,36 +74,71 @@
             el: '#app2',
             data: {
                 form: {},
-                sql: "",
-                activeName: "exec",
-                tableData: [],
                 token: '',
                 url: '',
+                need_trans: true,
+                sql: "",
                 kafka: '',
+
+                activeName: "exec",
+                tableData: [],
                 header: [],
-                loading: false,
+                trans_sql: "",
+                history_hset: {},
+                sql_history: [],
             },
             methods: {
-                post(data, url) {
-                    return new axios({
-                            method: 'POST',
-                            url: url,
-                            data: data,
-                            header: {
-                                Authorization: this.token
-                            }
-                        }
-                    )
-
+                remember() {
+                    this.sql_history = this.to_history("sql_history", this.sql)
+                    this.to_history("token", this.token)
+                    this.to_history("url", this.url)
+                    this.to_history("need_trans", this.need_trans)
                 },
-                async init() {
-                    let data = {sql: this.sql}
+                to_history(id, data) {
+                    let history_hset = JSON.parse(localStorage.getItem("history_hset"));
+                    let arr = history_hset.get(id)
+                    if (!arr) {
+                        history_hset[id] = []
+                        arr = history_hset[id]
+                    }
+                    if (!arr.index(data)) {
+                        arr.unshift(data)
+                        arr = arr.splice(0, 6)
+                    }
+                    localStorage.setItem("history_hset", JSON.stringify(history_hset));
+                    return arr
+                },
+                init() {
+                    this.history_hset = JSON.parse(localStorage.getItem("history_hset") || "{}")
+
+                    this.sql_history = this.history_hset["sql_history"]
+                    this.token = this.history_hset["token"][0]
+                    this.url = this.history_hset["url"][0]
+                    this.need_trans = this.history_hset["need_trans"][0]
+                },
+                trans_sql_func() {
+                    this.trans_sql = this.sql
+
+                    let tmp_sql = this.sql
+                    tmp_sql = tmp_sql.toUpperCase()
+                    while (tmp_sql.indexOf("FROM") != -1) {
+                        let index = tmp_sql.toUpperCase().indexOf("FROM")
+                        let old = tmp_sql.substring(index, index + 4)
+                        tmp_sql = tmp_sql.replace(old, "fro2")
+                        this.trans_sql = tmp_sql.replace(old, "fro2")
+                    }
+                },
+                async searchData() {
+                    this.remember()
+
+                    let data = {sql: this.sql, need_trans: this.need_trans}
+                    if (this.need_trans) {
+                        data.sql = this.trans_sql
+                    }
                     let res = await this.post(data, this.url)
                     this.tableData = res.data.data
                     let obj = this.tableData[0]
                     this.header = Object.keys(obj)
-                },
-                ok() {
                 },
                 labelHead(h, {column, index}) { //动态表头渲染
                     //let l = column.label.length;
@@ -96,11 +146,46 @@
                     //column.minWidth = f * l; //字大小乘个数即长度 ,注意不要加px像素，这里minWidth只是一个比例值，不是真正的长度
                     //然后将列标题放在一个div块中，注意块的宽度一定要100%，否则表格显示不完全
                     return h('span', {class: 'table-head', style: {width: '100%'}}, [column.label])
-                }
+                },
+                post(data, url) {
+                    return new axios({
+                            method: 'POST',
+                            url: url,
+                            // params: data,
+                            data: data,
+                            headers: {
+                                Authorization: this.token,
+                            }
+                        }
+                    )
+                },
+                get(data, url) {
+                    return new axios({
+                            method: 'GET',
+                            url: url,
+                            params: data,
+                            headers: {
+                                Authorization: this.token,
+                            }
+                        }
+                    )
+                },
             },
+            watch: {
+                sql() {
+                    this.trans_sql_func()
+                }
+            }
         }
     );
 </script>
 </body>
-
+<style>
+    .span_key {
+        display: inline-block;
+        width: 6rem;
+        color: blue;
+        /*border: black solid 1px;*/
+    }
+</style>
 </html>

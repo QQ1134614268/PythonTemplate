@@ -6,11 +6,37 @@
 import datetime
 import random
 import string
+from base64 import b64encode, b64decode
+from binascii import b2a_base64, a2b_base64
 
 from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
 from conf.config import TIME_FMT
+
+
+def s_2_b64(text):
+    return b2a_base64(text.encode("utf8"), newline=False).decode("utf8")
+
+
+def b64_2_s(text):
+    # base64转字符串
+    return a2b_base64(text.encode("utf8")).decode("utf8")
+
+
+def s_2_b64_v2(text):
+    return b64encode(text.encode("utf8")).decode("utf8")
+
+
+def b64_2_s_v2(text):
+    # base64转字符串
+    return b64decode(text.encode("utf8")).decode("utf8")
+
+
+if __name__ == '__main__':
+    text = "永恒a"
+    print(text == b64_2_s(s_2_b64(text)))
+    print(text == b64_2_s_v2(s_2_b64_v2(text)))
 
 
 class MyStrUti:
