@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>test</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app2" style="height: 100vh">
+    <el-table :data="tableData" @sort-change="sortChange" :sort-by="['r','g','b']">
+        <el-table-column prop="r" label="r" sortable></el-table-column>
+        <el-table-column prop="g" label="g" sortable></el-table-column>
+        <el-table-column prop="b" label="b" sortable></el-table-column>
+        <el-table-column prop="describe" label="颜色">
+            <template slot-scope="scope">
+                <div :style="'background-color:'+scope.row.color" class="div_a">
+                </div>
+            </template>
+        </el-table-column>
+    </el-table>
+</div>
+<script>
+    let t = new Vue(
+        {
+            el: '#app2',
+            data: {
+                tableData: [],
+            },
+            methods: {
+                init() {
+                    let arr = [0, 64, 128, 192, 255]
+                    for (let r in arr) {
+                        for (let g in arr) {
+                            for (let b in arr) {
+                                this.tableData.push({
+                                    r: arr[r],
+                                    g: arr[g],
+                                    b: arr[b],
+                                    color: 'rgb(' + arr[r] + ',' + arr[g] + ',' + arr[b] + ')'
+                                })
+                            }
+                        }
+                    }
+                },
+                sortChange() {
+
+                }
+            },
+            created() {
+                this.init()
+            }
+        }
+    );
+</script>
+</body>
+<style>
+    .div_a {
+        width: 50px;
+        height: 50px;
+        border: blue 1px solid;
+    }
+</style>
+</html>

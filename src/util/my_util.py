@@ -222,11 +222,6 @@ class TimeUtil:
         return datetime.datetime.now().strftime(date_time_format)
 
 
-class PdUtil:
-    ...
-    # todo
-
-
 class ExcelUtil:
     # 读取Excel,数据解析
     #     1. 换行
