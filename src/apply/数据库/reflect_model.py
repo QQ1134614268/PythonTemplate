@@ -4,7 +4,7 @@
 @Description:
 """
 import os
-from conf.sw_config import SHENWAN_AUTH_URL
+from conf.sw_config import SHENWAN_URL
 
 
 cmd = "sqlacodegen mysql://root:123456@127.0.0.1:3306/test?charset=utf8 > old_models.py"
@@ -15,6 +15,6 @@ cmd = "sqlacodegen mysql://root:123456@127.0.0.1:3306/test?charset=utf8 > old_mo
 # cmd = "sqlacodegen oracle+cx_oracle://system:oracle@127.0.0.1:15210/?service_name=helowin > old_models.py"
 # cx_Oracle.init_oracle_client(lib_dir=r"D:\dev\instantclient_21_3")
 
-cmd = f"sqlacodegen {SHENWAN_AUTH_URL} > old_models.py"
+cmd = f"sqlacodegen {SHENWAN_URL} > old_models.py"
 
 os.system(cmd)

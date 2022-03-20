@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from apply.issue.issue_api.models import AuthMenu
-from conf.sw_config import SHENWAN_AUTH_URL
+from conf.sw_config import SHENWAN_URL
 from util.cache_util import list_to_file
 
 
@@ -20,7 +20,7 @@ def get_menu_list():
 
 @list_to_file("db.out.txt")
 def get_db():
-    engine = create_engine(SHENWAN_AUTH_URL, echo=True)
+    engine = create_engine(SHENWAN_URL, echo=True)
     session = sessionmaker(bind=engine)()
     vos = session.query(AuthMenu).all()
     ret = []

@@ -1,11 +1,249 @@
 # coding: utf-8
-from sqlalchemy import BigInteger, CHAR, Column, DECIMAL, Date, DateTime, Float, ForeignKey, Index, Integer, JSON, String, TIMESTAMP, Table, text
+from sqlalchemy import BigInteger, CHAR, Column, DECIMAL, Date, DateTime, Float, ForeignKey, Index, Integer, JSON, String, TIMESTAMP, Table, Text, text
 from sqlalchemy.dialects.mysql import BIGINT, BIT, CHAR, INTEGER, TEXT, TIMESTAMP, TINYINT, VARCHAR
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 metadata = Base.metadata
+
+
+class AbnCustomIndex(Base):
+    __tablename__ = 'abn_custom_index'
+    __table_args__ = (
+        Index('uk_biz_date_stk_code', 'biz_date', 'stk_code', unique=True),
+        {'comment': '证券异动用户导入指标表'}
+    )
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    stk_code = Column(VARCHAR(20), comment='证券代码')
+    biz_date = Column(Date, nullable=False, comment='业务时间')
+    data = Column(JSON, comment='每个证券的值')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnCustomIndexConfig(Base):
+    __tablename__ = 'abn_custom_index_config'
+    __table_args__ = {'comment': '证券异动用户指标配置表'}
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    name = Column(VARCHAR(128), nullable=False, unique=True, comment='名称')
+    type = Column(VARCHAR(32), nullable=False, comment='值类型')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnDynamicIndex(Base):
+    __tablename__ = 'abn_dynamic_index'
+    __table_args__ = (
+        Index('uk_biz_date_stk_code', 'biz_date', 'stk_code', unique=True),
+        {'comment': '证券异动动态指标表'}
+    )
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    stk_code = Column(VARCHAR(20), comment='证券代码')
+    biz_date = Column(Date, nullable=False, comment='业务时间')
+    data = Column(JSON, comment='每个证券的值')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnDynamicIndexConfig(Base):
+    __tablename__ = 'abn_dynamic_index_config'
+    __table_args__ = {'comment': '动态指标配置表'}
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    name = Column(VARCHAR(128), nullable=False, comment='名称')
+    cn_name = Column(String(128, 'utf8mb4_general_ci'), comment='中文名称')
+    rule_type = Column(VARCHAR(32), nullable=False, comment='规则类型')
+    index = Column(VARCHAR(128), nullable=False, comment='基础指标名称')
+    type = Column(String(32, 'utf8mb4_general_ci'), nullable=False, server_default=text("'NUMBER'"), comment='值类型')
+    cfg = Column(JSON, comment='配置')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnEventConfig(Base):
+    __tablename__ = 'abn_event_config'
+    __table_args__ = {'comment': '事件配置表'}
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    name = Column(VARCHAR(128), nullable=False, unique=True, comment='名称')
+    category = Column(VARCHAR(32), nullable=False, server_default=text("'未分类'"), comment='类别')
+    desc = Column(TEXT, comment='描述')
+    result_type = Column(VARCHAR(32), nullable=False, server_default=text("''"), comment='结果类型')
+    var_id = Column(BigInteger, nullable=False, server_default=text("'0'"), comment='规则引擎变量表ID')
+    index_ids = Column(String(255, 'utf8mb4_general_ci'), comment='使用到的基础指标ID')
+    custom_index_ids = Column(String(255, 'utf8mb4_general_ci'), comment='使用到的用户指标ID')
+    dynamic_index_ids = Column(String(255, 'utf8mb4_general_ci'), comment='使用到的动态指标ID')
+    create_by = Column(String(32, 'utf8mb4_general_ci'), comment='创建者ID')
+    create_by_name = Column(String(32, 'utf8mb4_general_ci'), comment='创建者名称')
+    update_by = Column(String(32, 'utf8mb4_general_ci'), comment='修改者ID')
+    update_by_name = Column(String(32, 'utf8mb4_general_ci'), comment='修改者名称')
+    is_enable = Column(TINYINT, nullable=False, server_default=text("'1'"), comment='是否使用')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnEventResult(Base):
+    __tablename__ = 'abn_event_result'
+    __table_args__ = (
+        Index('uk_stk_code_biz_date_var_id', 'stk_code', 'biz_date', 'var_id', unique=True),
+        {'comment': '异动事件结果表'}
+    )
+
+    id = Column(BIGINT, primary_key=True)
+    stk_code = Column(VARCHAR(20), nullable=False, comment='证券代码')
+    biz_date = Column(Date, nullable=False, comment='业务时间')
+    plan_id = Column(BigInteger, nullable=False, comment='方案ID')
+    var_id = Column(BigInteger, nullable=False, comment='变量ID')
+    var_name = Column(String(128, 'utf8mb4_general_ci'), nullable=False, comment='变量名称')
+    rule_ids = Column(VARCHAR(255), comment='命中规则ID集，逗号分隔')
+    result_type = Column(VARCHAR(32), server_default=text("''"), comment='结果类型')
+    result_value = Column(TEXT, comment='结果值')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnIndex(Base):
+    __tablename__ = 'abn_index'
+    __table_args__ = (
+        Index('uk_biz_date_stk_code', 'biz_date', 'stk_code', unique=True),
+        {'comment': '证券异动指标表'}
+    )
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    stk_code = Column(VARCHAR(20), nullable=False, comment='证券代码')
+    biz_date = Column(Date, nullable=False, comment='业务时间')
+    data = Column(JSON, comment='每个证券的值')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnIndexConfig(Base):
+    __tablename__ = 'abn_index_config'
+    __table_args__ = {'comment': '证券异动基础指标配置表'}
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    name = Column(VARCHAR(128), nullable=False, unique=True, comment='英文名称')
+    cn_name = Column(VARCHAR(128), nullable=False, unique=True, comment='中文名称')
+    type = Column(VARCHAR(32), nullable=False, comment='值类型')
+    category = Column(VARCHAR(32), nullable=False, server_default=text("'未分类'"), comment='类别')
+    desc = Column(TEXT, comment='描述')
+    dictionary = Column(JSON, comment='字典映射')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnSecuritiesConfig(Base):
+    __tablename__ = 'abn_securities_config'
+    __table_args__ = {'comment': '名单配置表'}
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    name = Column(VARCHAR(128), nullable=False, unique=True, comment='名称')
+    list_type = Column(String(32, 'utf8mb4_general_ci'), comment='名单类型')
+    result_type = Column(VARCHAR(32), nullable=False, server_default=text("''"), comment='结果类型')
+    var_id = Column(BigInteger, nullable=False, server_default=text("'0'"), comment='规则引擎变量表ID')
+    state_ids = Column(String(255, 'utf8mb4_general_ci'), comment='使用到的状态ID')
+    create_by = Column(String(32, 'utf8mb4_general_ci'), comment='创建者ID')
+    create_by_name = Column(String(32, 'utf8mb4_general_ci'), comment='创建者名称')
+    update_by = Column(String(32, 'utf8mb4_general_ci'), comment='修改者ID')
+    update_by_name = Column(String(32, 'utf8mb4_general_ci'), comment='修改者名称')
+    is_enable = Column(TINYINT, nullable=False, server_default=text("'1'"), comment='是否使用')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnSecuritiesResult(Base):
+    __tablename__ = 'abn_securities_result'
+    __table_args__ = (
+        Index('uk_stk_code_biz_date_var_id', 'stk_code', 'biz_date', 'var_id', unique=True),
+        {'comment': '异常名单结果表'}
+    )
+
+    id = Column(BIGINT, primary_key=True)
+    stk_code = Column(VARCHAR(20), nullable=False, comment='证券代码')
+    cn_name = Column(VARCHAR(128), nullable=False, server_default=text("''"), comment='证券名称')
+    biz_date = Column(Date, nullable=False, comment='业务时间')
+    list_type = Column(String(32, 'utf8mb4_general_ci'), comment='名单类型')
+    plan_id = Column(BigInteger, nullable=False, comment='方案ID')
+    var_id = Column(BigInteger, nullable=False, comment='变量ID')
+    var_name = Column(String(128, 'utf8mb4_general_ci'), nullable=False, comment='变量名称')
+    rule_ids = Column(VARCHAR(255), comment='命中规则ID集，逗号分隔')
+    is_exchange_guarantee = Column(TINYINT, nullable=False, server_default=text("'0'"), comment='是否交易所担保券')
+    is_broker_guarantee = Column(TINYINT, nullable=False, server_default=text("'0'"), comment='是否券商担保券')
+    citic_level = Column(String(10, 'utf8mb4_general_ci'), comment='中信分级')
+    status = Column(VARCHAR(255), comment='触发的状态id列表，逗号分隔')
+    event = Column(VARCHAR(255), comment='触发的事件id列表，逗号分隔')
+    index = Column(JSON, comment='指标数据')
+    result_type = Column(VARCHAR(32), comment='结果类型')
+    result_value = Column(TEXT, comment='结果值')
+    compare_result_value = Column(Integer, comment='对比昨日变动（如，正数代表上升，负数代表下降）')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnStateConfig(Base):
+    __tablename__ = 'abn_state_config'
+    __table_args__ = {'comment': '状态配置表'}
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    name = Column(VARCHAR(128), nullable=False, unique=True, comment='名称')
+    category = Column(VARCHAR(32), nullable=False, server_default=text("'未分类'"), comment='类别')
+    desc = Column(TEXT, comment='描述')
+    result_type = Column(VARCHAR(32), nullable=False, server_default=text("''"), comment='结果类型')
+    risk_level = Column(String(32, 'utf8mb4_general_ci'), comment='风险等级')
+    var_id = Column(BigInteger, nullable=False, server_default=text("'0'"), comment='规则引擎变量表ID')
+    event_ids = Column(String(255, 'utf8mb4_general_ci'), comment='使用到的事件ID')
+    create_by = Column(String(32, 'utf8mb4_general_ci'), comment='创建者ID')
+    create_by_name = Column(String(32, 'utf8mb4_general_ci'), comment='创建者名称')
+    update_by = Column(String(32, 'utf8mb4_general_ci'), comment='修改者ID')
+    update_by_name = Column(String(32, 'utf8mb4_general_ci'), comment='修改者名称')
+    is_enable = Column(TINYINT, nullable=False, server_default=text("'1'"), comment='是否使用')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AbnStateResult(Base):
+    __tablename__ = 'abn_state_result'
+    __table_args__ = (
+        Index('uk_stk_code_biz_date_var_id', 'stk_code', 'biz_date', 'var_id', unique=True),
+        {'comment': '异动状态结果表'}
+    )
+
+    id = Column(BIGINT, primary_key=True, comment='自增ID')
+    stk_code = Column(VARCHAR(20), nullable=False, comment='证券代码')
+    cn_name = Column(VARCHAR(128), nullable=False, server_default=text("''"), comment='证券名称')
+    biz_date = Column(Date, nullable=False, comment='业务时间')
+    plan_id = Column(BigInteger, nullable=False, comment='方案ID')
+    var_id = Column(BigInteger, nullable=False, comment='变量ID')
+    var_name = Column(String(128, 'utf8mb4_general_ci'), nullable=False, comment='变量名称')
+    rule_ids = Column(VARCHAR(255), comment='命中规则ID集，逗号分隔')
+    result_type = Column(VARCHAR(32), comment='结果类型')
+    result_value = Column(TEXT, comment='结果值')
+    risk_level = Column(String(32, 'utf8mb4_general_ci'), comment='风险等级')
+    enter_time = Column(Date, comment='进入时点')
+    duration = Column(Integer, comment='持续时间')
+    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    gmt_modified = Column(DateTime)
+
+
+class AppVer(Base):
+    __tablename__ = 'app_ver'
+    __table_args__ = {'comment': '程序当前版本号'}
+
+    id = Column(Integer, primary_key=True)
+    version = Column(String(10, 'utf8mb4_general_ci'), comment='当前程序版本号')
+
+
+class AppVerLog(Base):
+    __tablename__ = 'app_ver_log'
+    __table_args__ = {'comment': '程序升级记录表'}
+
+    id = Column(Integer, primary_key=True, comment='升级序号')
+    version = Column(String(10, 'utf8mb4_general_ci'), nullable=False, comment='目标版本号')
+    created_time = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"), comment='升级时间')
 
 
 class AshareEspecialStk(Base):
@@ -43,6 +281,52 @@ class AshareOldname(Base):
     opr_type = Column(VARCHAR(12), comment='操作类型')
     data_time = Column(DateTime, comment='数据时间')
     biz_date = Column(Integer, comment='业务日期')
+
+
+t_ashareyield = Table(
+    'ashareyield', metadata,
+    Column('object_id', VARCHAR(100), nullable=False),
+    Column('s_info_windcode', VARCHAR(40)),
+    Column('trade_dt', VARCHAR(8)),
+    Column('pct_change_d', DECIMAL(22, 4)),
+    Column('pct_change_w', DECIMAL(22, 4)),
+    Column('pct_change_m', DECIMAL(22, 4)),
+    Column('volume_w', DECIMAL(22, 4)),
+    Column('volume_m', DECIMAL(22, 4)),
+    Column('amount_w', DECIMAL(22, 4)),
+    Column('amount_m', DECIMAL(22, 4)),
+    Column('turnover_d', DECIMAL(22, 4)),
+    Column('turnover_d_float', DECIMAL(22, 4)),
+    Column('turnover_w', DECIMAL(22, 4)),
+    Column('turnover_w_float', DECIMAL(22, 4)),
+    Column('turnover_w_ave', DECIMAL(22, 4)),
+    Column('turnover_w_ave_float', DECIMAL(22, 4)),
+    Column('turnover_m', DECIMAL(22, 4)),
+    Column('turnover_m_float', DECIMAL(22, 4)),
+    Column('turnover_m_ave', DECIMAL(22, 4)),
+    Column('turnover_m_ave_float', DECIMAL(22, 4)),
+    Column('pct_change_ave_100w', DECIMAL(22, 4)),
+    Column('std_deviation_100w', DECIMAL(22, 4)),
+    Column('variance_100w', DECIMAL(22, 4)),
+    Column('pct_change_ave_24m', DECIMAL(22, 4)),
+    Column('std_deviation_24m', DECIMAL(22, 4)),
+    Column('variance_24m', DECIMAL(22, 4)),
+    Column('pct_change_ave_60m', DECIMAL(22, 4)),
+    Column('std_deviation_60m', DECIMAL(22, 4)),
+    Column('variance_60m', DECIMAL(22, 4)),
+    Column('beta_day_1y', DECIMAL(22, 8)),
+    Column('beta_day_2y', DECIMAL(22, 8)),
+    Column('alpha_day_1y', DECIMAL(22, 8)),
+    Column('alpha_day_2y', DECIMAL(22, 8)),
+    Column('beta_100w', DECIMAL(22, 8)),
+    Column('alpha_100w', DECIMAL(22, 8)),
+    Column('beta_24m', DECIMAL(22, 8)),
+    Column('beta_60m', DECIMAL(22, 8)),
+    Column('alpha_24m', DECIMAL(22, 8)),
+    Column('alpha_60m', DECIMAL(22, 8)),
+    Column('opdate', DateTime),
+    Column('opmode', VARCHAR(1))
+)
 
 
 class AsynExport(Base):
@@ -156,20 +440,28 @@ class CpGuaranteeList(Base):
     biz_date = Column(Date, primary_key=True, nullable=False, comment='业务日期')
 
 
+class CustIndicationErrorLog(Base):
+    __tablename__ = 'cust_indication_error_log'
+
+    fund_id = Column(String(100, 'utf8mb4_general_ci'), primary_key=True, nullable=False, comment='资金账号')
+    biz_date = Column(Date, primary_key=True, nullable=False, comment='业务日期')
+    error_info = Column(Text(collation='utf8mb4_general_ci'), comment='异常指标信息')
+
+
 class CustRiskGrade(Base):
     __tablename__ = 'cust_risk_grade'
     __table_args__ = {'comment': '客户风险等级分类设置结果表'}
 
     fund_id = Column(VARCHAR(200), primary_key=True, nullable=False, comment='资金账户（信用）')
-    final_score = Column(DECIMAL(10, 0), comment='风险等级设置最后总得分')
+    final_score = Column(DECIMAL(10, 4), comment='风险等级设置最后总得分')
     detail_score = Column(JSON, comment='客户风险等级6个指标的得分')
     grade = Column(Integer, comment='客户风险等级，0:安全,1:关注,2:低风险,3:中风险,4:高风险')
     biz_date = Column(Date, primary_key=True, nullable=False, comment='计算日期')
     ranks = Column(BigInteger, comment='得分排名')
     rank_percent = Column(DECIMAL(10, 4), comment='得分排名比')
     guarantee_rank_percent = Column(DECIMAL(10, 4), comment='担保物质量排名比')
-    gmt_create = Column(Date, comment='创建日期')
-    gmt_modified = Column(Date, comment='修改日期')
+    gmt_create = Column(Date, comment='创建时间')
+    gmt_modified = Column(Date, comment='最后修改时间')
 
 
 class CustRiskKeeprateReal(Base):
@@ -330,7 +622,7 @@ class EsContractMonitorSec(Base):
     regis_no_limit_ratio = Column(DECIMAL(26, 4), comment='无涨跌幅限制注册制持仓集中度')
     stkqty = Column(Integer, comment='该证券合计持仓数量')
     unpay_sec_num_tot = Column(DECIMAL(26, 4), comment='该证券合计未还数量')
-    is_limit_ext = Column(String(2, 'utf8mb4_general_ci'), comment='是否限制融券展期，是和否')
+    is_limit_ext = Column(VARCHAR(2), comment='是否限制融券展期，是和否')
 
 
 class EsCustinfo(Base):
@@ -514,7 +806,7 @@ class GuaranteeBond(Base):
     conversion_rate = Column(VARCHAR(10), comment='折算率')
     standard_basis = Column(VARCHAR(20), comment='标准依据')
     trading_market = Column(VARCHAR(20), comment='交易市场')
-    stk_type = Column(String(20, 'utf8mb4_general_ci'), comment='证券品种')
+    stk_type = Column(VARCHAR(20), comment='证券品种')
     regist = Column(VARCHAR(2), comment='是否注册制上市')
     sec_code = Column(VARCHAR(30), comment='带后缀的code')
 
@@ -554,6 +846,19 @@ t_inf_ashare_ipo_type = Table(
     Column('biz_date', Integer),
     comment='A股ipo类型'
 )
+
+
+class KettleParallelList(Base):
+    __tablename__ = 'kettle_parallel_list'
+    __table_args__ = {'comment': 'kettle文件并行运行记录，用于kettle判断并行执行的情况'}
+
+    type = Column(VARCHAR(10), primary_key=True, nullable=False, comment='类型，0: T-1日任务, 1: T日任务')
+    job_name = Column(VARCHAR(100), comment='任务名称')
+    remark = Column(VARCHAR(100), comment='备注')
+    biz_date = Column(Date, primary_key=True, nullable=False, comment='业务日期')
+    job_id = Column(Integer, primary_key=True, nullable=False, comment='任务id')
+    job_status = Column(VARCHAR(10), comment='0：成功， 1：失败')
+    total = Column(Integer, comment='数据总数')
 
 
 class LrDiscountRate(Base):
@@ -632,6 +937,17 @@ class LrMarketDailySta(Base):
     ave_gua_ratio = Column(VARCHAR(255), comment='平均维持担保比例')
 
 
+class MacroAkshareMarketDatum(Base):
+    __tablename__ = 'macro_akshare_market_data'
+    __table_args__ = {'comment': 'A股上深两市总市值数据'}
+
+    biz_date = Column(Integer, primary_key=True, comment='交易日期')
+    sh_total_value = Column(DECIMAL(26, 4), comment='上交所总市值（亿元）')
+    sz_total_value = Column(DECIMAL(26, 4), comment='深交所总市值（亿元）')
+    sh_circulation_market_value = Column(DECIMAL(26, 4), comment='上交所流通市值（亿元）')
+    sz_circulation_market_value = Column(DECIMAL(26, 4), comment='深交所流通市值（亿元）')
+
+
 class MacroDatum(Base):
     __tablename__ = 'macro_data'
     __table_args__ = {'comment': '宏观观测指标表'}
@@ -642,6 +958,17 @@ class MacroDatum(Base):
     total_val = Column(Float, comment='两市证券总市值（亿元）')
     sh_index = Column(Float, comment='上证指数')
     social_fin = Column(Float, comment='社会融资规模存量（万亿元）')
+
+
+class MacroEconomicIndex(Base):
+    __tablename__ = 'macro_economic_index'
+    __table_args__ = {'comment': '经济相关指数'}
+
+    biz_date = Column(Date, primary_key=True, comment='业务日期')
+    sh_index = Column(DECIMAL(26, 4), comment='上证指数')
+    m2 = Column(DECIMAL(26, 4), comment='M2货币供应量（亿）')
+    gdp = Column(DECIMAL(26, 4), comment='国内生产总值（亿）')
+    financing_stocks = Column(DECIMAL(26, 4), comment='社会融资规模存量（万亿）')
 
 
 class MacroStkM2(Base):
@@ -727,7 +1054,7 @@ class NetShortReal(Base):
     biz_date = Column(Date, primary_key=True, nullable=False, comment='资金账号')
     fund_id = Column(VARCHAR(100), primary_key=True, nullable=False, comment='业务日期')
     updated_at = Column(DateTime, comment='更新时间')
-    net_short = Column(DECIMAL(10, 4), comment='账户净值')
+    net_short = Column(DECIMAL(26, 4), comment=' 账户净值')
     type = Column(CHAR(1), comment='类型，0用户净值 ，1沪深300，2无风险收益率')
     year_return_rate = Column(DECIMAL(10, 4), comment='收益率，近一年')
     share = Column(DECIMAL(20, 4), comment='份额')
@@ -747,7 +1074,7 @@ class PdFinancierAttPool(Base):
     id_card = Column(VARCHAR(255), primary_key=True, nullable=False, comment='身份证号/组织机构代码')
     name = Column(VARCHAR(100), comment='融资人姓名')
     create_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
-    fund_id = Column(String(32, 'utf8mb4_general_ci'), comment='融资人信用账户')
+    fund_id = Column(VARCHAR(32), comment='融资人信用账户')
 
 
 class PdRiskLevel(Base):
@@ -958,7 +1285,7 @@ class RatingItem(Base):
     created_by = Column(Integer, nullable=False, comment='创建人')
     updated_at = Column(DateTime, nullable=False, comment='更新时间')
     created_at = Column(DateTime, nullable=False, comment='创建时间')
-    created_by_name = Column(String(120), comment='创建人姓名')
+    created_by_name = Column(VARCHAR(120), comment='创建人姓名')
 
 
 class RatingItemRule(Base):
@@ -1181,6 +1508,181 @@ class RzrqMarketDatum(Base):
     curd_securities_mkt = Column(Float, comment='当日日末证券总市值（亿元）')
     guar_sec_prop = Column(Float, comment='当日日末担保证券市值占该证券总市值比重（%）')
     flag = Column(Integer, primary_key=True, nullable=False, comment='标记位 用于区分 证金数据-1 、交易数据-2')
+    rq_avl_qty = Column(DECIMAL(26, 4), comment='融券余量 (股/份)')
+
+
+class SameIndustryDatum(Base):
+    __tablename__ = 'same_industry_data'
+    __table_args__ = {'comment': '同业折数据'}
+
+    biz_date = Column(Date, primary_key=True, nullable=False, comment='业务日期')
+    stk_code = Column(VARCHAR(20), primary_key=True, nullable=False, index=True, comment='证券代码')
+    biz_type = Column(VARCHAR(8), primary_key=True, nullable=False, comment='1：担保券，2：融资标的，3：融券标的')
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), comment='更新时间')
+    s1 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s2 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s3 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s4 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s5 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s6 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s7 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s8 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s9 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s10 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s11 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s12 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s13 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s14 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s15 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s16 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s17 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s18 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s19 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s20 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s21 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s22 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s23 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s24 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s25 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s26 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s27 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s28 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s29 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s30 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s31 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s32 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s33 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s34 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s35 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s36 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s37 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s38 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s39 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s40 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s41 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s42 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s43 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s44 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s45 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s46 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s47 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s48 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s49 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s50 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s51 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s52 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s53 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s54 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s55 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s56 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s57 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s58 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s59 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s60 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s61 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s62 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s63 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s64 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s65 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s66 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s67 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s68 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s69 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s70 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s71 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s72 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s73 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s74 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s75 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s76 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s77 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s78 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s79 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s80 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s81 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s82 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s83 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s84 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s85 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s86 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s87 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s88 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s89 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s90 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s91 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s92 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s93 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s94 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s95 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s96 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s97 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s98 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s99 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s100 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s101 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s102 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s103 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s104 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s105 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s106 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s107 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s108 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s109 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s110 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s111 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s112 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s113 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s114 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s115 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s116 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s117 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s118 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s119 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s120 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s121 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s122 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s123 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s124 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s125 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s126 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s127 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s128 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s129 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s130 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s131 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s132 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s133 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s134 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s135 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s136 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s137 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s138 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s139 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s140 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s141 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s142 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s143 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s144 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s145 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s146 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s147 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s148 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s149 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+    s150 = Column(DECIMAL(3, 2), comment='券商对应折算率')
+
+
+class SameIndustryDataStatu(Base):
+    __tablename__ = 'same_industry_data_status'
+    __table_args__ = {'comment': '同业折数据状态'}
+
+    biz_date = Column(Date, primary_key=True, nullable=False, comment='业务日期')
+    sec_trader_id = Column(Integer, primary_key=True, nullable=False, comment='券商ID')
+    stk_code = Column(VARCHAR(20), primary_key=True, nullable=False, comment='证券代码')
+    biz_type = Column(VARCHAR(2), primary_key=True, nullable=False, comment='1：担保券，2：融资标的，3：融券标的')
+    stk_status = Column(VARCHAR(20), comment='担保物状态，包含：正常、受限、作废等（默认正常 可以不存)')
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
+    updated_at = Column(TIMESTAMP, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), comment='更新时间')
 
 
 class SecAcctInfo(Base):
@@ -1196,7 +1698,7 @@ class SecAcctInfo(Base):
     acct_status = Column(CHAR(4), comment=' 账户状态')
     trade_mrkt = Column(VARCHAR(4), comment=' 交易所')
     trade_board = Column(VARCHAR(4), primary_key=True, nullable=False, comment=' 交易板块')
-    trade_prvlg = Column(VARCHAR(10), comment=' 股东账户交易权限')
+    trade_prvlg = Column(VARCHAR(100), comment=' 股东账户交易权限')
     spec_trade_seat = Column(VARCHAR(100), comment=' 股东指定席位')
     acct_type = Column(VARCHAR(10), comment=' 账户类别')
     credit_flag = Column(VARCHAR(10), comment='信用标志')
@@ -1226,6 +1728,19 @@ class SecAcctPo(Base):
     mrkt_val_rmb = Column(DECIMAL(26, 4), comment='折人民币市值')
     ref_cost = Column(DECIMAL(26, 4), comment='参考成本')
     ref_mrkt_val = Column(DECIMAL(26, 4), comment='参考市值')
+
+
+class SecBeta(Base):
+    __tablename__ = 'sec_beta'
+    __table_args__ = (
+        Index('stk_index', 'stk_code', 'biz_date'),
+    )
+
+    stk_code = Column(VARCHAR(20), primary_key=True)
+    beta_24m = Column(DECIMAL(22, 8))
+    biz_date = Column(Date)
+    gmt_create = Column(DateTime)
+    gmt_modified = Column(DateTime)
 
 
 class SecBkseBizEvt(Base):
@@ -1292,7 +1807,7 @@ class SecBkseBizEvt(Base):
 
 class SecCapStkChangeEvt(Base):
     __tablename__ = 'sec_cap_stk_change_evt'
-    __table_args__ = {'comment': '资金股份变动流水表'}
+    __table_args__ = {'comment': '银证转账流水表'}
 
     data_label = Column(VARCHAR(4), primary_key=True, nullable=False, comment=' 数据标签')
     evt_id = Column(VARCHAR(200), comment=' 事件编号')
@@ -1537,7 +2052,7 @@ class SecCreditassetdebtsReal(Base):
     closestatus = Column(CHAR(1), comment='追加平仓状态')
     tradeflag = Column(VARCHAR(128), comment='信用交易属性设置')
     total_debts = Column(DECIMAL(26, 4), comment='信用总负债')
-    realcreditstatus = Column(CHAR(10, 'utf8mb4_general_ci'), comment='实时信用状态')
+    realcreditstatus = Column(CHAR(10), comment='实时信用状态')
     updated_at = Column(DateTime)
     serverid = Column(VARCHAR(32), comment='服务器编码')
 
@@ -1565,12 +2080,39 @@ class SecCreditmixparam(Base):
     amt = Column(DECIMAL(19, 2), comment='净资本')
 
 
+class SecCustAvgIndication(Base):
+    __tablename__ = 'sec_cust_avg_indication'
+    __table_args__ = {'comment': '客户指标均值表'}
+
+    biz_date = Column(Date, primary_key=True, comment='业务日期')
+    stock_weigthte_ave = Column(DECIMAL(26, 4), comment='持证券加权平均分')
+    market_pledge_ratio = Column(DECIMAL(26, 4), comment='全市场质押率')
+    main_guarantee_ratio = Column(DECIMAL(26, 4), comment='维持担保比例')
+    net_shorts = Column(DECIMAL(26, 4), comment='净空头占比，净空头/净资产')
+    debt_assets_ratio = Column(DECIMAL(26, 4), comment='资产负债率')
+    concentration = Column(DECIMAL(26, 4), comment='集中度')
+    annualized_returns = Column(DECIMAL(26, 4), comment='年化收益')
+    sharp_ratio = Column(DECIMAL(26, 4), comment='Sharpe比率')
+    alpha = Column(DECIMAL(26, 4), comment='alpha')
+    beta = Column(DECIMAL(26, 4), comment='beta')
+    annualized_volatility = Column(DECIMAL(26, 4), comment='年化波动')
+    maximum_drawdown = Column(DECIMAL(26, 4), comment='最大回撤')
+    var = Column(DECIMAL(26, 4), comment='var')
+    interest_income = Column(DECIMAL(26, 4), comment='利息收入(近一年)')
+    sec_balance = Column(DECIMAL(26, 4), comment='当前两融余额排名百分比')
+    total_asset_size = Column(DECIMAL(26, 4), comment='总资产规模')
+    sortino = Column(DECIMAL(26, 4), comment='索提诺比率')
+    info_rate = Column(DECIMAL(26, 4), comment='信息比率')
+    second_max_drawdown = Column(DECIMAL(26, 4), comment='第二大回撤')
+    third_max_drawdown = Column(DECIMAL(26, 4), comment='第三大回撤')
+
+
 class SecCustIndicationReal(Base):
     __tablename__ = 'sec_cust_indication_real'
     __table_args__ = {'comment': '客户指标信息表'}
 
     fund_id = Column(VARCHAR(100), primary_key=True, nullable=False, comment='资金账户')
-    biz_date = Column(Date, primary_key=True, nullable=False, comment='业务日期')
+    biz_date = Column(Date, primary_key=True, nullable=False, index=True, comment='业务日期')
     stock_weigthte_ave = Column(DECIMAL(26, 4), comment='持证券加权平均分')
     market_pledge_ratio = Column(DECIMAL(26, 4), comment='全市场质押率')
     main_guarantee_ratio = Column(DECIMAL(26, 4), comment='维持担保比例')
@@ -1593,7 +2135,7 @@ class SecCustIndicationReal(Base):
     second_max_drawdown = Column(DECIMAL(26, 4), comment='第二大回撤')
     third_max_drawdown = Column(DECIMAL(26, 4), comment='第三大回撤')
     top_three_concentration = Column(JSON, comment='前三大集中度')
-    ps_warning_list = Column(String(1, 'utf8mb4_general_ci'))
+    ps_warning_list = Column(VARCHAR(1))
 
 
 class SecCustinfo(Base):
@@ -1753,7 +2295,7 @@ class SecLogbanktranReal(Base):
     opertime = Column(DateTime, comment='发生时间')
     sno = Column(VARCHAR(32), primary_key=True, nullable=False, comment='流水号')
     moneytype = Column(CHAR(1), comment='货币代码')
-    banktranid = Column(CHAR(1, 'utf8mb4_general_ci'), primary_key=True, nullable=False, comment="业务类型，'1'--银行转证券'2'--证券转银行'3'--查证券余额'4'--查银行余额'5'--冲银行转证券'6'--冲证券转银行'7'--开户")
+    banktranid = Column(CHAR(1), primary_key=True, nullable=False, comment="业务类型，'1'--银行转证券'2'--证券转银行'3'--查证券余额'4'--查银行余额'5'--冲银行转证券'6'--冲证券转银行'7'--开户")
     fundeffect = Column(DECIMAL(19, 2), comment='转帐发生金额')
     fundbal = Column(DECIMAL(19, 2), comment='发生后余额')
     status = Column(CHAR(1), comment='" 交易状态\\n\t\'0\',\'未报\'\\n\t\'1\',\'已报\'\\n\t\'2\',\'成功\'\\n\t\'3\',\'失败\'\\n\t\'4\',\'超时\'\\n\t\'5\',\'待冲正\'\\n\t\'6\',\'已冲正\'\\n\t\'7\',\'调整为成功\'\\n\t\'8\',\'调整为失败\'\\n\t\'9\',\'单边销户\'"')
@@ -1832,13 +2374,13 @@ class SecMatchReal(Base):
     trddate = Column(Date, comment='交易时间')
     market = Column(CHAR(1), primary_key=True, nullable=False, comment='市场')
     stkcode = Column(CHAR(8), primary_key=True, nullable=False, comment='证券代码')
-    creditflag = Column(CHAR(1), comment='交易类型')
+    creditflag = Column(CHAR(1), comment="交易类型,'0':担保品转入，'1':担保品转出，'2':余券划转，'3':现券还券，'6':买入担保品，'7':卖出担保品，'a':融资开仓，'b':卖券还款，'c':融资平仓，'A':融券开仓'，B':买券还券'，C':融券平仓")
     matchamt = Column(DECIMAL(19, 2), comment='成交金额')
     matchtime = Column(Integer)
     matchcode = Column(VARCHAR(20), primary_key=True, nullable=False, comment='成交编号')
     matchprice = Column(DECIMAL(26, 4), comment='成交价格')
     matchqty = Column(Integer, comment='成交数量')
-    matchtype = Column(CHAR(1), comment='成交类型')
+    matchtype = Column(CHAR(1), comment="成交类型,0'普通成交 ")
     updated_at = Column(DateTime)
     data_label = Column(CHAR(1), comment='数据来源，0：redis， 1：XCB')
 
@@ -2128,6 +2670,16 @@ class SecStopstkcodeAm(Base):
     sourcetype = Column(VARCHAR(4), comment='数据来源')
 
 
+class SecTrader(Base):
+    __tablename__ = 'sec_trader'
+    __table_args__ = {'comment': '券商对照表'}
+
+    sec_trader_id = Column(Integer, primary_key=True, comment='券商id')
+    sec_trader = Column(VARCHAR(30), comment='券商')
+    ranking = Column(Integer, server_default=text("'999'"), comment='排序')
+    status = Column(Integer, server_default=text("'0'"), comment='1：启用  0：不启用')
+
+
 class SecVipCustomer(Base):
     __tablename__ = 'sec_vip_customers'
     __table_args__ = {'comment': 'VIP客户信息表'}
@@ -2284,8 +2836,8 @@ class SecuritiesScorePlanCopy(Base):
     securities_plan_created_by = Column(Integer, nullable=False, comment='创建人')
     created_at = Column(DateTime, nullable=False, comment='创建时间')
     plan_name = Column(VARCHAR(64), comment='方案名称')
-    securities_plan_created_by_name = Column(String(120), comment='创建人')
-    period = Column(String(32), comment='计算周期')
+    securities_plan_created_by_name = Column(VARCHAR(120), comment='创建人')
+    period = Column(VARCHAR(32), comment='计算周期')
 
 
 class StBadDebtsCust(Base):
@@ -2293,7 +2845,7 @@ class StBadDebtsCust(Base):
     __table_args__ = {'comment': '坏账客户'}
 
     task_id = Column(BigInteger, primary_key=True, nullable=False, comment='任务ID')
-    flag = Column(TINYINT, primary_key=True, nullable=False, comment='标识 -1-无含义 自定义压测类型的象征')
+    flag = Column(TINYINT, primary_key=True, nullable=False, server_default=text("'-1'"), comment='标识 -1-无含义 自定义压测类型的象征')
     bad_debts_cust_num_before = Column(DECIMAL(26, 4), comment='坏账客户数_压测前')
     bad_debts_cust_num_after = Column(DECIMAL(26, 4), comment='坏账客户数_压测后')
     bad_debts_cust_avg_keeprate_before = Column(DECIMAL(26, 4), comment='坏账客户平均维保比例_压测前   ')
@@ -2304,6 +2856,7 @@ class StBadDebtsCust(Base):
     expect_bad_debts_amt_after = Column(DECIMAL(26, 4), comment='预计坏账金额_压测后')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建日期')
     gmt_modified = Column(DateTime)
+    stage = Column(Integer, primary_key=True, nullable=False, server_default=text("'1'"), comment='场景标记；1：场景1；2：场景2；场景3')
 
 
 class StCustAccountDetail(Base):
@@ -2312,7 +2865,7 @@ class StCustAccountDetail(Base):
 
     task_id = Column(BigInteger, primary_key=True, nullable=False, comment='主键-作为唯一标识')
     fund_id = Column(VARCHAR(100), primary_key=True, nullable=False, comment='资金账号 ')
-    flag = Column(TINYINT, primary_key=True, nullable=False, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20% ')
+    flag = Column(TINYINT, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20% ')
     cust_name = Column(VARCHAR(100), comment='客户名称')
     cust_type = Column(VARCHAR(100), comment='客户类型')
     cust_risk_score = Column(DECIMAL(26, 4), comment='客户风险评分')
@@ -2337,6 +2890,9 @@ class StCustAccountDetail(Base):
     awkward_stk_code = Column(VARCHAR(20), comment='重仓证券代码')
     awkward_stk_name = Column(VARCHAR(30), comment='重仓证券名称')
     pos_concentration = Column(DECIMAL(26, 4), comment='持仓集中度')
+    net_asset_prop = Column(DECIMAL(26, 4), comment='单一证券净空头')
+    total_asset_prop_before = Column(DECIMAL(26, 4), comment='账户整体净空头-压测前')
+    stage = Column(Integer, primary_key=True, nullable=False, server_default=text("'1'"), comment='压测场景标记；1：场景1；2：场景2；3：场景3')
     pos_price = Column(DECIMAL(26, 4), comment='持仓市值 (万元)')
     close_mkt_keeprate = Column(DECIMAL(26, 4), comment='收市维保')
     resist_stop_times = Column(DECIMAL(26, 4), comment='抗跌停次数')
@@ -2345,27 +2901,48 @@ class StCustAccountDetail(Base):
     biz_date = Column(Date, comment='业务日期 (结果表 需要)')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建日期')
     gmt_modified = Column(DateTime)
+    total_asset_prop_after = Column(DECIMAL(26, 4), comment='账户整体净空头-压测后')
+    fin_debt_tot_amt_before = Column(DECIMAL(26, 4), comment='融资总负债-压测前')
+    fin_debt_tot_amt_after = Column(DECIMAL(26, 4), comment='融资总负债-压测后')
+    secu_debt_tot_amt_before = Column(DECIMAL(26, 4), comment='融券总负债-压测前')
+    secu_debt_tot_amt_after = Column(DECIMAL(26, 4), comment='融券总负债-压测后')
 
 
-class StCustKeeprateChange(Base):
-    __tablename__ = 'st_cust_keeprate_change'
-    __table_args__ = {'comment': '客户维保比例变动'}
+t_st_cust_keeprate_change = Table(
+    'st_cust_keeprate_change', metadata,
+    Column('task_id', BigInteger, nullable=False, comment='任务ID'),
+    Column('flag', TINYINT, nullable=False, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20%'),
+    Column('cust_keep_rate', VARCHAR(100), nullable=False, comment='客户维保比例'),
+    Column('stress_test_before_cust_num', DECIMAL(26, 4), comment='压测前客户数'),
+    Column('stress_test_after_cust_num', DECIMAL(26, 4), comment='压测后客户数'),
+    Column('change_rate', DECIMAL(26, 4), comment='变动率（%）'),
+    Column('stress_test_before_lr_bal', DECIMAL(26, 4), comment='压测前两融余额（万元）'),
+    Column('stress_test_after_lr_bal', DECIMAL(26, 4), comment='压测后两融余额（万元）'),
+    Column('gmt_create', DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建日期'),
+    Column('gmt_modified', DateTime),
+    Column('stage', Integer, nullable=False, server_default=text("'1'"), comment='场景标记：1-场景1；2-场景2；3-场景3'),
+    comment='客户维保比例变动'
+)
 
-    task_id = Column(BigInteger, primary_key=True, nullable=False, comment='任务ID')
-    flag = Column(TINYINT, primary_key=True, nullable=False, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20%')
-    cust_keep_rate = Column(VARCHAR(100), primary_key=True, nullable=False, comment='客户维保比例')
-    stress_test_before_cust_num = Column(DECIMAL(26, 4), comment='压测前客户数')
-    stress_test_after_cust_num = Column(DECIMAL(26, 4), comment='压测后客户数')
-    change_rate = Column(DECIMAL(26, 4), comment='变动率（%）')
-    stress_test_before_lr_bal = Column(DECIMAL(26, 4), comment='压测前两融余额（万元）')
-    stress_test_after_lr_bal = Column(DECIMAL(26, 4), comment='压测后两融余额（万元）')
-    gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建日期')
-    gmt_modified = Column(DateTime)
+
+t_st_cust_net_short = Table(
+    'st_cust_net_short', metadata,
+    Column('task_id', BigInteger, nullable=False, comment='主键-作为唯一标识'),
+    Column('stage', Integer, nullable=False, server_default=text("'1'"), comment='主键-场景标记：1-场景1；2-场景2；3-场景3；'),
+    Column('cust_id', VARCHAR(20), nullable=False, comment='客户id'),
+    Column('fund_id', VARCHAR(100), comment='资金账号'),
+    Column('stk_code', VARCHAR(20), server_default=text("''"), comment='证券代码'),
+    Column('stk_name', VARCHAR(20), comment='证券简称'),
+    Column('net_short_before', DECIMAL(26, 4), comment='净空头-压测前'),
+    Column('net_short_after', DECIMAL(26, 4), comment='净空头-压测后'),
+    Column('biz_date', Date, comment='业务日期'),
+    Column('gmt_create', DateTime, comment='创建日期'),
+    Column('gmt_modified', DateTime, comment='修改日期')
+)
 
 
 class StCustRangeDatum(Base):
     __tablename__ = 'st_cust_range_data'
-    __table_args__ = {'comment': '客户范围修改临时表'}
 
     id = Column(BIGINT, primary_key=True, comment='自增ID')
     biz_date = Column(Date, comment='业务时间')
@@ -2375,7 +2952,7 @@ class StCustRangeDatum(Base):
     cust_name = Column(VARCHAR(32), comment='客户名称')
     keeprate = Column(DECIMAL(26, 4), comment='收市维保比例')
     credit_test_score = Column(DECIMAL(26, 4), comment='客户风险评分')
-    stk_code = Column(VARCHAR(32), comment='持仓证券代码')
+    stk_code = Column(VARCHAR(20), nullable=False, comment='证券代码')
     mktval = Column(DECIMAL(26, 4), comment='持仓证券市值')
     stk_name = Column(VARCHAR(32), comment='证券名称')
     sum_fund_id_rz_bal = Column(DECIMAL(26, 4), comment='融资余额（同一资金账户）')
@@ -2395,24 +2972,26 @@ class StCustRangeSet(Base):
     keeprate_real = Column(DECIMAL(26, 4), comment='实时维保比例')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
     gmt_modified = Column(DateTime)
+    stage = Column(Integer, server_default=text("'1'"), comment='场景标记；1：场景1；2：场景2；3：场景3')
 
 
 class StCustomRiseFallRange(Base):
     __tablename__ = 'st_custom_rise_fall_range'
     __table_args__ = (
-        Index('uk_task_id_stk_code', 'task_id', 'stk_code', unique=True),
+        Index('uk_task_id_stk_code', 'task_id', 'stk_code', 'stage', unique=True),
         {'comment': '自定义个券涨跌幅'}
     )
 
     id = Column(BIGINT, primary_key=True, comment='自增ID')
     task_id = Column(BigInteger, comment='任务ID')
-    stk_code = Column(VARCHAR(12), comment='证券代码')
+    stk_code = Column(VARCHAR(20), nullable=False, comment='证券代码')
     stk_name = Column(VARCHAR(20), comment='证券简称')
     rise_fall_range = Column(DECIMAL(26, 4), comment='涨跌幅(跌负数，涨正数)')
     control_panel_num = Column(DECIMAL(26, 4), comment='调控板设定天数(是负就负数，是正就正数)')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
     gmt_modified = Column(DateTime)
-    stage = Column(Integer, comment='场景标记，1：场景1；2：场景2；3：场景3')
+    stage = Column(Integer, server_default=text("'1'"), comment='场景标记，1：场景1；2：场景2；3：场景3')
+    group_id = Column(BigInteger, server_default=text("'0'"), comment='标识个券场景分组，同个值为同个分组，默认值为0')
 
 
 class StFullMktRiseFallRange(Base):
@@ -2426,14 +3005,14 @@ class StFullMktRiseFallRange(Base):
     control_panel_num = Column(DECIMAL(26, 4), comment='涨跌幅个数')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
     gmt_modified = Column(DateTime)
-    stage = Column(Integer, comment='场景标记;1:场景1；2:场景2；3：场景3')
+    stage = Column(Integer, server_default=text("'1'"), comment='场景标记;1:场景1；2:场景2；3：场景3')
     is_beta = Column(TINYINT, server_default=text("'0'"), comment='贝塔系数校正，0-否 1-是，默认0')
 
 
 class StInduRiseFallRange(Base):
     __tablename__ = 'st_indu_rise_fall_range'
     __table_args__ = (
-        Index('uk_task_id_indu_code', 'task_id', 'indu_code', unique=True),
+        Index('uk_task_id_indu_code', 'task_id', 'indu_code', 'stage', unique=True),
         {'comment': '行业涨跌幅'}
     )
 
@@ -2445,7 +3024,7 @@ class StInduRiseFallRange(Base):
     gmt_modified = Column(DateTime)
     is_beta = Column(TINYINT, server_default=text("'0'"), comment='贝塔系数校正，0-否 1-是，默认0')
     control_panel_num = Column(DECIMAL(26, 4), comment='涨跌幅个数')
-    stage = Column(Integer, comment='场景标记；1:场景1；2:场景2；3:场景3')
+    stage = Column(Integer, server_default=text("'1'"), comment='场景标记；1:场景1；2:场景2；3:场景3')
     group_id = Column(Integer, server_default=text("'0'"), comment='标识行业分组，同个值为同个分组，默认值为0')
 
 
@@ -2462,7 +3041,10 @@ class StInspectSubmitCustKeeprateChange(Base):
 
 class StMktBoardRiseFallRange(Base):
     __tablename__ = 'st_mkt_board_rise_fall_range'
-    __table_args__ = {'comment': '市场板块涨跌幅'}
+    __table_args__ = (
+        Index('uk_task_id_mkt_code', 'task_id', 'board_code', 'stage', unique=True),
+        {'comment': '市场板块涨跌幅'}
+    )
 
     id = Column(BIGINT, primary_key=True, comment='自增ID')
     task_id = Column(BigInteger, comment='任务ID')
@@ -2473,7 +3055,7 @@ class StMktBoardRiseFallRange(Base):
     gmt_modified = Column(DateTime)
     is_beta = Column(TINYINT, server_default=text("'0'"), comment='贝塔系数校正，0-否 1-是，默认0')
     control_panel_num = Column(DECIMAL(26, 4), comment='涨跌幅个数')
-    stage = Column(Integer, comment='场景标记；1：场景-1；2：场景2；3：场景3')
+    stage = Column(Integer, server_default=text("'1'"), comment='场景标记；1：场景-1；2：场景2；3：场景3')
     group_id = Column(Integer, server_default=text("'0'"), comment='标识板块场景分组，同个值为同个分组，默认值为0')
 
 
@@ -2482,7 +3064,7 @@ class StNeedToKeeprateCust(Base):
     __table_args__ = {'comment': '需追保客户'}
 
     task_id = Column(BigInteger, primary_key=True, nullable=False, comment='任务ID')
-    flag = Column(TINYINT, primary_key=True, nullable=False, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20% ')
+    flag = Column(TINYINT, primary_key=True, nullable=False, server_default=text("'-1'"), comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20% ')
     need_to_keeprate_cust_num_before = Column(DECIMAL(26, 4), comment='需追保客户数_压测前 ')
     need_to_keeprate_cust_num_after = Column(DECIMAL(26, 4), comment='需追保客户数_压测后')
     need_to_avg_keeprate_cust_before = Column(DECIMAL(26, 4), comment='需追保客户平均维保比例_压测前 ')
@@ -2493,6 +3075,7 @@ class StNeedToKeeprateCust(Base):
     expect_keeprate_amt_after = Column(DECIMAL(26, 4), comment='预计追保金额_压测后 ')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建日期')
     gmt_modified = Column(DateTime)
+    stage = Column(Integer, primary_key=True, nullable=False, server_default=text("'1'"), comment='场景标记；1：场景1；2：场景2；3：场景3')
 
 
 class StSituationPreview(Base):
@@ -2500,15 +3083,16 @@ class StSituationPreview(Base):
     __table_args__ = {'comment': '压测情景预览表'}
 
     task_id = Column(BigInteger, primary_key=True, nullable=False, comment='任务ID')
-    stk_code = Column(VARCHAR(12), primary_key=True, nullable=False, comment='证券代码')
+    stk_code = Column(VARCHAR(20), primary_key=True, nullable=False, comment='证券代码')
     stk_name = Column(VARCHAR(128), nullable=False, comment='证券简称\\r\\n')
     base_period_close_price = Column(DECIMAL(26, 4), comment='基期收盘价')
     rise_fall_range = Column(DECIMAL(26, 4), comment='涨跌幅')
     last_period_close_price = Column(DECIMAL(26, 4), comment='末期收盘价')
-    flag = Column(TINYINT, primary_key=True, nullable=False, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20% ')
+    flag = Column(TINYINT, comment='标识 -1-无含义  1-轻度5%  2-中度10% 3-重度-20% ')
     biz_date = Column(Date, comment='业务日期 (开始压测的日期)')
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建日期')
     gmt_modified = Column(DateTime)
+    stage = Column(Integer, primary_key=True, nullable=False, server_default=text("'1'"), comment='场景值，1：场景1；2：场景2；3：场景3')
 
 
 class StTask(Base):
@@ -2539,7 +3123,20 @@ class StTask(Base):
     gmt_create = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), comment='创建时间')
     gmt_modified = Column(DateTime)
     cust_range = Column(VARCHAR(10), server_default=text("'all'"), comment='客户范围')
-    rise_fall_range_type = Column(Integer, comment='涨跌幅类型；0-涨跌幅；1-涨跌停个数')
+    rise_fall_range_type = Column(Integer, comment='压测涨跌幅类型，0：按涨跌幅设置；1：按涨跌停个数。')
+    remark = Column(TEXT, comment='任务的相关备注的信息')
+
+
+class StTaskCondition(Base):
+    __tablename__ = 'st_task_condition'
+
+    task_id = Column(BigInteger, primary_key=True, comment='任务id')
+    type = Column(Integer, comment='标记条件类型枚举类型，1：实时涨跌幅；2：连续涨跌幅；3：累积涨跌幅\\r\\n')
+    oper = Column(VARCHAR(50), comment='条件值；大于、大于等于；等于；小于等于；小于')
+    duration = Column(DECIMAL(26, 4), comment='连续n个交易日')
+    rise_fall_range = Column(DECIMAL(26, 4), comment='涨跌幅')
+    gmt_create = Column(DateTime, comment='创建任务条件的时间')
+    gmt_modified = Column(DateTime, comment='修改任务条件的时间')
 
 
 class StkListImport(Base):
@@ -2563,9 +3160,9 @@ class StkSecLimitExtList(Base):
     __tablename__ = 'stk_sec_limit_ext_list'
     __table_args__ = {'comment': '限制融券展期证券'}
 
-    stk_code = Column(String(20, 'utf8mb4_general_ci'), primary_key=True, comment='证券代码')
-    stk_name = Column(String(50, 'utf8mb4_general_ci'), nullable=False, comment='证券名称')
-    stk_status = Column(String(100, 'utf8mb4_general_ci'), comment='证券状态')
+    stk_code = Column(VARCHAR(20), primary_key=True, comment='证券代码')
+    stk_name = Column(VARCHAR(50), nullable=False, comment='证券名称')
+    stk_status = Column(VARCHAR(100), comment='证券状态')
     import_time = Column(DateTime, comment='导入时间')
     biz_date = Column(Date, comment='业务日期')
 
@@ -2578,7 +3175,7 @@ class StockDayPrice(Base):
     )
 
     stk_code = Column(VARCHAR(20), primary_key=True, nullable=False, comment='证券代码')
-    date = Column(String(8, 'utf8mb4_general_ci'), primary_key=True, nullable=False, comment='交易日期')
+    date = Column(VARCHAR(8), primary_key=True, nullable=False, comment='交易日期')
     open_price = Column(DECIMAL(26, 4), comment='开盘价')
     pre_close_price = Column(DECIMAL(26, 4), comment='前收盘价')
     high_limit_price = Column(DECIMAL(26, 4), comment='涨停价')
@@ -3063,16 +3660,30 @@ class SwUnderlyingList(Base):
     datatime = Column(DateTime, comment='数据日期')
 
 
+class Syslog(Base):
+    __tablename__ = 'syslog'
+    __table_args__ = {'comment': '日志记录'}
+
+    id = Column(BigInteger, primary_key=True)
+    systemid = Column(VARCHAR(100), comment='系统id，1:kettle， 2:ds， 3:japi')
+    type = Column(VARCHAR(100), comment='日志类型,0:普通日志，1:错误日志， 2:成功日志')
+    f_module = Column(VARCHAR(100), comment='日志模块')
+    status = Column(VARCHAR(10), comment='状态，0:成功，1:失败')
+    desc = Column(VARCHAR(1000), comment='日志详细描述')
+    biz_date = Column(Date, comment='数据的业务日期')
+    logtime = Column(TIMESTAMP, comment='发生时间')
+
+
 class UploadFileInfo(Base):
     __tablename__ = 'upload_file_info'
     __table_args__ = {'comment': '上传文件信息表'}
 
-    url = Column(String(200, 'utf8mb4_general_ci'), comment='上传路径')
-    file_name = Column(String(100, 'utf8mb4_general_ci'), primary_key=True, nullable=False, comment='文件名称')
-    location = Column(String(100, 'utf8mb4_general_ci'), comment='文件位置')
+    url = Column(VARCHAR(200), comment='上传路径')
+    file_name = Column(VARCHAR(100), primary_key=True, nullable=False, comment='文件名称')
+    location = Column(VARCHAR(100), comment='文件位置')
     file_size = Column(Float(10), comment='大小，单位M')
     upload_at = Column(DateTime, comment='上传时间')
-    module_tag = Column(String(200, 'utf8mb4_general_ci'), primary_key=True, nullable=False, comment='所属模块')
+    module_tag = Column(VARCHAR(200), primary_key=True, nullable=False, comment='所属模块')
 
 
 t_v_fin_afordpnifee = Table(
@@ -3168,7 +3779,7 @@ class TotalScore(Base):
     created_by = Column(Integer, nullable=False, comment='创建人')
     updated_at = Column(DateTime, nullable=False, comment='更新时间')
     created_at = Column(DateTime, nullable=False, comment='创建时间')
-    created_by_name = Column(String(120), comment='创建人姓名')
+    created_by_name = Column(VARCHAR(120), comment='创建人姓名')
 
     plan = relationship('SecuritiesScorePlan')
 
