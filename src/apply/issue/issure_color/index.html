@@ -11,7 +11,16 @@
 </head>
 <body>
 <div id="app2" style="height: 100vh">
-    <el-table :data="tableData" @sort-change="sortChange" :sort-by="['r','g','b']">
+    <div style="display: flex; margin-top: 2rem;margin-bottom: 2rem;justify-content: center">
+        <div style="width: 20%">排序顺序:{{fields}}</div>
+        <el-checkbox-group v-model="fields" @change="sortChange">
+            <el-checkbox label="r">r-红色</el-checkbox>
+            <el-checkbox label="g">g-绿色</el-checkbox>
+            <el-checkbox label="b">b-蓝色</el-checkbox>
+        </el-checkbox-group>
+    </div>
+
+    <el-table :data="tableData">
         <el-table-column prop="r" label="r" sortable></el-table-column>
         <el-table-column prop="g" label="g" sortable></el-table-column>
         <el-table-column prop="b" label="b" sortable></el-table-column>
@@ -29,10 +38,12 @@
             el: '#app2',
             data: {
                 tableData: [],
+                fields: [],
             },
             methods: {
                 init() {
                     let arr = [0, 64, 128, 192, 255]
+                    let arr2 = [0, 64, 128, 192, 255]
                     for (let r in arr) {
                         for (let g in arr) {
                             for (let b in arr) {
@@ -47,8 +58,16 @@
                     }
                 },
                 sortChange() {
-
-                }
+                    let fields = this.fields
+                    this.tableData = this.tableData.sort(function (objA, objB) {
+                        for (name of fields) {
+                            if (objA[name] != objB[name]) {
+                                return objA[name] - objB[name]
+                            }
+                        }
+                        return 0
+                    })
+                },
             },
             created() {
                 this.init()
