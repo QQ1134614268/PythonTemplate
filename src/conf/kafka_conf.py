@@ -3,10 +3,9 @@
 @Time: 2021/7/19
 @Description:
 """
-IP = "182.160.10.221"
-PORT = "9857"
-TOPIC = "ai-news.news"
-KEY = "news"
+LOCAL_HOST = "localhost:9092"
 
-DEV_IP = "127.0.0.1"
-DEV_PORT = "9092"
+SHENWAN_HOST = "120.78.167.19:9092"
+
+GGOK_HOST = "ggok.top:9092"
+MY_TOPIC1="MY_TOPIC1"

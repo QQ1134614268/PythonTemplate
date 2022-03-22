@@ -6,6 +6,8 @@
 from kafka import KafkaProducer, KafkaAdminClient
 from kafka.admin import NewTopic
 
+from conf.kafka_conf import GGOK_HOST, MY_TOPIC1
+
 
 def create_topic(client, topic):
     # 创建topic
@@ -16,16 +18,15 @@ def create_topic(client, topic):
 
 
 if __name__ == '__main__':
-    admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092")
+    admin_client = KafkaAdminClient(bootstrap_servers=GGOK_HOST)
 
-    new_topic = "MY_TOPIC1"
-    if new_topic not in admin_client.list_topics():
-        create_topic(admin_client, new_topic)
+    if MY_TOPIC1 not in admin_client.list_topics():
+        create_topic(admin_client, MY_TOPIC1)
 
-    producer = KafkaProducer(bootstrap_servers=['127.0.0.1:9092'])
+    producer = KafkaProducer(bootstrap_servers=[GGOK_HOST])
 
     for i in range(0, 2):
         # type(value_bytes) in (bytes, bytearray, memoryview, type(None)
-        producer.send(new_topic, value=b'lai zi shouke de msg')
+        producer.send(MY_TOPIC1, value=b'lai zi shouke de msg')
     producer.flush()
     producer.close()
