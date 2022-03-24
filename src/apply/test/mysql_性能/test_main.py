@@ -10,7 +10,6 @@ from conf.config import localhost_test_engine, localhost_test_session
 # 根据model 生成存储过程,根据类型生成字段
 # 根据model 生成数据, model批量插入
 
-# todo
 # TPCC 它模拟了一个仓储物流的业务场景，包括新建订单、付款、发货、订单查询、库存查询五个事务操作
 
 #   1. 注册用户 1千万条
