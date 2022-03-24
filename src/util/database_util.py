@@ -5,7 +5,7 @@
 """
 import unittest
 
-from conf.config import dev_test_session, DB
+from conf.config import localhost_test_session, DB
 
 
 def exec_sql(curr_session, sql):
@@ -61,14 +61,14 @@ def get_unique_cols(curr_session, db, tb_name):
 
 class Test(unittest.TestCase):
     def test_get_tables(self):
-        print(get_tables(dev_test_session, DB))
+        print(get_tables(localhost_test_session, DB))
 
     def test_get_cols(self):
-        print(get_cols(dev_test_session, DB, 'dividend_bond'))
+        print(get_cols(localhost_test_session, DB, 'dividend_bond'))
 
     def test_get_pks(self):
-        print(get_unique_cols(dev_test_session, DB, 'dividend_bond'))
+        print(get_unique_cols(localhost_test_session, DB, 'dividend_bond'))
 
     def test_version(self):
         sql = "select version()"
-        print(exec_to_list_dict(dev_test_session, sql))
+        print(exec_to_list_dict(localhost_test_session, sql))
