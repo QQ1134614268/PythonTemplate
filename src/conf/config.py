@@ -23,9 +23,10 @@ PORT = "3306"
 USERNAME = 'root'
 PASSWORD = "123456"
 DB = "test"
-dev_test_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
-dev_test_engine = create_engine(dev_test_url, echo=DEBUG_MODE)
-dev_test_session = sessionmaker(bind=dev_test_engine)()
+localhost_test_url = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME, PASSWORD, HOST, PORT, DB)
+localhost_test_engine = create_engine(localhost_test_url, echo=DEBUG_MODE)
+localhost_test_session = sessionmaker(bind=localhost_test_engine)()
+
 
 # Oracle db
 ORACLE_NAME = "system"
@@ -45,8 +46,7 @@ sqlserver_password = "123456"
 sqlserver_url = 'mssql+pymssql://{}:{}@{}/{}'.format(sqlserver_username, sqlserver_password, sqlserver_ip, sqlserver_db)
 sqlserver_engine = create_engine(sqlserver_url)
 
-localhost_world_url = "mysql+mysqlconnector://wg:123456@ggok.top:3306/world?charset=utf8"
-localhost_test_url = "mysql+pymysql://root:123456@127.0.0.1:3306/test?charset=utf8"
+
 time_zone_url = 'mysql+mysqlconnector://{}:{}@{}/{}?time_zone={}'.format(
     'root', "123456", "127.0.0.1", 'test', "%2B10:00")
 
