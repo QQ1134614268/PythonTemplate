@@ -50,4 +50,4 @@ localhost_test_url = "mysql+pymysql://root:123456@127.0.0.1:3306/test?charset=ut
 time_zone_url = 'mysql+mysqlconnector://{}:{}@{}/{}?time_zone={}'.format(
     'root', "123456", "127.0.0.1", 'test', "%2B10:00")
 
-ZOOKEEPER_HOST = "ggok.top:2181"
+GGOK_ZOOKEEPER_HOST = "ggok.top:2181"

@@ -6,7 +6,7 @@
 import re
 import unittest
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Column, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
@@ -17,8 +17,8 @@ Base = declarative_base()
 
 
 class RightManage(Base):
-    __table_name__ = "right_manage"
-    pass
+    __tablename__ = "right_manage"
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
 
 
 class Filed:
@@ -52,7 +52,7 @@ class TestMysql(unittest.TestCase):
             data[vo.Field] = self.get_data(vo.Type)
         print(str(data).replace("'", '"'))
 
-    def get_data2(self, f_type):
+    def get_data(self, f_type):
         all_list = re.findall(r"\d+", f_type)
         length = 4
         if all_list:

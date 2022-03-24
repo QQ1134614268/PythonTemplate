@@ -1,8 +1,8 @@
 from kazoo.client import KazooClient
-from conf.config import ZOOKEEPER_HOST
+from conf.config import GGOK_ZOOKEEPER_HOST
 
 # 连接zookeeper
-zk = KazooClient(hosts=ZOOKEEPER_HOST)  # hosts="127.0.0.1:2181,192.168.0.162:2182,192.168.0.162:2183"
+zk = KazooClient(hosts=GGOK_ZOOKEEPER_HOST)  # hosts="127.0.0.1:2181,192.168.0.162:2182,192.168.0.162:2183"
 
 # 启动连接
 zk.start()
