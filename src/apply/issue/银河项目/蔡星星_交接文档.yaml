@@ -1,0 +1,89 @@
+桌面:
+    地址1: https://hz-connect02.chinastock.com.cn/portal/webclient/index.html#/desktop
+    地址2: https://hz-connect01.chinastock.com.cn/portal/webclient/index.html#/desktop
+    用户: vdi.CRS02
+    密码: ToX;fdiFp(
+    
+    etl管理平台（虚拟桌面内）: 	http://10.1.72.3:8887/dev/	vdi.CRS01	Sy)H]304dn
+    Hue（虚拟桌面内）	10.1.72.11:8888	sys_crs	4WegMuafbrbB  (历史? Y3ebRPgBPpvE )
+    Wind门户	http://wds.wind.com.cn/rdf/?#/main	15210381731	112358
+    ssh	10.1.72.3 	sys_dw_dev	s2T9UsScYW0D
+    大数据平台表结构	https://shimo.im/sheets/nySFjJL4WQ4VD7Ul/E48Rq
+    业务系统处理表清单	https://shimo.im/sheets/5A2AR8fLEBkeykR6/ZNElc
+    
+    沟通	周诗咏
+    
+    数据推送:
+        发邮件到：tao.wang25@pactera.com，
+        抄送：zhoushiyong_it@chinastock.com.cn
+        数据推送样例：信用风险数仓表推送列表.xlsx(只写需要推送的任务)
+
+
+
+
+	
+    脚本名称	脚本描述	涉及表
+    prd_adm.mid_corp_fin_d.sql	财务基础指标表	adm.mid_corp_fin_d
+    prd_adm.mid_ashare_mkt_der_idx_d.sql	a股衍生指标表	adm.mid_ashare_mkt_der_idx_d
+    prd_adm.mid_sw_industry_inf_d.sql	申万二级中值表	adm.mid_industry_sw_inf_d
+    prd_mart_rpt.crs_stock_fin_idx_d.sql	信用风险指标表	adm.crs_sec_fin_idx_d
+    sync_sample_data.py	定时检测样本	
+    adm.mid_corp_main_holders_std_qrt_inf_d.sql	10大股东标准化表	fdm.inf_ashare_inter_hld_quar
+    mart_app.crs_sec_industry_plate.sql	行业板块信息表	mart_app.crs_sec_industry_plate
+    adm.mid_main_cir_holders_inf_d.sql	10大流通股东	fdm.inf_ashare_out_stkhld_quar
+    MART_RPT.CRS_COMP_ATTENT_INF_D.sql	银河质押标的表	mart_app.crs_pledge_underlying_inf_d
+    MART_RPT.CRS_RELATION_SHIP_D.sql	公司关联表	fdm.inf_ashare_co_rela_ha
+    
+        说明：任务可以通过对应的表名查询，表结构可以通过hue界面查看，上述脚本列表内容以etl平台为准，因为不能从etl粘贴出来，后期有些测试直和修改时直接在管理平台的脚本改的；标红颜色的是随着字段需求可能变化的表，其他表比较稳定，不需要修改。
+
+        etl管理平台中[mid_corp_fin_d],[mid_ashare_mkt_der_idx_d],[mid_industry_sw_inf_d],[crs_sec_fin_idx_d],带dev的是我自己补数的任务，不带dev的是需要修改对应脚本后提交上线申请的，两套任务的脚本略微不一致。
+        注意：业务库新增字段时数据平台中是decimal(xx,x)的禁止使用float或者double等数据类型
+        测试库（xxx_dev_xxx）中的表自己可以修改，删除，创建等等,只能操作和自己有关的表。
+
+Hive/impala常用命令：
+    Insert overwrite xxxx; //覆盖插入
+    Insert into xxxx;//追加插入
+    show partitions tb_name; 
+    eg:show partitions dw_dev_adm.mid_corp_fin_d;
+    删除单个分区：alter table dw_dev_adm.mid_corp_fin_d drop partition (biz_date = 20200930);
+    删除多个分区：alter table dw_dev_adm.mid_corp_fin_d drop 
+    partition (biz_date = 20200930),
+    partition (biz_date=20200929);
+    增加列：ALTER TABLE table_name ADD|REPLACE COLUMNS (col_name data_type [COMMENT col_comment], ...);
+    
+    Eg：
+        ALTER TABLE dw_dev_adm.mid_corp_fin_d ADD  COLUMNS 
+        (
+        NET_ASSET_PAYOFF_RATE DECIMAL(38,8) COMMENT '净资产收益率',
+        ASSET_LIAB_RATE DECIMAL(38,8) COMMENT '资产负债率',
+        TOTL_ASSET_REWARD_RATE DECIMAL(38,8) COMMENT '总资产报酬率',
+        SYNTHETIC_PAYOFF_GROSS_PARENT DECIMAL(38,8) COMMENT '归属于母公司所有者的净利润',
+        BIZ_INCOME DECIMAL(38,8) COMMENT '营业收入',
+        SALEGROSS_PROFIT_MARGIN DECIMAL(38,8) COMMENT '销售毛利率'
+        );
+
+历史补数步骤：
+    1，分别修改DW_DEV_ADM_MID_INDUSTRY_SW_INF_D，DW_DEV_ADM_MID_ASHARE_MKT_DER_IDX_D，DW_DEV_MART_CRS_SEC_FIN_IDX_D任务脚本中的固定值(如果没有则无需修改)到需要补数的日期，比如【20210115】；历史最早支持可追溯的数据到20190408
+    2，删除表【dw_dev_adm.mid_corp_fin_d】的所有非报告期的分区；
+    3，复制【DW_DEV_ADM_MID_CORP_FIN_D】任务中的脚本在hue中执行，执行的时候需要输入变量，输入对应的日期，这里考虑到已经发布的财报日期没有必要按照天跑重复的数据，所以执行完脚本后数据会落在固定的4个财报日期对应的分区里，接下来的两个任务【DW_DEV_ADM_MID_INDUSTRY_SW_INF_D】，【DW_DEV_MART_CRS_SEC_FIN_IDX_D】也是从对应的财报日期的分区取得数据，变量输入的时候依次输入最近的日期和接下来的财报日期即可，比如：今天是20210118，txdate=20210115,exe_date=20210115,执行；接下来改exe_date为20201231,执行；20200930,执行；20200630执行；20200331执行。。。执行到20190630即可；这里也可以用【show partitions xxx;】来查看表的最新分区确定最新的执行日期。
+    4，登录上述资源列表【SSH】资源服务器移步如下路径：/etc/bigdata_jobs/dev/dpl/
+    5，补dw_dev_adm.mid_ashare_mkt_der_idx_d 表数据：python3 run_ndays_job.py DW_DEV_ADM_MID_ASHARE_MKT_DER_IDX_D 20190408 20210115 1
+    6，补dw_dev_adm.mid_industry_sw_inf_d数据：python3 run_ndays_job.py DW_DEV_ADM_MID_INDUSTRY_SW_INF_D 20190408 20210115 1
+    7，补dw_dev_mart.crs_sec_fin_idx_d 数据：python3 run_ndays_job.py DW_DEV_MART_CRS_SEC_FIN_IDX_D 20190408 20210115 1
+    8，Etl管理平台编辑DTS_DW_DEV_MART_CRS_PLEDGE_RISK_STOCK_FIN_IDX任务，修改推送为全量推送，刷新元数据，如元数据没有变化(stock_fin_idx表没有新增或者删除字段),无需刷新；
+    9，推送数据：python3 etljob.py DTS_DW_DEV_MART_CRS_PLEDGE_RISK_STOCK_FIN_IDX 20210115
+    10，同时在etl管理平台的测试环境找到对应的有修改的不带dev的任务脚本，修改完后测试，单次执行，查看日志没问题后提交上线申请即可。
+5开发流程思路
+    (1)	需求分析
+    (2)	根据必要的字段和常用的字段以及复用性等方面确定最终表结构
+    (3)	确定表依赖的所有表的结构，数据维度，一条记录的意义等细节
+    (4)	确定需求表的主键，数据维度，计算，更新策略等
+    (5)	将自己的想法用程序或者脚本落地实现
+    (6)	执行脚本查看结果是否复合预期结果
+    (7)	优化，部署上线
+2.	开发步鄹
+    1，根据需求确定表结构发诗咏老师评审；
+    2，评审完成建表后在测试库新建对应的表； 建表可以在hue中执行对应的建表语句；
+    3，Etl测试环境新建任务：任务列表->数据处理，见下图中的数据处理； 
+    4，选择对应的表，编写处理逻辑提交； 
+    5，保存任务并增加调度，增加表之前的依赖关系
