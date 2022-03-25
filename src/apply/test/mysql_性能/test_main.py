@@ -36,7 +36,7 @@ class TestMysql(TestCase):
             for j in range(100000):
                 row = next(num)
                 vos.append(User(**{
-                    "name": "name_"+row,
+                    "name": "name_" + row,
                     "sex": random.randint(0, 2),
                     "id": row,
                     "create_time": create_time,
@@ -98,6 +98,8 @@ class TestMysql(TestCase):
                         "order_id": order_id,
                         "goods_id": goods_ids[x],
                         "goods_name": "goods_name_" + str(goods_ids[x]),
+                        "price": goods_ids[x] % 100,
+                        "num": random.randint(1, 10),
 
                         "id": row,
                         "create_time": create_time,
