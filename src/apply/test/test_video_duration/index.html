@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input type="file" onchange="changeFile(this)">
+<script>
+    function changeFile(ele) {
+        let content = ele.files[0]
+        let url = URL.createObjectURL(content);//获取录音时长
+        let audioElement = new Audio(url);//audio也可获取视频的时长
+        let duration;
+        audioElement.addEventListener("loadedmetadata", function (_event) {
+            duration = audioElement.duration;
+            console.log(duration / 60);
+        });
+    }
+</script>
+</body>
+</html>
