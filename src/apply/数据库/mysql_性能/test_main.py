@@ -2,8 +2,8 @@ import datetime
 import random
 from unittest import TestCase
 
-from apply.test.mysql_性能.models import User, Base, Order, OrderInfo, Goods
-from apply.test.mysql_性能.util import get_id
+from apply.数据库.mysql_性能.models import User, Base, Order, OrderInfo, Goods
+from apply.数据库.mysql_性能.util import get_id
 from conf.config import localhost_test_engine, localhost_test_session
 
 

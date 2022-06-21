@@ -1,7 +1,10 @@
 import os
 from enum import Enum, unique
+from unittest import TestCase
 
 import jinja2
+
+from apply.issue.issure_js_auto_code.db import DbUtil
 
 
 class Colum:
@@ -60,25 +63,26 @@ class DataType(Enum):
 class Form:
 
     @staticmethod
-    def get_table_info():
-        """SELECT
-    TB.TABLE_SCHEMA,    -- 模式
-    TB.TABLE_NAME,      -- 表名
-    TB.TABLE_COMMENT,   -- 表名注释
-    COL.COLUMN_NAME,    -- 字段名
-    COL.COLUMN_TYPE,    -- 字段类型
-    COL.COLUMN_COMMENT,  -- 字段注释
-    COL.DATA_TYPE        -- 字段数据类型
-    FROM
-        INFORMATION_SCHEMA.TABLES TB,
-        INFORMATION_SCHEMA.COLUMNS COL
-    Where TB.TABLE_SCHEMA ='gdmo_sp' -- 库名
-    AND TB.TABLE_NAME = COL.TABLE_NAME"""
+    def get_tables(db):
+        sql = "select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA ={db}"
+        db_session = DbUtil("root", "123456", "127.0.0.1", "3306", "oa")
+        data = db_session.exec(sql, db)
+        return data
+
+    @staticmethod
+    def get_table_info(table_name, db=None):
+        sql = """SELECT COL.COLUMN_NAME, COL.COLUMN_TYPE, COL.COLUMN_COMMENT, COL.DATA_TYPE 
+        FROM INFORMATION_SCHEMA.COLUMNS COL 
+        Where COL.table_schema = %(db)s AND COL.TABLE_NAME = %(table_name)s"""
+
+        db_session = DbUtil("root", "123456", "127.0.0.1", "3306", "oa")
+        args = {"db": db, "table_name": table_name}
+        data = db_session.exec(sql, args)
+        return data
         # 表名,表注释
         # 字段名,字段类型,字段注释, 枚举值
 
         # json数据 -- class数据-- 类数据
-        pass
 
     @staticmethod
     def table_to_class():
@@ -89,26 +93,31 @@ class Form:
         pass
 
     @staticmethod
-    def class_to_tile():
-        resource_dir = os.path.abspath(__file__)
-        data2 = {}
-        template_file = "template_worker_time.tpl.html"
+    def class_to_file(data2, path):
+        resource_dir = os.path.dirname(__file__)
+        template_file = "autocode.tpl.html"
 
         template_loader = jinja2.FileSystemLoader(searchpath=resource_dir)
         template_env = jinja2.Environment(loader=template_loader)
         template = template_env.get_template(template_file)
         output_text = template.render(data2)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(output_text)
 
     @staticmethod
     def table_to_tile():
         pass
 
 
-# class User(Form):
-#     __table_name__ = ""
-#     name = Colum("姓名", "name", StrData(), order=1, nullable=True)
-#     age = Colum("年龄", "name", StrData(), order=2, nullable=True)
+class TestAutoCode(TestCase):
 
+    def test_run(self):
+        table = "user"
+        rows = Form.get_table_info(table, "oa")
+        data = {
+            "list": rows
+        }
+        Form.class_to_file(data, "user.vue")
 
-if __name__ == '__main__':
-    pass
+    def test_run_all(self):
+        table = "user"

@@ -4,7 +4,7 @@
                  label-width="68px">
             {% for row in list %}
             <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.deptId" placeholder="请输入部门ID" clearable
+                <el-input v-model="queryForm.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}" clearable
                           @keyup.enter.native="query"/>
             </el-form-item>
             {% endfor %}
@@ -21,7 +21,7 @@
         </div>
         <el-table v-loading="loading" :data="tableData" @selection-change="handleSelectionChange">
             {% for row in list %}
-            <el-table-column type="selection" width="55" align="center"/>
+            <el-table-column label="{{row.COLUMN_COMMENT}}" prop="{{row.COLUMN_NAME}}" width="55" align="center"></el-table-column>
             {% endfor %}
             <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
                 <template slot-scope="scope">
@@ -42,8 +42,8 @@
         <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
             <el-form ref="form" :model="form" :rules="rules" label-width="80px">
                 {% for row in list %}
-                <el-form-item label="{row.comment}" prop="deptId">
-                    <el-input v-model="form.{row.field_name}" placeholder="请输入{row.comment}"/>
+                <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
+                    <el-input v-model="form.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
                 </el-form-item>
                 {% endfor %}
                 <div slot="footer" class="dialog-footer">
@@ -84,9 +84,9 @@ export default {
             form: {},
             // 表单校验
             rules: {
-                // {% for row in list %}
-                // userName: [{required: {row.required}, trigger: "blur", message: "{row.message}",}],
-                // {% endfor %}
+                {% for row in list %}
+                {{row.COLUMN_NAME}}: [{required: {{row.required or "false"}}, trigger: "blur", message: "{{row.COLUMN_COMMENT}}",}],
+                {% endfor %}
             }
         };
     },
