@@ -17,7 +17,7 @@ class Es(unittest.TestCase):
         # os.system(r"D:\dev\elasticsearch-7.14.0\bin\elasticsearch.bat")
 
         self.test_index = "test_index_db"
-        self.es = Elasticsearch(hosts=['127.0.0.1'])
+        self.es = Elasticsearch(hosts=['ggok.top'])
 
     def test_main(self):
         es = self.es
