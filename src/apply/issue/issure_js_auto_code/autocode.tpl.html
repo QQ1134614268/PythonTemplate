@@ -3,9 +3,8 @@
         <el-form :model="queryForm" ref="queryForm" size="small" :inline="true" v-show="showSearch"
                  label-width="68px">
             {% for row in list %}
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
+                <el-input v-model="queryForm.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
             </el-form-item>
             {% endfor %}
             <el-form-item>
@@ -19,7 +18,7 @@
                 删除
             </el-button>
         </div>
-        <el-table v-loading="loading" :data="tableData" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="tableData">
             {% for row in list %}
             <el-table-column label="{{row.COLUMN_COMMENT}}" prop="{{row.COLUMN_NAME}}" width="55" align="center"></el-table-column>
             {% endfor %}
@@ -34,10 +33,7 @@
                 </template>
             </el-table-column>
         </el-table>
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-                       :page-sizes="[10, 20, 50]" :page-size="pagesize" layout="total, sizes, prev, pager, next, jumper"
-                       :total="total" style="margin:1rem 0">
-        </el-pagination>
+        <el-pagination @current-change="init" :current-page="page" :total="total"></el-pagination>
 
         <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
             <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -56,6 +52,8 @@
 </template>
 
 <script>
+import {postJosn2, get2, putJson2, deleteJson2} from "@/api/util";
+import _URL from "@/api/api";
 
 export default {
     name: "User",
@@ -74,6 +72,7 @@ export default {
             showSearch: true,
             // 总条数
             total: 0,
+            page: 1,
             // 弹出层标题
             title: "",
             // 是否显示弹出层
@@ -95,12 +94,12 @@ export default {
     },
     methods: {
         async init() {
-            let response = await this.$getjson(WorkerApi, this.queryForm);
+            let response = await this.$get2(_URL, this.queryForm);
             if (response.data.code != 1) {
                 this.$message.error(response.data.data);
                 return
             }
-            this.tableData = response.data
+            this.tableData = response.data.data
             this.total = response.total
         },
         query() {
@@ -133,13 +132,13 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     if (this.form.id == null) {
-                        this.postjosn(this.form)
+                        this.postJosn2(_URL, this.form)
                         this.$message.success("修改成功");
                     } else {
-                        this.putjson(this.form)
+                        this.putJson2(_URL, this.form)
                         this.$message.success("修改成功");
                     }
-                    // this.this.ppjson(this.form)
+                    // this.this.ppJson(_URL, this.form)
                     this.open = false;
                     this.init();
                 }
@@ -147,7 +146,7 @@ export default {
         },
         // 批量删除或者单个删除
         handleDelete(row) {
-            this.deletejson(url, row.id)
+            this.deleteJson2(_URL, row.id)
         },
     }
 };

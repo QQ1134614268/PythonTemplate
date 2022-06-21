@@ -3,94 +3,76 @@
         <el-form :model="queryForm" ref="queryForm" size="small" :inline="true" v-show="showSearch"
                  label-width="68px">
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.id" placeholder="请输入主键id" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="主键id" prop="deptId">
+                <el-input v-model="queryForm.id" placeholder="请输入主键id"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.create_by" placeholder="请输入创建者id" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="创建者id" prop="deptId">
+                <el-input v-model="queryForm.create_by" placeholder="请输入创建者id"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.create_time" placeholder="请输入创建时间" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="创建时间" prop="deptId">
+                <el-input v-model="queryForm.create_time" placeholder="请输入创建时间"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.update_by" placeholder="请输入修改者id" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="修改者id" prop="deptId">
+                <el-input v-model="queryForm.update_by" placeholder="请输入修改者id"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.update_time" placeholder="请输入修改时间" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="修改时间" prop="deptId">
+                <el-input v-model="queryForm.update_time" placeholder="请输入修改时间"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.email" placeholder="请输入邮箱" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="邮箱" prop="deptId">
+                <el-input v-model="queryForm.email" placeholder="请输入邮箱"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.entry_date" placeholder="请输入入职日期" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="入职日期" prop="deptId">
+                <el-input v-model="queryForm.entry_date" placeholder="请输入入职日期"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.id_card" placeholder="请输入身份证号" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="身份证号" prop="deptId">
+                <el-input v-model="queryForm.id_card" placeholder="请输入身份证号"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.id_card_type" placeholder="请输入证件类型" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="证件类型" prop="deptId">
+                <el-input v-model="queryForm.id_card_type" placeholder="请输入证件类型"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.no" placeholder="请输入工号" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="工号" prop="deptId">
+                <el-input v-model="queryForm.no" placeholder="请输入工号"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.org_id" placeholder="请输入部门" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="部门" prop="deptId">
+                <el-input v-model="queryForm.org_id" placeholder="请输入部门"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.password" placeholder="请输入密码" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="密码" prop="deptId">
+                <el-input v-model="queryForm.password" placeholder="请输入密码"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.phone" placeholder="请输入手机号码" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="手机号码" prop="deptId">
+                <el-input v-model="queryForm.phone" placeholder="请输入手机号码"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.post_id" placeholder="请输入职位" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="职位" prop="deptId">
+                <el-input v-model="queryForm.post_id" placeholder="请输入职位"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.state" placeholder="请输入状态" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="状态" prop="deptId">
+                <el-input v-model="queryForm.state" placeholder="请输入状态"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.type" placeholder="请输入类型" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="类型" prop="deptId">
+                <el-input v-model="queryForm.type" placeholder="请输入类型"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.user_name" placeholder="请输入用户名" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="用户名" prop="deptId">
+                <el-input v-model="queryForm.user_name" placeholder="请输入用户名"/>
             </el-form-item>
             
-            <el-form-item label="部门ID" prop="deptId">
-                <el-input v-model="queryForm.work_hour_system" placeholder="请输入工时制度" clearable
-                          @keyup.enter.native="query"/>
+            <el-form-item label="工时制度" prop="deptId">
+                <el-input v-model="queryForm.work_hour_system" placeholder="请输入工时制度"/>
             </el-form-item>
             
             <el-form-item>
@@ -104,7 +86,7 @@
                 删除
             </el-button>
         </div>
-        <el-table v-loading="loading" :data="tableData" @selection-change="handleSelectionChange">
+        <el-table v-loading="loading" :data="tableData">
             
             <el-table-column label="主键id" prop="id" width="55" align="center"></el-table-column>
             
@@ -153,10 +135,7 @@
                 </template>
             </el-table-column>
         </el-table>
-        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-                       :page-sizes="[10, 20, 50]" :page-size="pagesize" layout="total, sizes, prev, pager, next, jumper"
-                       :total="total" style="margin:1rem 0">
-        </el-pagination>
+        <el-pagination @current-change="init" :current-page="page" :total="total"></el-pagination>
 
         <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
             <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -243,6 +222,7 @@
 </template>
 
 <script>
+import {postJosn2, get2, putJson2, deleteJson2} from "@/api/util";
 
 export default {
     name: "User",
@@ -261,6 +241,7 @@ export default {
             showSearch: true,
             // 总条数
             total: 0,
+            page: 1,
             // 弹出层标题
             title: "",
             // 是否显示弹出层
@@ -316,7 +297,7 @@ export default {
     },
     methods: {
         async init() {
-            let response = await this.$getjson(WorkerApi, this.queryForm);
+            let response = await this.$get2(_URL, this.queryForm);
             if (response.data.code != 1) {
                 this.$message.error(response.data.data);
                 return
@@ -354,13 +335,13 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     if (this.form.id == null) {
-                        this.postjosn(this.form)
+                        this.postJosn2(_URL, this.form)
                         this.$message.success("修改成功");
                     } else {
-                        this.putjson(this.form)
+                        this.putJson2(_URL, this.form)
                         this.$message.success("修改成功");
                     }
-                    // this.this.ppjson(this.form)
+                    // this.this.ppJson(_URL, this.form)
                     this.open = false;
                     this.init();
                 }
@@ -368,7 +349,7 @@ export default {
         },
         // 批量删除或者单个删除
         handleDelete(row) {
-            this.deletejson(url, row.id)
+            this.deleteJson2(_URL, row.id)
         },
     }
 };
