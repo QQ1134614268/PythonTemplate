@@ -1,11 +1,11 @@
 import os
-from enum import Enum, unique
+from enum import Enum
 from unittest import TestCase
 
 import jinja2
 
 from apply.issue.issure_js_auto_code.db import DbUtil
-from util.str_util import to_lower_camel
+from util.str_util import to_lower_camel, to_snake, to_upper_camel
 
 
 class Colum:
@@ -99,11 +99,20 @@ class Form:
         with open(path, "w", encoding="utf-8") as f:
             f.write(output_text)
 
+    @staticmethod
+    def index_js_to_file2(data2, path, resource_dir=os.path.dirname(__file__), template_file="autocode.tpl.html"):
+        template_loader = jinja2.FileSystemLoader(searchpath=resource_dir)
+        template_env = jinja2.Environment(loader=template_loader)
+        template = template_env.get_template(template_file)
+        output_text = template.render(data2)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(output_text)
+
 
 class TestAutoCode(TestCase):
 
     def test_run(self):
-        table = "user"
+        table = "organization"
         rows = Form.get_table_info(table, "oa")
         data = {
             "list": rows
@@ -113,8 +122,28 @@ class TestAutoCode(TestCase):
     def test_run_all(self):
         tables = Form.get_tables("oa")
         for table in tables:
-            rows = Form.get_table_info(table["TABLE_NAME"], "oa")
+            table_name = table["TABLE_NAME"]
+            table_upper_caml = to_upper_camel(table_name)
+            rows = Form.get_table_info(table_name, "oa")
             data = {
-                "list": rows
+                "list": rows,
+                "tableUpperCaml": table_upper_caml,
+                "tableConst": to_snake(table_name).upper(),
             }
-            Form.class_to_file(data, f"{table}.vue".format(table))
+            Form.class_to_file(data, f"tmp/{table_upper_caml}.vue")
+
+    def test_run_all1(self):
+        tables = Form.get_tables("oa")
+        table_infos = []
+        for table in tables:
+            table_name = table["TABLE_NAME"]
+            table_upper_caml = to_upper_camel(table_name)
+            table_infos.append({
+                "tableUpperCaml": table_upper_caml,
+                "tableLowerCaml": to_lower_camel(table_name),
+                "tableConst": to_snake(table_name).upper(),
+            })
+        data = {
+            "list": table_infos
+        }
+        Form.index_js_to_file2(data, "tmp/index.js", template_file="index.template")

@@ -1,0 +1,22 @@
+{% for row in list %}
+export const {{row.tableConst}}_API = '/api/{{row.tableLowerCaml}}/';
+export const {{row.tableConst}}_CRATE_API = "/api/{{row.tableLowerCaml}}/crate";
+export const {{row.tableConst}}_PAGE_API = "/api/{{row.tableLowerCaml}}/getPage";
+export const {{row.tableConst}}_UPDATE_API = "/api/{{row.tableLowerCaml}}/update";
+export const {{row.tableConst}}_DELETE_API = "/api/{{row.tableLowerCaml}}/delete";
+export const {{row.tableConst}}_DELETE_BATCH_API = "/api/{{row.tableLowerCaml}}/deleteBatch";
+{% endfor %}
+
+{% for row in list %}
+export const {{row.tableConst}}_URL = '/{{row.tableUpperCaml}}';
+{% endfor %}
+
+const routes = [
+    {% for row in list %}
+    {
+        path: {{row.tableConst}}_URL,
+        component: () => import('@/views/{{row.tableUpperCaml}}'),
+    },
+    {% endfor %}
+];
+export default routes;

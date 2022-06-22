@@ -23,56 +23,32 @@
                 <el-input v-model="queryForm.updateTime" placeholder="请输入修改时间"/>
             </el-form-item>
             
-            <el-form-item label="邮箱" prop="deptId">
-                <el-input v-model="queryForm.email" placeholder="请输入邮箱"/>
+            <el-form-item label="上级评价" prop="deptId">
+                <el-input v-model="queryForm.leaderAppraise" placeholder="请输入上级评价"/>
             </el-form-item>
             
-            <el-form-item label="入职日期" prop="deptId">
-                <el-input v-model="queryForm.entryDate" placeholder="请输入入职日期"/>
+            <el-form-item label="上级评分" prop="deptId">
+                <el-input v-model="queryForm.leaderScore" placeholder="请输入上级评分"/>
             </el-form-item>
             
-            <el-form-item label="身份证号" prop="deptId">
-                <el-input v-model="queryForm.idCard" placeholder="请输入身份证号"/>
+            <el-form-item label="绩效考核id" prop="deptId">
+                <el-input v-model="queryForm.performanceId" placeholder="请输入绩效考核id"/>
             </el-form-item>
             
-            <el-form-item label="证件类型" prop="deptId">
-                <el-input v-model="queryForm.idCardType" placeholder="请输入证件类型"/>
+            <el-form-item label="自我评价(完成情况)" prop="deptId">
+                <el-input v-model="queryForm.selfAppraise" placeholder="请输入自我评价(完成情况)"/>
             </el-form-item>
             
-            <el-form-item label="工号" prop="deptId">
-                <el-input v-model="queryForm.no" placeholder="请输入工号"/>
+            <el-form-item label="自我评分" prop="deptId">
+                <el-input v-model="queryForm.selfScore" placeholder="请输入自我评分"/>
             </el-form-item>
             
-            <el-form-item label="部门" prop="deptId">
-                <el-input v-model="queryForm.orgId" placeholder="请输入部门"/>
+            <el-form-item label="绩效指标" prop="deptId">
+                <el-input v-model="queryForm.target" placeholder="请输入绩效指标"/>
             </el-form-item>
             
-            <el-form-item label="密码" prop="deptId">
-                <el-input v-model="queryForm.password" placeholder="请输入密码"/>
-            </el-form-item>
-            
-            <el-form-item label="手机号码" prop="deptId">
-                <el-input v-model="queryForm.phone" placeholder="请输入手机号码"/>
-            </el-form-item>
-            
-            <el-form-item label="职位" prop="deptId">
-                <el-input v-model="queryForm.postId" placeholder="请输入职位"/>
-            </el-form-item>
-            
-            <el-form-item label="状态" prop="deptId">
-                <el-input v-model="queryForm.state" placeholder="请输入状态"/>
-            </el-form-item>
-            
-            <el-form-item label="类型" prop="deptId">
-                <el-input v-model="queryForm.type" placeholder="请输入类型"/>
-            </el-form-item>
-            
-            <el-form-item label="用户名" prop="deptId">
-                <el-input v-model="queryForm.userName" placeholder="请输入用户名"/>
-            </el-form-item>
-            
-            <el-form-item label="工时制度" prop="deptId">
-                <el-input v-model="queryForm.workHourSystem" placeholder="请输入工时制度"/>
+            <el-form-item label="绩效指标详情" prop="deptId">
+                <el-input v-model="queryForm.targetDescription" placeholder="请输入绩效指标详情"/>
             </el-form-item>
             
             <el-form-item>
@@ -98,31 +74,19 @@
             
             <el-table-column label="修改时间" prop="updateTime" width="55" align="center"></el-table-column>
             
-            <el-table-column label="邮箱" prop="email" width="55" align="center"></el-table-column>
+            <el-table-column label="上级评价" prop="leaderAppraise" width="55" align="center"></el-table-column>
             
-            <el-table-column label="入职日期" prop="entryDate" width="55" align="center"></el-table-column>
+            <el-table-column label="上级评分" prop="leaderScore" width="55" align="center"></el-table-column>
             
-            <el-table-column label="身份证号" prop="idCard" width="55" align="center"></el-table-column>
+            <el-table-column label="绩效考核id" prop="performanceId" width="55" align="center"></el-table-column>
             
-            <el-table-column label="证件类型" prop="idCardType" width="55" align="center"></el-table-column>
+            <el-table-column label="自我评价(完成情况)" prop="selfAppraise" width="55" align="center"></el-table-column>
             
-            <el-table-column label="工号" prop="no" width="55" align="center"></el-table-column>
+            <el-table-column label="自我评分" prop="selfScore" width="55" align="center"></el-table-column>
             
-            <el-table-column label="部门" prop="orgId" width="55" align="center"></el-table-column>
+            <el-table-column label="绩效指标" prop="target" width="55" align="center"></el-table-column>
             
-            <el-table-column label="密码" prop="password" width="55" align="center"></el-table-column>
-            
-            <el-table-column label="手机号码" prop="phone" width="55" align="center"></el-table-column>
-            
-            <el-table-column label="职位" prop="postId" width="55" align="center"></el-table-column>
-            
-            <el-table-column label="状态" prop="state" width="55" align="center"></el-table-column>
-            
-            <el-table-column label="类型" prop="type" width="55" align="center"></el-table-column>
-            
-            <el-table-column label="用户名" prop="userName" width="55" align="center"></el-table-column>
-            
-            <el-table-column label="工时制度" prop="workHourSystem" width="55" align="center"></el-table-column>
+            <el-table-column label="绩效指标详情" prop="targetDescription" width="55" align="center"></el-table-column>
             
             <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
                 <template slot-scope="scope">
@@ -160,56 +124,32 @@
                     <el-input v-model="form.updateTime" placeholder="请输入修改时间"/>
                 </el-form-item>
                 
-                <el-form-item label="邮箱" prop="deptId">
-                    <el-input v-model="form.email" placeholder="请输入邮箱"/>
+                <el-form-item label="上级评价" prop="deptId">
+                    <el-input v-model="form.leaderAppraise" placeholder="请输入上级评价"/>
                 </el-form-item>
                 
-                <el-form-item label="入职日期" prop="deptId">
-                    <el-input v-model="form.entryDate" placeholder="请输入入职日期"/>
+                <el-form-item label="上级评分" prop="deptId">
+                    <el-input v-model="form.leaderScore" placeholder="请输入上级评分"/>
                 </el-form-item>
                 
-                <el-form-item label="身份证号" prop="deptId">
-                    <el-input v-model="form.idCard" placeholder="请输入身份证号"/>
+                <el-form-item label="绩效考核id" prop="deptId">
+                    <el-input v-model="form.performanceId" placeholder="请输入绩效考核id"/>
                 </el-form-item>
                 
-                <el-form-item label="证件类型" prop="deptId">
-                    <el-input v-model="form.idCardType" placeholder="请输入证件类型"/>
+                <el-form-item label="自我评价(完成情况)" prop="deptId">
+                    <el-input v-model="form.selfAppraise" placeholder="请输入自我评价(完成情况)"/>
                 </el-form-item>
                 
-                <el-form-item label="工号" prop="deptId">
-                    <el-input v-model="form.no" placeholder="请输入工号"/>
+                <el-form-item label="自我评分" prop="deptId">
+                    <el-input v-model="form.selfScore" placeholder="请输入自我评分"/>
                 </el-form-item>
                 
-                <el-form-item label="部门" prop="deptId">
-                    <el-input v-model="form.orgId" placeholder="请输入部门"/>
+                <el-form-item label="绩效指标" prop="deptId">
+                    <el-input v-model="form.target" placeholder="请输入绩效指标"/>
                 </el-form-item>
                 
-                <el-form-item label="密码" prop="deptId">
-                    <el-input v-model="form.password" placeholder="请输入密码"/>
-                </el-form-item>
-                
-                <el-form-item label="手机号码" prop="deptId">
-                    <el-input v-model="form.phone" placeholder="请输入手机号码"/>
-                </el-form-item>
-                
-                <el-form-item label="职位" prop="deptId">
-                    <el-input v-model="form.postId" placeholder="请输入职位"/>
-                </el-form-item>
-                
-                <el-form-item label="状态" prop="deptId">
-                    <el-input v-model="form.state" placeholder="请输入状态"/>
-                </el-form-item>
-                
-                <el-form-item label="类型" prop="deptId">
-                    <el-input v-model="form.type" placeholder="请输入类型"/>
-                </el-form-item>
-                
-                <el-form-item label="用户名" prop="deptId">
-                    <el-input v-model="form.userName" placeholder="请输入用户名"/>
-                </el-form-item>
-                
-                <el-form-item label="工时制度" prop="deptId">
-                    <el-input v-model="form.workHourSystem" placeholder="请输入工时制度"/>
+                <el-form-item label="绩效指标详情" prop="deptId">
+                    <el-input v-model="form.targetDescription" placeholder="请输入绩效指标详情"/>
                 </el-form-item>
                 
                 <div slot="footer" class="dialog-footer">
@@ -222,11 +162,11 @@
 </template>
 
 <script>
-import {postJosn2, get2, putJson2, deleteJson2} from "@/api/util";
-import _URL from "@/api/api";
+import {postJson2, getJson2} from "@/api/util";
+import { PERFORMANCE_INFO_CRATE_API, PERFORMANCE_INFO_PAGE_API, PERFORMANCE_INFO_UPDATE_API, PERFORMANCE_INFO_DELETE_API, PERFORMANCE_INFO_DELETE_BATCH_API } from "@/api/api";
 
 export default {
-    name: "User",
+    name: "PerformanceInfo",
     data() {
         return {
             tableData: [],
@@ -264,31 +204,19 @@ export default {
                 
                 updateTime: [{required: false, trigger: "blur", message: "修改时间",}],
                 
-                email: [{required: false, trigger: "blur", message: "邮箱",}],
+                leaderAppraise: [{required: false, trigger: "blur", message: "上级评价",}],
                 
-                entryDate: [{required: false, trigger: "blur", message: "入职日期",}],
+                leaderScore: [{required: false, trigger: "blur", message: "上级评分",}],
                 
-                idCard: [{required: false, trigger: "blur", message: "身份证号",}],
+                performanceId: [{required: false, trigger: "blur", message: "绩效考核id",}],
                 
-                idCardType: [{required: false, trigger: "blur", message: "证件类型",}],
+                selfAppraise: [{required: false, trigger: "blur", message: "自我评价(完成情况)",}],
                 
-                no: [{required: false, trigger: "blur", message: "工号",}],
+                selfScore: [{required: false, trigger: "blur", message: "自我评分",}],
                 
-                orgId: [{required: false, trigger: "blur", message: "部门",}],
+                target: [{required: false, trigger: "blur", message: "绩效指标",}],
                 
-                password: [{required: false, trigger: "blur", message: "密码",}],
-                
-                phone: [{required: false, trigger: "blur", message: "手机号码",}],
-                
-                postId: [{required: false, trigger: "blur", message: "职位",}],
-                
-                state: [{required: false, trigger: "blur", message: "状态",}],
-                
-                type: [{required: false, trigger: "blur", message: "类型",}],
-                
-                userName: [{required: false, trigger: "blur", message: "用户名",}],
-                
-                workHourSystem: [{required: false, trigger: "blur", message: "工时制度",}],
+                targetDescription: [{required: false, trigger: "blur", message: "绩效指标详情",}],
                 
             }
         };
@@ -298,13 +226,13 @@ export default {
     },
     methods: {
         async init() {
-            let response = await this.$get2(_URL, this.queryForm);
+            let response = await this.$get2(PERFORMANCE_INFO_PAGE, this.queryForm);
             if (response.data.code != 1) {
                 this.$message.error(response.data.data);
                 return
             }
             this.tableData = response.data.data
-            this.total = response.total
+            this.total = response.data.total
         },
         query() {
             this.queryForm.page = 1;
@@ -336,10 +264,10 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     if (this.form.id == null) {
-                        this.postJosn2(_URL, this.form)
+                        this.postJson2(PERFORMANCE_INFO_CRATE, this.form);
                         this.$message.success("修改成功");
                     } else {
-                        this.putJson2(_URL, this.form)
+                        this.postJson2(PERFORMANCE_INFO_UPDATE, this.form);
                         this.$message.success("修改成功");
                     }
                     // this.this.ppJson(_URL, this.form)
@@ -350,7 +278,7 @@ export default {
         },
         // 批量删除或者单个删除
         handleDelete(row) {
-            this.deleteJson2(_URL, row.id)
+            this.postJson2(PERFORMANCE_INFO_DELETE, row.id);
         },
     }
 };

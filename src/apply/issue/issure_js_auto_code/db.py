@@ -1,19 +1,10 @@
-from sqlalchemy import Column, String, Integer, create_engine, Boolean
-from sqlalchemy.dialects.mysql import insert
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-from conf.config import localhost_test_url
-
-from datetime import datetime
 from unittest import TestCase
 
-from sqlalchemy import Column, create_engine, DateTime, Integer, TIMESTAMP, String
+from unittest import TestCase
+
+from sqlalchemy import Column, create_engine, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql.functions import func
-
-from conf.config import time_zone_url
 
 Base = declarative_base()
 

@@ -2,11 +2,31 @@
     <div class="app-container">
         <el-form :model="queryForm" ref="queryForm" size="small" :inline="true" v-show="showSearch"
                  label-width="68px">
-            {% for row in list %}
-            <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
-                <el-input v-model="queryForm.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
+            
+            <el-form-item label="主键id" prop="deptId">
+                <el-input v-model="queryForm.id" placeholder="请输入主键id"/>
             </el-form-item>
-            {% endfor %}
+            
+            <el-form-item label="创建者id" prop="deptId">
+                <el-input v-model="queryForm.createBy" placeholder="请输入创建者id"/>
+            </el-form-item>
+            
+            <el-form-item label="创建时间" prop="deptId">
+                <el-input v-model="queryForm.createTime" placeholder="请输入创建时间"/>
+            </el-form-item>
+            
+            <el-form-item label="修改者id" prop="deptId">
+                <el-input v-model="queryForm.updateBy" placeholder="请输入修改者id"/>
+            </el-form-item>
+            
+            <el-form-item label="修改时间" prop="deptId">
+                <el-input v-model="queryForm.updateTime" placeholder="请输入修改时间"/>
+            </el-form-item>
+            
+            <el-form-item label="待办事项" prop="deptId">
+                <el-input v-model="queryForm.note" placeholder="请输入待办事项"/>
+            </el-form-item>
+            
             <el-form-item>
                 <el-button type="primary" icon="el-icon-search" size="mini" @click="query">搜索</el-button>
                 <el-button icon="el-icon-refresh" size="mini" @click="queryReset">重置</el-button>
@@ -19,9 +39,19 @@
             </el-button>
         </div>
         <el-table v-loading="loading" :data="tableData">
-            {% for row in list %}
-            <el-table-column label="{{row.COLUMN_COMMENT}}" prop="{{row.COLUMN_NAME}}" width="55" align="center"></el-table-column>
-            {% endfor %}
+            
+            <el-table-column label="主键id" prop="id" width="55" align="center"></el-table-column>
+            
+            <el-table-column label="创建者id" prop="createBy" width="55" align="center"></el-table-column>
+            
+            <el-table-column label="创建时间" prop="createTime" width="55" align="center"></el-table-column>
+            
+            <el-table-column label="修改者id" prop="updateBy" width="55" align="center"></el-table-column>
+            
+            <el-table-column label="修改时间" prop="updateTime" width="55" align="center"></el-table-column>
+            
+            <el-table-column label="待办事项" prop="note" width="55" align="center"></el-table-column>
+            
             <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
                 <template slot-scope="scope">
                     <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">
@@ -37,11 +67,31 @@
 
         <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
             <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-                {% for row in list %}
-                <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
-                    <el-input v-model="form.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
+                
+                <el-form-item label="主键id" prop="deptId">
+                    <el-input v-model="form.id" placeholder="请输入主键id"/>
                 </el-form-item>
-                {% endfor %}
+                
+                <el-form-item label="创建者id" prop="deptId">
+                    <el-input v-model="form.createBy" placeholder="请输入创建者id"/>
+                </el-form-item>
+                
+                <el-form-item label="创建时间" prop="deptId">
+                    <el-input v-model="form.createTime" placeholder="请输入创建时间"/>
+                </el-form-item>
+                
+                <el-form-item label="修改者id" prop="deptId">
+                    <el-input v-model="form.updateBy" placeholder="请输入修改者id"/>
+                </el-form-item>
+                
+                <el-form-item label="修改时间" prop="deptId">
+                    <el-input v-model="form.updateTime" placeholder="请输入修改时间"/>
+                </el-form-item>
+                
+                <el-form-item label="待办事项" prop="deptId">
+                    <el-input v-model="form.note" placeholder="请输入待办事项"/>
+                </el-form-item>
+                
                 <div slot="footer" class="dialog-footer">
                     <el-button type="primary" @click="submitForm">确 定</el-button>
                     <el-button @click="cancel">取 消</el-button>
@@ -53,10 +103,10 @@
 
 <script>
 import {postJson2, getJson2} from "@/api/util";
-import { {{tableConst}}_CRATE_API, {{tableConst}}_PAGE_API, {{tableConst}}_UPDATE_API, {{tableConst}}_DELETE_API, {{tableConst}}_DELETE_BATCH_API } from "@/api/api";
+import { MEMO_CRATE_API, MEMO_PAGE_API, MEMO_UPDATE_API, MEMO_DELETE_API, MEMO_DELETE_BATCH_API } from "@/api/api";
 
 export default {
-    name: "{{tableUpperCaml}}",
+    name: "Memo",
     data() {
         return {
             tableData: [],
@@ -83,9 +133,19 @@ export default {
             form: {},
             // 表单校验
             rules: {
-                {% for row in list %}
-                {{row.COLUMN_NAME}}: [{required: {{row.required or "false"}}, trigger: "blur", message: "{{row.COLUMN_COMMENT}}",}],
-                {% endfor %}
+                
+                id: [{required: false, trigger: "blur", message: "主键id",}],
+                
+                createBy: [{required: false, trigger: "blur", message: "创建者id",}],
+                
+                createTime: [{required: false, trigger: "blur", message: "创建时间",}],
+                
+                updateBy: [{required: false, trigger: "blur", message: "修改者id",}],
+                
+                updateTime: [{required: false, trigger: "blur", message: "修改时间",}],
+                
+                note: [{required: false, trigger: "blur", message: "待办事项",}],
+                
             }
         };
     },
@@ -94,7 +154,7 @@ export default {
     },
     methods: {
         async init() {
-            let response = await this.$get2({{tableConst}}_PAGE, this.queryForm);
+            let response = await this.$get2(MEMO_PAGE, this.queryForm);
             if (response.data.code != 1) {
                 this.$message.error(response.data.data);
                 return
@@ -132,10 +192,10 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     if (this.form.id == null) {
-                        this.postJson2({{tableConst}}_CRATE, this.form);
+                        this.postJson2(MEMO_CRATE, this.form);
                         this.$message.success("修改成功");
                     } else {
-                        this.postJson2({{tableConst}}_UPDATE, this.form);
+                        this.postJson2(MEMO_UPDATE, this.form);
                         this.$message.success("修改成功");
                     }
                     // this.this.ppJson(_URL, this.form)
@@ -146,7 +206,7 @@ export default {
         },
         // 批量删除或者单个删除
         handleDelete(row) {
-            this.postJson2({{tableConst}}_DELETE, row.id);
+            this.postJson2(MEMO_DELETE, row.id);
         },
     }
 };
