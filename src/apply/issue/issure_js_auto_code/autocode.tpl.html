@@ -100,7 +100,7 @@ export default {
                 return
             }
             this.tableData = response.data.data
-            this.total = response.total
+            this.total = response.data.total
         },
         query() {
             this.queryForm.page = 1;

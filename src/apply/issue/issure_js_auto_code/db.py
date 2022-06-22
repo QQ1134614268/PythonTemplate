@@ -32,10 +32,7 @@ class DbUtil:
     def __init__(self, username, password, host, port, db):
         url = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(username, password, host, port, db)
         self.engine = create_engine(url, echo=True)
-        self.session = sessionmaker(bind=self.engine)()
-
-    def get_session(self):
-        return self.session
+        # self.session = sessionmaker(bind=self.engine)()
 
     def exec(self, sql, args=None):
         response = self.engine.execute(sql, args)
@@ -48,17 +45,16 @@ class TestDb(TestCase):
     def test_run(self):
         sql = "select * from user where user_name=:name and id=:id"
         url = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format("root", "123456", "127.0.0.1", "3306", "oa")
-        self.engine = create_engine(url, echo=True)
-        self.session = sessionmaker(bind=self.engine)()
-        res = self.session.execute(sql, {"id": 1, "name": "test"})
+        engine = create_engine(url, echo=True)
+        session = sessionmaker(bind=engine)()
+        res = session.execute(sql, {"id": 1, "name": "test"})
         result2 = res.fetchall()  # 获取全部
         print(result2)
 
     def test_run_all(self):
         sql = "select * from user where user_name=%(name)s and id=%(id)s"
         url = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format("root", "123456", "127.0.0.1", "3306", "oa")
-        self.engine = create_engine(url, echo=True)
-        self.session = sessionmaker(bind=self.engine)()
-        res = self.engine.execute(sql, {"id": 1, "name": "test"})
+        engine = create_engine(url, echo=True)
+        res = engine.execute(sql, {"id": 1, "name": "test"})
         result2 = res.fetchall()  # 获取全部
         print(result2)

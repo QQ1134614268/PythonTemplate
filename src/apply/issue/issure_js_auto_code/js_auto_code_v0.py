@@ -5,6 +5,7 @@ from unittest import TestCase
 import jinja2
 
 from apply.issue.issure_js_auto_code.db import DbUtil
+from util.str_util import to_lower_camel
 
 
 class Colum:
@@ -64,13 +65,17 @@ class Form:
 
     @staticmethod
     def get_tables(db):
-        sql = "select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA ={db}"
+        sql = "select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = %(db)s"
         db_session = DbUtil("root", "123456", "127.0.0.1", "3306", "oa")
-        data = db_session.exec(sql, db)
+        data = db_session.exec(sql, {"db": db})
         return data
 
     @staticmethod
     def get_table_info(table_name, db=None):
+        # 表名,表注释
+        # 字段名,字段类型,字段注释, 枚举值
+
+        # json数据 -- class数据-- 类数据
         sql = """SELECT COL.COLUMN_NAME, COL.COLUMN_TYPE, COL.COLUMN_COMMENT, COL.DATA_TYPE 
         FROM INFORMATION_SCHEMA.COLUMNS COL 
         Where COL.table_schema = %(db)s AND COL.TABLE_NAME = %(table_name)s"""
@@ -78,19 +83,9 @@ class Form:
         db_session = DbUtil("root", "123456", "127.0.0.1", "3306", "oa")
         args = {"db": db, "table_name": table_name}
         data = db_session.exec(sql, args)
+        for item in data:
+            item["COLUMN_NAME"] = to_lower_camel(item["COLUMN_NAME"])
         return data
-        # 表名,表注释
-        # 字段名,字段类型,字段注释, 枚举值
-
-        # json数据 -- class数据-- 类数据
-
-    @staticmethod
-    def table_to_class():
-        # 表名,表注释
-        # 字段名,字段类型,字段注释, 枚举值
-
-        # json数据 -- class数据-- 类数据
-        pass
 
     @staticmethod
     def class_to_file(data2, path):
@@ -104,10 +99,6 @@ class Form:
         with open(path, "w", encoding="utf-8") as f:
             f.write(output_text)
 
-    @staticmethod
-    def table_to_tile():
-        pass
-
 
 class TestAutoCode(TestCase):
 
@@ -117,7 +108,13 @@ class TestAutoCode(TestCase):
         data = {
             "list": rows
         }
-        Form.class_to_file(data, "user.vue")
+        Form.class_to_file(data, f"{table}.vue".format(table))
 
     def test_run_all(self):
-        table = "user"
+        tables = Form.get_tables("oa")
+        for table in tables:
+            rows = Form.get_table_info(table["TABLE_NAME"], "oa")
+            data = {
+                "list": rows
+            }
+            Form.class_to_file(data, f"{table}.vue".format(table))
