@@ -37,7 +37,7 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
 {% for row in list %}
-        <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
+        <el-form-item label="{{row.COLUMN_COMMENT}}">
           <el-input v-model="form.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
         </el-form-item>
 {% endfor %}
@@ -92,6 +92,7 @@ export default {
   },
   methods: {
     async init() {
+      this.queryForm.page = this.page;
       let response = await getJson2({{tableConst}}_PAGE_API, this.queryForm);
       if (response.data.code != 1) {
         this.$message.error(response.data.data);
@@ -101,11 +102,11 @@ export default {
       this.total = response.data.total
     },
     query() {
-      this.queryForm.page = 1;
+      this.page = 1;
       this.init();
     },
     queryReset() {
-      // todo
+      this.form = {};
     },
     /** 新增按钮操作 */
     handleAdd() {
@@ -122,8 +123,7 @@ export default {
     /** 取消 */
     cancel() {
       this.form = {};
-      this.open = true;
-      this.title = "新增";
+      this.open = false;
     },
     /** 提交 -- 新增或者修改 */
     async submitForm() {
