@@ -214,7 +214,7 @@ export default {
     },
     methods: {
         async init() {
-            let response = await this.$get2(ENUM_PAGE, this.queryForm);
+            let response = await getJson2(ENUM_PAGE_API, this.queryForm);
             if (response.data.code != 1) {
                 this.$message.error(response.data.data);
                 return
@@ -231,7 +231,7 @@ export default {
         },
         /** 新增按钮操作 */
         handleAdd() {
-            this.form = null;
+            this.form = {};
             this.open = true;
             this.title = "新增";
         },
@@ -243,7 +243,7 @@ export default {
         },
         /** 取消 */
         cancel() {
-            this.form = null;
+            this.form = {};
             this.open = true;
             this.title = "新增";
         },
@@ -252,10 +252,10 @@ export default {
             this.$refs["form"].validate(valid => {
                 if (valid) {
                     if (this.form.id == null) {
-                        this.postJson2(ENUM_CRATE, this.form);
+                        postJson2(ENUM_CRATE_API, this.form);
                         this.$message.success("修改成功");
                     } else {
-                        this.postJson2(ENUM_UPDATE, this.form);
+                        postJson2(ENUM_UPDATE_API, this.form);
                         this.$message.success("修改成功");
                     }
                     // this.this.ppJson(_URL, this.form)
@@ -266,7 +266,7 @@ export default {
         },
         // 批量删除或者单个删除
         handleDelete(row) {
-            this.postJson2(ENUM_DELETE, row.id);
+            postJson2(ENUM_DELETE_API, row.id);
         },
     }
 };
