@@ -1,153 +1,153 @@
 <template>
-    <div class="app-container">
-        <el-form :model="queryForm" ref="queryForm" size="small" :inline="true" v-show="showSearch"
-                 label-width="68px">
-            {% for row in list %}
-            <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
-                <el-input v-model="queryForm.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
-            </el-form-item>
-            {% endfor %}
-            <el-form-item>
-                <el-button type="primary" icon="el-icon-search" size="mini" @click="query">搜索</el-button>
-                <el-button icon="el-icon-refresh" size="mini" @click="queryReset">重置</el-button>
-            </el-form-item>
-        </el-form>
-        <div>
-            <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button>
-            <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete">
-                删除
-            </el-button>
-        </div>
-        <el-table v-loading="loading" :data="tableData">
-            {% for row in list %}
-            <el-table-column label="{{row.COLUMN_COMMENT}}" prop="{{row.COLUMN_NAME}}" width="55" align="center"></el-table-column>
-            {% endfor %}
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-                <template slot-scope="scope">
-                    <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">
-                        修改
-                    </el-button>
-                    <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">
-                        删除
-                    </el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <el-pagination @current-change="init" :current-page="page" :total="total"></el-pagination>
-
-        <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-            <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-                {% for row in list %}
-                <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
-                    <el-input v-model="form.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
-                </el-form-item>
-                {% endfor %}
-                <div slot="footer" class="dialog-footer">
-                    <el-button type="primary" @click="submitForm">确 定</el-button>
-                    <el-button @click="cancel">取 消</el-button>
-                </div>
-            </el-form>
-        </el-dialog>
+  <div class="app-container">
+    <el-form :model="queryForm" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+{% for row in list %}
+      <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
+        <el-input v-model="queryForm.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
+      </el-form-item>
+{% endfor %}
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="query">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="queryReset">重置</el-button>
+      </el-form-item>
+    </el-form>
+    <div>
+      <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button>
+      <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete">
+        删除
+      </el-button>
     </div>
+    <el-table v-loading="loading" :data="tableData">
+{% for row in list %}
+      <el-table-column label="{{row.COLUMN_COMMENT}}" prop="{{row.COLUMN_NAME}}" width="55" align="center"></el-table-column>
+{% endfor %}
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">
+            修改
+          </el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination @current-change="init" :current-page="page" :total="total"></el-pagination>
+
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+{% for row in list %}
+        <el-form-item label="{{row.COLUMN_COMMENT}}" prop="deptId">
+          <el-input v-model="form.{{row.COLUMN_NAME}}" placeholder="请输入{{row.COLUMN_COMMENT}}"/>
+        </el-form-item>
+{% endfor %}
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
-import {postJson2, getJson2} from "@/api/util";
-import { {{tableConst}}_CRATE_API, {{tableConst}}_PAGE_API, {{tableConst}}_UPDATE_API, {{tableConst}}_DELETE_API, {{tableConst}}_DELETE_BATCH_API } from "@/api/api";
+import {getJson2, postJson2} from "@/api/util";
+import { {{tableConst}}_CREATE_API, {{tableConst}}_PAGE_API, {{tableConst}}_UPDATE_API, {{tableConst}}_DELETE_API, {{tableConst}}_DELETE_BATCH_API } from "@/api/api";
 
 export default {
-    name: "{{tableUpperCaml}}",
-    data() {
-        return {
-            tableData: [],
-            // 遮罩层
-            loading: false,
-            // 选中数组
-            ids: [],
-            // 非单个禁用
-            single: true,
-            // 非多个禁用
-            multiple: true,
-            // 显示搜索条件
-            showSearch: true,
-            // 总条数
-            total: 0,
-            page: 1,
-            // 弹出层标题
-            title: "",
-            // 是否显示弹出层
-            open: false,
-            // 查询参数
-            queryForm: {},
-            // 表单参数
-            form: {},
-            // 表单校验
-            rules: {
-                {% for row in list %}
-                {{row.COLUMN_NAME}}: [{required: {{row.required or "false"}}, trigger: "blur", message: "{{row.COLUMN_COMMENT}}",}],
-                {% endfor %}
-            }
-        };
+  name: "{{tableUpperCaml}}",
+  data() {
+    return {
+      tableData: [],
+      // 遮罩层
+      loading: false,
+      // 选中数组
+      ids: [],
+      // 非单个禁用
+      single: true,
+      // 非多个禁用
+      multiple: true,
+      // 显示搜索条件
+      showSearch: true,
+      // 总条数
+      total: 0,
+      page: 1,
+      // 弹出层标题
+      title: "",
+      // 是否显示弹出层
+      open: false,
+      // 查询参数
+      queryForm: {},
+      // 表单参数
+      form: {},
+      // 表单校验
+      rules: {
+        {% for row in list %}{{row.COLUMN_NAME}}: [{required: {{row.required or "false"}}, trigger: "blur", message: "{{row.COLUMN_COMMENT}}",}],
+        {% endfor %}
+      }
+    };
+  },
+  created() {
+    this.init();
+  },
+  methods: {
+    async init() {
+      let response = await getJson2({{tableConst}}_PAGE_API, this.queryForm);
+      if (response.data.code != 1) {
+        this.$message.error(response.data.data);
+        return
+      }
+      this.tableData = response.data.data
+      this.total = response.data.total
     },
-    created() {
-        this.init();
+    query() {
+      this.queryForm.page = 1;
+      this.init();
     },
-    methods: {
-        async init() {
-            let response = await getJson2({{tableConst}}_PAGE_API, this.queryForm);
-            if (response.data.code != 1) {
-                this.$message.error(response.data.data);
-                return
-            }
-            this.tableData = response.data.data
-            this.total = response.data.total
-        },
-        query() {
-            this.queryForm.page = 1;
-            this.init();
-        },
-        queryReset() {
-            // todo
-        },
-        /** 新增按钮操作 */
-        handleAdd() {
-            this.form = {};
-            this.open = true;
-            this.title = "新增";
-        },
-        /** 修改按钮操作 */
-        handleUpdate(row) {
-            this.form = row;
-            this.open = true;
-            this.title = "修改";
-        },
-        /** 取消 */
-        cancel() {
-            this.form = {};
-            this.open = true;
-            this.title = "新增";
-        },
-        /** 提交 -- 新增或者修改 */
-        submitForm() {
-            this.$refs["form"].validate(valid => {
-                if (valid) {
-                    if (this.form.id == null) {
-                        postJson2({{tableConst}}_CRATE_API, this.form);
-                        this.$message.success("修改成功");
-                    } else {
-                        postJson2({{tableConst}}_UPDATE_API, this.form);
-                        this.$message.success("修改成功");
-                    }
-                    // this.this.ppJson(_URL, this.form)
-                    this.open = false;
-                    this.init();
-                }
-            });
-        },
-        // 批量删除或者单个删除
-        handleDelete(row) {
-            postJson2({{tableConst}}_DELETE_API, row.id);
-        },
-    }
+    queryReset() {
+      // todo
+    },
+    /** 新增按钮操作 */
+    handleAdd() {
+      this.form = {};
+      this.open = true;
+      this.title = "新增";
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.form = row;
+      this.open = true;
+      this.title = "修改";
+    },
+    /** 取消 */
+    cancel() {
+      this.form = {};
+      this.open = true;
+      this.title = "新增";
+    },
+    /** 提交 -- 新增或者修改 */
+    async submitForm() {
+      this.$refs["form"].validate(async valid => {
+        if (valid) {
+          if (this.form.id == null) {
+            await postJson2({{tableConst}}_CREATE_API, this.form);
+            this.$message.success("修改成功");
+          } else {
+            await postJson2({{tableConst}}_UPDATE_API, this.form);
+            this.$message.success("修改成功");
+          }
+          // this.this.ppJson(_URL, this.form)
+          this.open = false;
+          await this.init();
+        }
+      });
+    },
+    // 批量删除或者单个删除
+    async handleDelete(row) {
+      await postJson2({{tableConst}}_DELETE_API, row.id);
+      this.$message.success("删除成功");
+      await this.init();
+    },
+  }
 };
 </script>

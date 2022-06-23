@@ -132,7 +132,7 @@ class TestAutoCode(TestCase):
             }
             Form.class_to_file(data, f"tmp/{table_upper_caml}.vue")
 
-    def test_run_all1(self):
+    def test_run_index_js(self):
         tables = Form.get_tables("oa")
         table_infos = []
         for table in tables:
