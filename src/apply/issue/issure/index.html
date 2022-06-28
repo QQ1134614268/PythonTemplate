@@ -11,7 +11,9 @@
 </head>
 <body>
 <div id="app3" style="height: 95vh">
-    <div>生成表, email date time 保存 (字段,保存配置,复制配置) 常见字段,自动翻译, 导出, 数据库, 继承, 日志</div>
+    <div>map-reduce; 类似游戏高辨识度, 生成表, email date time 保存 (字段,保存配置,复制配置) 常见字段,自动翻译, 导出, 数据库, 继承, 日志</div>
+    <textarea v-model="origin" rows="10" autocomplete="on" style="width: 100%">
+    </textarea>
     <el-table :data="tableData">
         <el-table-column prop="column_name" label="数据类型">
 
@@ -35,6 +37,7 @@
         {
             el: '#app3',
             data: {
+                origin: "客户姓名,客户来源",
                 template: [],
                 tableData: [{"column_name": 1}],
             },
