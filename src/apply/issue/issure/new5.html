@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
+<body>
+<form id="user_form">
+
+</form>
+<script type="text/template" id="tpl">
+    姓名:<input type="text" value="{{user.username}}">
+</script>
+
+<!--引入template-web.js文件-->
+<script src="https://unpkg.com/art-template/lib/template-web.js"></script>
+<!--引入jquery.js文件-->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+<script>
+    let result = template('tpl', {
+        user: {username: "tom"},
+    });
+    //渲染到页面上
+    document.getElementById("user_form").innerHTML = result;
+</script>
+</body>
+</html>
