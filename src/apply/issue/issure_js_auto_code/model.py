@@ -39,7 +39,7 @@ class MysqlColumns(Base):
     COLUMN_COMMENT = Column('COLUMN_COMMENT', Text, comment="字段注释")
     GENERATION_EXPRESSION = Column('GENERATION_EXPRESSION', LONGTEXT, comment="表名")
     SRS_ID = Column('SRS_ID', INTEGER(10), comment="")
-    PrimaryKeyConstraint(TABLE_CATALOG, TABLE_SCHEMA, COLUMN_NAME)
+    PrimaryKeyConstraint(TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME)
 
 
 class JsForm(Base):
