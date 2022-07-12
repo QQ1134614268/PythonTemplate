@@ -1,3 +1,4 @@
+import json
 from unittest import TestCase
 
 from apply.issue.issure_db_excel.models import MysqlTables
@@ -60,4 +61,44 @@ class TestAutoCode(TestCase):
             self.dic_to_yaml(item["child"], res)
 
     def test_yaml_to_db(self):
-        pass
+        with open("xx.txt", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        tree = []
+        for i in range(len(lines)):
+            line = lines[i]
+            dic = {
+                "name": line,
+                "db_line": line.lstrip(),
+                "children": []
+            }
+            self.get_child(dic, lines[i + 1:])
+            if line.lstrip() == line:
+                tree.append(dic)
+        with open("xx.json", "w+", encoding="utf-8") as f:
+            f.write(json.dumps(tree, ensure_ascii=False))
+
+    def get_child(self, dic, lines, step=2):
+        if not lines:
+            return
+        line = dic["name"]
+        ret = dic["children"]
+        for i in range(len(lines)):
+            child_line = lines[i]
+            if self.get_level2(line, child_line) < step:
+                return
+            if self.get_level2(line, child_line) > step:
+                continue
+            if self.get_level2(line, child_line) == step:
+                dic2 = {
+                    "name": child_line,
+                    "db_line": child_line.lstrip(),
+                    "children": []
+                }
+                ret.append(dic2)
+                self.get_child(dic2, lines[i:])
+
+    def get_level(self, line):
+        return len(line) - len(line.lstrip())
+
+    def get_level2(self, p_line, c_line):
+        return self.get_level(c_line) - self.get_level(p_line)

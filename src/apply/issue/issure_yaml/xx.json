@@ -1,0 +1,69 @@
+[
+  {
+    "name": "个人办公\n",
+    "db_line": "个人办公\n",
+    "children": [
+      {
+        "name": "  工作台\n",
+        "db_line": "工作台\n",
+        "children": []
+      },
+      {
+        "name": "  我的日程\n",
+        "db_line": "我的日程\n",
+        "children": []
+      },
+      {
+        "name": "  办公中心\n",
+        "db_line": "办公中心\n",
+        "children": []
+      },
+      {
+        "name": "  企业动态\n",
+        "db_line": "企业动态\n",
+        "children": []
+      },
+      {
+        "name": "  企业通讯录\n",
+        "db_line": "企业通讯录\n",
+        "children": []
+      },
+      {
+        "name": "  职位说明\n",
+        "db_line": "职位说明\n",
+        "children": []
+      },
+      {
+        "name": "  记事本\n",
+        "db_line": "记事本\n",
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "人事管理\n",
+    "db_line": "人事管理\n",
+    "children": [
+      {
+        "name": "  人事档案\n",
+        "db_line": "人事档案\n",
+        "children": []
+      },
+      {
+        "name": "  绩效考核\n",
+        "db_line": "绩效考核\n",
+        "children": []
+      },
+      {
+        "name": "  办公审批\n",
+        "db_line": "办公审批\n",
+        "children": []
+      },
+      {
+        "name": "  职位管理",
+        "db_line": "职位管理",
+        "children": []
+      }
+    ]
+  }
+]
