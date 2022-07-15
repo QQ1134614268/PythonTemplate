@@ -5,7 +5,7 @@ from sqlalchemy import Column, Date
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
-from conf.config import localhost_oa_engine, localhost_oa_session
+from conf.config import localhost_test_engine, localhost_test_session
 
 Base = declarative_base()
 
@@ -25,8 +25,8 @@ class Calendar(Base):
 class Test(TestCase):
     def test_pre(self):
         ...
-        Base.metadata.drop_all(localhost_oa_engine)
-        Base.metadata.create_all(localhost_oa_engine)
+        Base.metadata.drop_all(localhost_test_engine)
+        Base.metadata.create_all(localhost_test_engine)
 
     def test_main(self):
         self.test_pre()
@@ -55,6 +55,6 @@ class Test(TestCase):
 
     @staticmethod
     def save_all(day_list):
-        localhost_oa_session.add_all(day_list)
-        localhost_oa_session.commit()
+        localhost_test_session.add_all(day_list)
+        localhost_test_session.commit()
         day_list.clear()
