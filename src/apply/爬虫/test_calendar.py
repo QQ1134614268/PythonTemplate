@@ -44,8 +44,8 @@ class Test(TestCase):
             week_year = cur_date.isocalendar()[1]
             quarter = cur_date.month // 3 + 1
             half_year = quarter // 2 + 1
-            vo = Calendar(date=cur_date, year=cur_date.year, month=cur_date.month, day=cur_date.day,
-                          week=week, week_year=week_year, quarter=quarter, half_year=half_year)
+            vo = Calendar(date=cur_date, year=cur_date.year, month=cur_date.month, day=cur_date.day, week=week,
+                          week_year=week_year, quarter=quarter, half_year=half_year)
             day_list.append(vo)
             if len(day_list) > 1000:
                 self.save_all(day_list)
