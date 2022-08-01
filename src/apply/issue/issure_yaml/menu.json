@@ -1,0 +1,463 @@
+[
+  {
+    "value": 88,
+    "id": 88,
+    "pid": 0,
+    "label": "\u4e2a\u4eba\u529e\u516c",
+    "entid": 1,
+    "children": [
+      {
+        "value": 114,
+        "id": 114,
+        "pid": 88,
+        "label": "\u5de5\u4f5c\u53f0",
+        "entid": 1
+      },
+      {
+        "value": 167,
+        "id": 167,
+        "pid": 88,
+        "label": "\u6211\u7684\u65e5\u7a0b",
+        "entid": 1
+      },
+      {
+        "value": 89,
+        "id": 89,
+        "pid": 88,
+        "label": "\u529e\u516c\u4e2d\u5fc3",
+        "entid": 1,
+        "children": [
+          {
+            "value": 188,
+            "id": 188,
+            "pid": 89,
+            "label": "\u7533\u8bf7\u5ba1\u6279",
+            "entid": 1
+          },
+          {
+            "value": 90,
+            "id": 90,
+            "pid": 89,
+            "label": "\u6211\u7684\u6c47\u62a5",
+            "entid": 1
+          },
+          {
+            "value": 217,
+            "id": 217,
+            "pid": 89,
+            "label": "\u7ee9\u6548\u8003\u6838",
+            "entid": 1
+          },
+          {
+            "value": 171,
+            "id": 171,
+            "pid": 89,
+            "label": "\u4e91\u6587\u4ef6",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 193,
+        "id": 193,
+        "pid": 88,
+        "label": "\u4f01\u4e1a\u52a8\u6001",
+        "entid": 1
+      },
+      {
+        "value": 91,
+        "id": 91,
+        "pid": 88,
+        "label": "\u4f01\u4e1a\u901a\u8baf\u5f55",
+        "entid": 1
+      },
+      {
+        "value": 184,
+        "id": 184,
+        "pid": 88,
+        "label": "\u804c\u4f4d\u8bf4\u660e",
+        "entid": 1
+      },
+      {
+        "value": 170,
+        "id": 170,
+        "pid": 88,
+        "label": "\u8bb0\u4e8b\u672c",
+        "entid": 1
+      },
+      {
+        "value": 221,
+        "id": 221,
+        "pid": 88,
+        "label": "\u6211\u7684\u4f01\u4e1a",
+        "entid": 1
+      }
+    ]
+  },
+  {
+    "value": 93,
+    "id": 93,
+    "pid": 0,
+    "label": "\u4eba\u4e8b\u7ba1\u7406",
+    "entid": 1,
+    "children": [
+      {
+        "value": 220,
+        "id": 220,
+        "pid": 93,
+        "label": "\u7ec4\u7ec7\u67b6\u6784",
+        "entid": 1
+      },
+      {
+        "value": 94,
+        "id": 94,
+        "pid": 93,
+        "label": "\u4eba\u4e8b\u6863\u6848",
+        "entid": 1,
+        "children": [
+          {
+            "value": 95,
+            "id": 95,
+            "pid": 94,
+            "label": "\u5458\u5de5\u6863\u6848",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 96,
+        "id": 96,
+        "pid": 93,
+        "label": "\u7ee9\u6548\u8003\u6838",
+        "entid": 1,
+        "children": [
+          {
+            "value": 147,
+            "id": 147,
+            "pid": 96,
+            "label": "\u5458\u5de5\u7ee9\u6548",
+            "entid": 1
+          },
+          {
+            "value": 148,
+            "id": 148,
+            "pid": 96,
+            "label": "\u8003\u6838\u8bbe\u7f6e",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 218,
+        "id": 218,
+        "pid": 93,
+        "label": "\u529e\u516c\u5ba1\u6279",
+        "entid": 1,
+        "children": [
+          {
+            "value": 186,
+            "id": 186,
+            "pid": 218,
+            "label": "\u5ba1\u6279\u8bbe\u7f6e",
+            "entid": 1
+          },
+          {
+            "value": 187,
+            "id": 187,
+            "pid": 218,
+            "label": "\u5ba1\u6279\u8bb0\u5f55",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 117,
+        "id": 117,
+        "pid": 93,
+        "label": "\u804c\u4f4d\u7ba1\u7406",
+        "entid": 1
+      }
+    ]
+  },
+  {
+    "value": 133,
+    "id": 133,
+    "pid": 0,
+    "label": "\u5ba2\u6237\u7ba1\u7406",
+    "entid": 1,
+    "children": [
+      {
+        "value": 173,
+        "id": 173,
+        "pid": 133,
+        "label": "\u5ba2\u6237\u5217\u8868",
+        "entid": 1
+      },
+      {
+        "value": 174,
+        "id": 174,
+        "pid": 133,
+        "label": "\u5408\u540c\u7ba1\u7406",
+        "entid": 1
+      },
+      {
+        "value": 175,
+        "id": 175,
+        "pid": 133,
+        "label": "\u53d1\u7968\u7ba1\u7406",
+        "entid": 1
+      },
+      {
+        "value": 176,
+        "id": 176,
+        "pid": 133,
+        "label": "\u5ba2\u6237\u8bbe\u7f6e",
+        "entid": 1,
+        "children": [
+          {
+            "value": 179,
+            "id": 179,
+            "pid": 176,
+            "label": "\u4e1a\u52a1\u8bbe\u7f6e",
+            "entid": 1
+          },
+          {
+            "value": 178,
+            "id": 178,
+            "pid": 176,
+            "label": "\u5ba2\u6237\u6807\u7b7e",
+            "entid": 1
+          },
+          {
+            "value": 177,
+            "id": 177,
+            "pid": 176,
+            "label": "\u5ba2\u6237\u5206\u7c7b",
+            "entid": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "value": 131,
+    "id": 131,
+    "pid": 0,
+    "label": "\u8d22\u52a1\u7ba1\u7406",
+    "entid": 1,
+    "children": [
+      {
+        "value": 139,
+        "id": 139,
+        "pid": 131,
+        "label": "\u8d26\u76ee\u8bb0\u5f55",
+        "entid": 1,
+        "children": [
+          {
+            "value": 141,
+            "id": 141,
+            "pid": 139,
+            "label": "\u6536\u652f\u8bb0\u8d26",
+            "entid": 1
+          },
+          {
+            "value": 142,
+            "id": 142,
+            "pid": 139,
+            "label": "\u6536\u652f\u7edf\u8ba1",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 180,
+        "id": 180,
+        "pid": 131,
+        "label": "\u8d22\u52a1\u5ba1\u6838",
+        "entid": 1
+      },
+      {
+        "value": 181,
+        "id": 181,
+        "pid": 131,
+        "label": "\u53d1\u7968\u7ba1\u7406",
+        "entid": 1
+      },
+      {
+        "value": 140,
+        "id": 140,
+        "pid": 131,
+        "label": "\u8d26\u76ee\u8bbe\u7f6e",
+        "entid": 1,
+        "children": [
+          {
+            "value": 143,
+            "id": 143,
+            "pid": 140,
+            "label": "\u8d26\u76ee\u5206\u7c7b",
+            "entid": 1
+          },
+          {
+            "value": 144,
+            "id": 144,
+            "pid": 140,
+            "label": "\u652f\u4ed8\u65b9\u5f0f",
+            "entid": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "value": 129,
+    "id": 129,
+    "pid": 0,
+    "label": "\u884c\u653f\u7ba1\u7406",
+    "entid": 1,
+    "children": [
+      {
+        "value": 190,
+        "id": 190,
+        "pid": 129,
+        "label": "\u4f01\u4e1a\u52a8\u6001",
+        "entid": 1
+      },
+      {
+        "value": 191,
+        "id": 191,
+        "pid": 129,
+        "label": "\u529e\u516c\u7269\u8d44",
+        "entid": 1,
+        "children": [
+          {
+            "value": 197,
+            "id": 197,
+            "pid": 191,
+            "label": "\u7269\u8d44\u7ba1\u7406",
+            "entid": 1
+          },
+          {
+            "value": 194,
+            "id": 194,
+            "pid": 191,
+            "label": "\u7269\u8d44\u6982\u89c8",
+            "entid": 1
+          },
+          {
+            "value": 196,
+            "id": 196,
+            "pid": 191,
+            "label": "\u7269\u8d44\u8bb0\u5f55",
+            "entid": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "value": 98,
+    "id": 98,
+    "pid": 0,
+    "label": "\u7cfb\u7edf\u7ba1\u7406",
+    "entid": 1,
+    "children": [
+      {
+        "value": 102,
+        "id": 102,
+        "pid": 98,
+        "label": "\u4f01\u4e1a\u8bbe\u7f6e",
+        "entid": 1,
+        "children": [
+          {
+            "value": 104,
+            "id": 104,
+            "pid": 102,
+            "label": "\u4f01\u4e1a\u4fe1\u606f",
+            "entid": 1
+          },
+          {
+            "value": 183,
+            "id": 183,
+            "pid": 102,
+            "label": "\u5de5\u4f5c\u53f0\u8bbe\u7f6e",
+            "entid": 1
+          },
+          {
+            "value": 160,
+            "id": 160,
+            "pid": 102,
+            "label": "\u7d20\u6750\u7ba1\u7406",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 99,
+        "id": 99,
+        "pid": 98,
+        "label": "\u6743\u9650\u8bbe\u7f6e",
+        "entid": 1,
+        "children": [
+          {
+            "value": 100,
+            "id": 100,
+            "pid": 99,
+            "label": "\u83dc\u5355\u7ba1\u7406",
+            "entid": 1
+          },
+          {
+            "value": 106,
+            "id": 106,
+            "pid": 99,
+            "label": "\u89d2\u8272\u7ba1\u7406",
+            "entid": 1
+          },
+          {
+            "value": 105,
+            "id": 105,
+            "pid": 99,
+            "label": "\u4eba\u5458\u6743\u9650",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 198,
+        "id": 198,
+        "pid": 98,
+        "label": "\u6743\u76ca\u6570\u636e",
+        "entid": 1,
+        "children": [
+          {
+            "value": 199,
+            "id": 199,
+            "pid": 198,
+            "label": "\u6743\u76ca\u6570\u636e",
+            "entid": 1
+          },
+          {
+            "value": 200,
+            "id": 200,
+            "pid": 198,
+            "label": "\u5386\u53f2\u8ba2\u5355",
+            "entid": 1
+          },
+          {
+            "value": 201,
+            "id": 201,
+            "pid": 198,
+            "label": "\u53d1\u7968\u7533\u8bf7",
+            "entid": 1
+          }
+        ]
+      },
+      {
+        "value": 101,
+        "id": 101,
+        "pid": 98,
+        "label": "\u64cd\u4f5c\u65e5\u5fd7",
+        "entid": 1
+      }
+    ]
+  }
+]

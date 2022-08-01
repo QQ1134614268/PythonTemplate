@@ -46,3 +46,25 @@ class TestAutoCode(TestCase):
             localhost_oa_session.add(vo)
             localhost_oa_session.commit()
             self.insert_menu(menu_dic.get("children"), vo.id)
+
+    def test_run2(self):
+        localhost_oa_session.query(Menu).delete()
+        with open("menu.json", encoding="utf-8", mode='r') as f:
+            menu_list = json.loads(f.read())
+
+        self.insert_menu2(menu_list)
+
+    def insert_menu2(self, menu_list):
+        if not menu_list:
+            return
+        for index, menu_dic in enumerate(menu_list):
+            vo = Menu(
+                id=menu_dic.get("id"),
+                menuName=menu_dic.get("label"),
+                parentId=menu_dic.get("pid"),
+                isSelect=True,
+                menuOrder=index
+            )
+            localhost_oa_session.add(vo)
+            localhost_oa_session.commit()
+            self.insert_menu2(menu_dic.get("children"))
