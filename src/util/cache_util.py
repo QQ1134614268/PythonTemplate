@@ -4,53 +4,40 @@
 @Description:
 """
 import json
-import os
+import logging
+from datetime import datetime
 
-import time
+from conf.config import FILE_FORMAT
+from conf.json_config import MyJSONEncoder
 
 
-def to_file(file_path='out.json', unique=False, load=False, skip_err=False):
+def to_file(file_path=None, skip_err=False):
     """
     存储结果
     :param file_path: 文件名
-    :param unique: 每次生成新文件
-    :param load: unique=false, 从文件加载
     :param skip_err:
     :return:
     """
 
-    def decorator(func):
-        def wrapper(*args, **kw):
-            if os.path.exists(file_path) and load:
-                with open(file_path, encoding="utf-8", mode='r') as f:
-                    return json.loads(f.readline())
-            else:
-                res = func(*args, **kw)
-                if unique:
-                    path = file_path + str(time.time())
-                else:
-                    path = file_path
-                try:
-                    with open(path, encoding="utf-8", mode='w') as f:
-                        f.write(json.dumps(res))
-                except Exception as e:
-                    if not skip_err:
-                        raise e
-            return res
+    if not file_path:
+        file_path = datetime.now().strftime(FILE_FORMAT) + ".json"
 
-        return wrapper
-
-    return decorator
-
-
-def list_to_file(file_path='out.json'):
     def decorator(func):
         def wrapper(*args, **kw):
             res = func(*args, **kw)
-            assert isinstance(res, list), "导出到文件异常,结果不是list"
-            text = "\n".join(res)
-            with open(file_path, encoding="utf-8", mode='w') as f:
-                f.write(text)
+            try:
+                try:
+                    content = json.dumps(res, cls=MyJSONEncoder, ensure_ascii=False)
+                except Exception as e:
+                    # todo
+                    content = "转json异常"
+                    logging.warning(content)
+                    raise e
+                with open(file_path, encoding="utf-8", mode='w') as f:
+                    f.write(content)
+            except Exception as e:
+                if not skip_err:
+                    raise e
             return res
 
         return wrapper
@@ -59,9 +46,10 @@ def list_to_file(file_path='out.json'):
 
 
 if __name__ == '__main__':
-    @to_file("test.txt")
-    def add(d, b):
-        return d + b
+    # todo 返回数据 dict 对象 list 标量
+    @to_file()
+    def add():
+        return 1
 
 
-    print(add(1, 1))
+    print(add())

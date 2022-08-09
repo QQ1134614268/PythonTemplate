@@ -15,8 +15,9 @@ DEBUG_MODE = True
 
 LOG_PATH = DATA_DIR  # path.join(DATA_DIR, "log")
 
-TIME_FMT = '%Y-%m-%d %H:%M:%S'
-DEFAULT_TIME_STR = '%Y-%m-%d %H:%M:%S'
+DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DATE_FORMAT = '%Y-%m-%d'
+FILE_FORMAT = "%Y-%m-%d.%H-%M-%S.%f"
 
 HOST = "127.0.0.1"
 PORT = "3306"

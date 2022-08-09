@@ -7,12 +7,12 @@ import datetime
 import random
 import string
 from base64 import b64encode, b64decode
-from binascii import b2a_base64, a2b_base64
 
+from binascii import b2a_base64, a2b_base64
 from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
-from conf.config import TIME_FMT
+from conf.config import DATE_TIME_FORMAT
 
 
 def s_2_b64(text):
@@ -218,7 +218,7 @@ class SqlUtil:
 
 class TimeUtil:
     @staticmethod
-    def get_time_str(date_time_format=TIME_FMT):
+    def get_time_str(date_time_format=DATE_TIME_FORMAT):
         return datetime.datetime.now().strftime(date_time_format)
 
 

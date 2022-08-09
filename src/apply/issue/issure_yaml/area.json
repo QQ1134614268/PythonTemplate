@@ -1,33 +1,169 @@
 [
   {
-    "name": "广东",
-    "order": 0,
+    "area_name": "sheng_0",
     "children": [
       {
-        "name": "广东1市",
-        "order": 0,
-        "children": []
+        "area_name": "city_0",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
       },
       {
-        "name": "广东2市",
-        "order": 1,
-        "children": []
+        "area_name": "city_1",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
+      },
+      {
+        "area_name": "city_2",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
       }
     ]
   },
   {
-    "name": "广西",
-    "order": 1,
+    "area_name": "sheng_1",
     "children": [
       {
-        "name": "广西1市",
-        "order": 0,
-        "children": []
+        "area_name": "city_0",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
       },
       {
-        "name": "广西2市",
-        "order": 1,
-        "children": []
+        "area_name": "city_1",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
+      },
+      {
+        "area_name": "city_2",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "area_name": "sheng_2",
+    "children": [
+      {
+        "area_name": "city_0",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
+      },
+      {
+        "area_name": "city_1",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
+      },
+      {
+        "area_name": "city_2",
+        "children": [
+          {
+            "area_name": "区_0",
+            "children": []
+          },
+          {
+            "area_name": "区_1",
+            "children": []
+          },
+          {
+            "area_name": "区_2",
+            "children": []
+          }
+        ]
       }
     ]
   }

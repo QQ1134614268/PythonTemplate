@@ -104,15 +104,6 @@ class Class2Json:
     pass
 
 
-class Child2Json:
-
-    def to_json(self):
-        pass
-
-    def to_json(self):
-        pass
-
-
 class TestAutoCode(TestCase):
     def test_to_prop(self):
         root = []

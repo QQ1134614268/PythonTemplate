@@ -1,5 +1,3 @@
-# todo sql性能分析
-
 EXPLAIN
 SELECT t1.code,
        t1.cn_short_name,
@@ -41,5 +39,3 @@ SELECT ashare_gl_cptl
 FROM (SELECT ashare_gl_cptl, ROW_NUMBER() over (PARTITION BY stk_code ORDER BY biz_date DESC) as row_num
       from stock_fin_idx) t6
 WHERE row_num < 2;
-
-
