@@ -52,8 +52,8 @@ class PropFileUtil:
             f.write("\n".join(ret_list))
 
     @staticmethod
-    def to_dict(path):
-        with open(path, encoding="utf-8") as f:
+    def to_dict(file_path):
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         new_list = []
         for line in lines:
@@ -74,7 +74,9 @@ class PropFileUtil:
         return root
 
     @staticmethod
-    def __dict_to_prop(data: dict, full_path="", ret=[]) -> list:
+    def __dict_to_prop(data: dict, full_path="", ret=None) -> list:
+        if ret is None:
+            ret = []
         if full_path:
             full_path += "."
         #  todo 优化 拼接 .
@@ -95,7 +97,9 @@ class XmindFileUtil:
             f.write("\n".join(ret_list))
 
     @staticmethod
-    def _handel_data(data_list, level=0, ret=[], key="value"):
+    def _handel_data(data_list, level=0, ret=None, key="value"):
+        if ret is None:
+            ret = []
         if isinstance(data_list, dict):
             data_list = [data_list]
 
@@ -107,8 +111,8 @@ class XmindFileUtil:
         return ret
 
     @staticmethod
-    def to_dict(path):
-        with open(path, encoding="utf-8") as f:
+    def to_dict(file_path):
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         vos = []
         for line in lines:
