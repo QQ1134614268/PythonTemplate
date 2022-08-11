@@ -8,8 +8,7 @@ from unittest import TestCase
 
 from util import class_dict_util
 from util.cache_util import to_json_file
-from util.file_util import get_data_dir
-from util.read_file_util import PropFileUtil, XmindFileUtil, YamlFileUtil
+from util.file_util import get_data_dir, YamlFileUtil, PropFileUtil, XmindFileUtil
 
 
 class XmindVO:
