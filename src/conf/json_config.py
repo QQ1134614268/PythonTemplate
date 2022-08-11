@@ -12,7 +12,7 @@ from enum import Enum
 from conf.config import DATE_TIME_FORMAT, DATE_FORMAT
 
 
-class MyJSONEncoder(json.JSONEncoder):
+class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Enum):
             return o.name
@@ -22,8 +22,6 @@ class MyJSONEncoder(json.JSONEncoder):
             return o.strftime(DATE_FORMAT)
         if isinstance(o, (decimal.Decimal, uuid.UUID)):
             return str(o)
-        if isinstance(o, (decimal.Decimal, uuid.UUID)):
-            return str(o)
-        if getattr(o, "__dict__"):
+        if hasattr(o, "__dict__"):
             return o.__dict__
         return super().default(o)

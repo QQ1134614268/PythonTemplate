@@ -8,10 +8,11 @@ import logging
 from datetime import datetime
 
 from conf.config import FILE_FORMAT
-from conf.json_config import MyJSONEncoder
+from conf.json_config import MyJsonEncoder
 
 
-def to_file(file_path=None, skip_err=False):
+# json yaml prop
+def to_json_file(file_path=None, skip_err=False):
     """
     存储结果
     :param file_path: 文件名
@@ -27,7 +28,7 @@ def to_file(file_path=None, skip_err=False):
             res = func(*args, **kw)
             try:
                 try:
-                    content = json.dumps(res, cls=MyJSONEncoder, ensure_ascii=False)
+                    content = json.dumps(res, cls=MyJsonEncoder, ensure_ascii=False)
                 except Exception as e:
                     # todo
                     content = "转json异常"
@@ -38,6 +39,7 @@ def to_file(file_path=None, skip_err=False):
             except Exception as e:
                 if not skip_err:
                     raise e
+                logging.exception(e)
             return res
 
         return wrapper
@@ -47,7 +49,7 @@ def to_file(file_path=None, skip_err=False):
 
 if __name__ == '__main__':
     # todo 返回数据 dict 对象 list 标量
-    @to_file()
+    @to_json_file()
     def add():
         return 1
 
