@@ -37,44 +37,41 @@ class PropFileUtil:
     @staticmethod
     def to_file(data: dict, file_path):
         ret_list = PropFileUtil.__dict_to_prop(data)
-        # content = json.dumps(ret_list, ensure_ascii=False, cls=MyJsonEncoder, indent=2)
         with open(file_path, encoding="utf-8", mode='w') as f:
             f.write("\n".join(ret_list))
 
     @staticmethod
-    def to_dict(lines):
-        # lines = ["dev/lib/xx", "dev/bin/xx"]
+    def to_dict(path):
+        with open(path, encoding="utf-8") as f:
+            lines = f.readlines()
+        new_list = []
+        for line in lines:
+            line = line.replace("\n", "")
+            if line.strip() != "":
+                new_list.append(line)
         root = {}
-        for index, line in enumerate(lines):
-            arr = line.split("/")
-            PropFileUtil.__change(arr, root)
+        for line in new_list:
+            pos_num = line.find("=")
+            arr = line[:pos_num].split(".")
+            curr = root
+            # 模拟文件夹, 根据路径,从根目录开始, 切换当前目录. 不存在时就创建
+            for index, name in enumerate(arr):
+                if index == len(arr) - 1:
+                    curr[name] = line[pos_num + 1:]
+                else:
+                    curr = root.setdefault(name, {})
         return root
-
-    # 模拟文件夹, 根据路径,从根目录开始, 切换当前目录. 不存在时就创建
-    @staticmethod
-    def __change(paths, root_dic):
-        c_path = root_dic
-        for path in paths:
-            if path not in c_path:
-                c_path[path] = {}
-            c_path = c_path[path]
-        return root_dic
 
     @staticmethod
     def __dict_to_prop(data: dict, full_path="", ret=[]) -> list:
-        #  todo 拼接 .
+        if full_path:
+            full_path += "."
+        #  todo 优化 拼接 .
         for k, v in data.items():
             if isinstance(v, dict):
-                if full_path:
-                    PropFileUtil.__dict_to_prop(v, f"{full_path}.{k}", ret)
-                else:
-                    PropFileUtil.__dict_to_prop(v, f"{k}", ret)
+                PropFileUtil.__dict_to_prop(v, f"{full_path}{k}", ret)
             else:
-                if full_path:
-                    ret.append(f"{full_path}.{k}={v}")
-                else:
-                    ret.append(f"{k}={v}")
-
+                ret.append(f"{full_path}{k}={v}")
         return ret
 
 

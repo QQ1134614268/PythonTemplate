@@ -4,7 +4,6 @@
 @Description:
 """
 import json
-import logging
 from datetime import datetime
 
 from conf.config import FILE_FORMAT
@@ -12,11 +11,10 @@ from conf.json_config import MyJsonEncoder
 
 
 # json yaml prop
-def to_json_file(file_path=None, skip_err=False):
+def to_json_file(file_path=None):
     """
     存储结果
     :param file_path: 文件名
-    :param skip_err:
     :return:
     """
 
@@ -26,20 +24,9 @@ def to_json_file(file_path=None, skip_err=False):
     def decorator(func):
         def wrapper(*args, **kw):
             res = func(*args, **kw)
-            try:
-                try:
-                    content = json.dumps(res, cls=MyJsonEncoder, ensure_ascii=False)
-                except Exception as e:
-                    # todo
-                    content = "转json异常"
-                    logging.warning(content)
-                    raise e
-                with open(file_path, encoding="utf-8", mode='w') as f:
-                    f.write(content)
-            except Exception as e:
-                if not skip_err:
-                    raise e
-                logging.exception(e)
+            content = json.dumps(res, cls=MyJsonEncoder, ensure_ascii=False)
+            with open(file_path, encoding="utf-8", mode='w') as f:
+                f.write(content)
             return res
 
         return wrapper
@@ -48,7 +35,6 @@ def to_json_file(file_path=None, skip_err=False):
 
 
 if __name__ == '__main__':
-    # todo 返回数据 dict 对象 list 标量
     @to_json_file()
     def add():
         return 1
