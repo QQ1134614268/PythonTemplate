@@ -23,3 +23,4 @@ kazoo~=2.8.0
 beautifulsoup4~=4.10.0
 Jinja2~=3.0.3
 PyYAML~=6.0
+Scrapy~=2.6.2
