@@ -11,10 +11,11 @@ from conf.json_config import MyJsonEncoder
 
 
 # json yaml prop
-def to_json_file(file_path=None):
+def to_json_file(file_path=None, indent=None):
     """
     存储结果
     :param file_path: 文件名
+    :param indent:
     :return:
     """
 
@@ -24,7 +25,7 @@ def to_json_file(file_path=None):
     def decorator(func):
         def wrapper(*args, **kw):
             res = func(*args, **kw)
-            content = json.dumps(res, cls=MyJsonEncoder, ensure_ascii=False)
+            content = json.dumps(res, cls=MyJsonEncoder, ensure_ascii=False, indent=indent)
             with open(file_path, encoding="utf-8", mode='w') as f:
                 f.write(content)
             return res

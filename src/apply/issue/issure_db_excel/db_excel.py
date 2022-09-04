@@ -32,10 +32,10 @@ class TestDbToExcel(TestCase):
                     "数据精度": vo2.NUMERIC_PRECISION,
                 })
         df = pandas.DataFrame(data)
-        df.to_excel(os.path.join(DATA_DIR, "oa系统表结构.xlsx"), index=False)
-        df.to_csv(os.path.join(DATA_DIR, "oa系统表结构.csv"), index=False)
-        df.to_html(os.path.join(DATA_DIR, "oa系统表结构.html"), index=False)
-        df.to_json(os.path.join(DATA_DIR, "oa系统表结构.json"), orient="records", force_ascii=False, indent=2)
+        df.to_excel(os.path.join(DATA_DIR, f"{db}系统表结构.xlsx"), index=False)
+        df.to_csv(os.path.join(DATA_DIR, f"{db}系统表结构.csv"), index=False)
+        df.to_html(os.path.join(DATA_DIR, f"{db}系统表结构.html"), index=False)
+        df.to_json(os.path.join(DATA_DIR, f"{db}系统表结构.json"), orient="records", force_ascii=False, indent=2)
 
         # path = 'name.xlsx'
         # writer = pandas.ExcelWriter(path, engine='xlsxwriter')

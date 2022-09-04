@@ -24,4 +24,5 @@ class MyJsonEncoder(json.JSONEncoder):
             return str(o)
         if hasattr(o, "__dict__"):
             return o.__dict__
+        # return str(o)
         return super().default(o)

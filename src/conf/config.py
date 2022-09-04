@@ -41,14 +41,6 @@ ORACLE_DB = "helowin"
 oracle_url = f"oracle+cx_oracle://{ORACLE_NAME}:{ORACLE_PASSWORD}@{ORACLE_IP}:{ORACLE_PORT}/?service_name={ORACLE_DB}"
 oracle_engine = create_engine(oracle_url)
 
-# sqlserver db
-sqlserver_ip = "127.0.0.1"
-sqlserver_db = "WindDB"
-sqlserver_username = "sa"
-sqlserver_password = "123456"
-sqlserver_url = f'mssql+pymssql://{sqlserver_username}:{sqlserver_password}@{sqlserver_ip}/{sqlserver_db}'
-sqlserver_engine = create_engine(sqlserver_url)
-
 time_zone = "%2B10:00"
 time_zone_url = f'mysql+mysqlconnector://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/test?time_zone={time_zone}'
 
