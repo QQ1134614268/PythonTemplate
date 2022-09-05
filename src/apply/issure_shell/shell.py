@@ -1,24 +1,17 @@
 from datetime import datetime
-from sqlalchemy.orm import declarative_base, sessionmaker
-
-import psutil
-from sqlalchemy import Column, Enum, MetaData, String, Text, PrimaryKeyConstraint, Integer, DateTime, create_engine
-from sqlalchemy.orm import declarative_base
-
-from conf.config import DEBUG_MODE, localhost_test_session
-from util.cache_util import to_json_file
 from urllib.parse import quote_plus as urlquote
 
+import psutil
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from conf.config import DEBUG_MODE
+from util.cache_util import to_json_file
+
 env = {
-    "arg": None,
-
-    "port": 3306,
-    "total_port": None,
-    "pid": None,
-    "pid_use_port_num": None,
-    "pid_": None,
-
-    "time": None,
+    "arg": {
+        "port": 3306,
+    },
     "server": {
         "cpu_percent": None,
         "memory_max": None,
@@ -26,7 +19,8 @@ env = {
         "memory_percent": None,
         "total_connection": None
     },
-    "pid": {
+    "process": {
+        "pid": None,
         "cpu_percent": None
     }
 }
