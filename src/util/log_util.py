@@ -6,7 +6,8 @@ import os
 
 from concurrent_log_handler import ConcurrentRotatingFileHandler
 
-from conf.config import LOG_PATH, DATE_TIME_FORMAT, DEBUG_MODE
+from conf.config import LOG_PATH, DEBUG_MODE
+from conf.time_conf import DATE_TIME_FORMAT
 
 
 def create_logger(file_path=LOG_PATH):

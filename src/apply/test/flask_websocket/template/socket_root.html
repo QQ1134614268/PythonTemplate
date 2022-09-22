@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Root</title>
+</head>
+<body>
+<h1> this is Root; id: 2</h1>
+发送给：<input id="to_user" type="text" value="1">消息：<input id="send_str" type="text" value="ni hao">
+<button id="send_btn" onclick="send()">发送消息</button>
+<div id="chat_list">
+</div>
+</body>
+<script type="application/javascript">
+    var ws = null;
+    ws = new WebSocket("ws://127.0.0.1:80/socket_api/websocket/2");
+    ws.onmessage = function (messageEvent) {
+        console.log(messageEvent.data);
+        var ptag = document.createElement("h1");
+        var message = JSON.parse(messageEvent.data);
+        ptag.innerText = message.from_user + " : " + message.message;
+        document.getElementById("chat_list").appendChild(ptag);
+    };
+
+    function send() {
+        var message = document.getElementById("send_str").value;
+        var send_str = {
+            id: 2,
+            route: "/user/chat",
+            data: {
+                id: 1,
+                to_id: document.getElementById("to_user").value,
+                message: message
+            }
+        };
+        var json_send_str = JSON.stringify(send_str);
+        console.log(json_send_str);
+        ws.send(json_send_str);
+
+        var ptag = document.createElement("h6");
+        ptag.innerText = message;
+        document.getElementById("chat_list").appendChild(ptag);
+    }
+</script>

@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.functions import func
 
-from conf.config import time_zone_url
+from conf.db_conf import time_zone_url
 
 Base = declarative_base()
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from conf.config import DATE_TIME_FORMAT
+from conf.time_conf import DATE_TIME_FORMAT
 
 
 # 字符串转时间

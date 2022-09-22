@@ -12,7 +12,7 @@ from binascii import b2a_base64, a2b_base64
 from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
-from conf.config import DATE_TIME_FORMAT
+from conf.time_conf import DATE_TIME_FORMAT
 
 
 def s_2_b64(text):

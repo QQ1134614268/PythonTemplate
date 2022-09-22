@@ -7,7 +7,7 @@
 # 获取表名、表注释
 import cx_Oracle
 
-from conf.config import ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB
+from conf.db_conf import ORACLE_NAME, ORACLE_PASSWORD, ORACLE_IP, ORACLE_PORT, ORACLE_DB
 
 
 class OracleTable:
