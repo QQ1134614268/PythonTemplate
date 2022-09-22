@@ -11,7 +11,7 @@ from conf.json_config import MyJsonEncoder
 
 
 # json yaml prop
-def to_json_file(file_path=None, indent=None):
+def to_json_file(file_path="", indent=None):
     """
     存储结果
     :param file_path: 文件名
@@ -19,14 +19,14 @@ def to_json_file(file_path=None, indent=None):
     :return:
     """
 
-    if not file_path:
-        file_path = datetime.now().strftime(FILE_FORMAT) + ".json"
+    # if not file_path:
+    #     file_path = datetime.now().strftime(FILE_FORMAT) + ".json"
 
     def decorator(func):
         def wrapper(*args, **kw):
             res = func(*args, **kw)
             content = json.dumps(res, cls=MyJsonEncoder, ensure_ascii=False, indent=indent)
-            with open(file_path, encoding="utf-8", mode='w') as f:
+            with open(file_path + datetime.now().strftime(FILE_FORMAT) + ".json", encoding="utf-8", mode='w') as f:
                 f.write(content)
             return res
 
