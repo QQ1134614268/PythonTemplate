@@ -1,8 +1,6 @@
-from sqlalchemy import Column, Enum, MetaData, String, Text, PrimaryKeyConstraint
+from sqlalchemy import Column, Enum, String, Text, PrimaryKeyConstraint
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, LONGTEXT, MEDIUMTEXT
 from sqlalchemy.orm import declarative_base
-
-metadata = MetaData()
 
 Base = declarative_base()
 
@@ -10,7 +8,6 @@ Base = declarative_base()
 class MysqlColumns(Base):
     __bind_key__ = 'information_schema'
     __tablename__ = 'columns'
-    metadata = MetaData()
     __table_args__ = {
         'schema': 'information_schema'
     }
@@ -45,7 +42,6 @@ class MysqlColumns(Base):
 class JsForm(Base):
     __bind_key__ = 'oa'
     __tablename__ = 'js_form'
-    metadata = MetaData()
     __table_args__ = {
         'mysql_engine': "InnoDB",
         'mysql_collate': 'utf8mb4_general_ci',

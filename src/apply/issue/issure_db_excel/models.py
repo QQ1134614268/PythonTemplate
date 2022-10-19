@@ -13,7 +13,6 @@ Base = declarative_base()
 class MysqlTables(Base):
     __tablename__ = 'tables'
     # __bind_key__ = 'information_schema'
-    # metadata = MetaData()
     __table_args__ = {
         'schema': 'information_schema'
     }
