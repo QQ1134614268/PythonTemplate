@@ -79,7 +79,7 @@ def exec_profile():
         },
         "result": []
     }
-    pcdbak5_url = f'mysql+mysqlconnector://root:{urlquote("Szcentral@1357")}@44.39.19.2:3306/pcd?charset=utf8mb4'
+    pcdbak5_url = f'mysql+mysqlconnector://root:{urlquote("xxx")}@44.39.19.2:3306/pcd?charset=utf8mb4'
     pcdbak5_engine = create_engine(pcdbak5_url, echo=DEBUG_MODE)
     pcdbak5_session = sessionmaker(bind=pcdbak5_engine)()
     # pcdbak5_session = localhost_test_session

@@ -5,6 +5,11 @@
 """
 import re
 
+# todo 正则
+# 重要语法
+# 函数 match search group findall
+
+
 # 如果hello的首字符小写，那么正则表达式需要小写的h
 ret = re.match("h", "hello Python")
 res = ret.group()
@@ -21,7 +26,7 @@ ret = re.findall("\((.+?)\)", "红灯(停),绿灯(行)")
 print(ret)
 
 ret = re.findall(r"\((.+?)\)", "红灯(停),绿灯(行)")
-print(ret)
+print(ret, "=")
 
 ret = re.findall(r"\[(.+?)\]", "中国A股日行情估值指标[AShareEODDerivativeIndicator]")
 print(ret)

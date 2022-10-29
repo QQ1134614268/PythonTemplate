@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-
 """
 @Time: 2022/10/19
-@Description:
+@Description: todo img脚本,优化--mapreduce env, filter
 """
 import os
-# -*- coding:utf-8 -*-
 import os.path
 from os import listdir
 from os.path import abspath, join
@@ -13,8 +12,8 @@ from unittest import TestCase
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import declarative_base
 
-from apply.issure_pc.model import BaseTable
 from conf.db_conf import localhost_test_session
+from conf.model import BaseTable
 
 Base = declarative_base()
 

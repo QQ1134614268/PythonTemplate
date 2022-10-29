@@ -8,7 +8,7 @@ from unittest import TestCase
 
 from util import class_dict_util
 from util.cache_util import to_json_file
-from util.file_util import get_data_dir, YamlFileUtil, PropFileUtil, XmindFileUtil
+from util.file_util import get_data_dir,  FileUtil
 
 
 class XmindVO:
@@ -81,26 +81,26 @@ class TestFileConvert(TestCase):
     def test_to_yaml(self):
         data_list = self.test_init_user_data()
         # data = [o.__dict__ for o in data_list]
-        YamlFileUtil.to_file(data_list, get_data_dir("to_yaml.yaml"))
+        FileUtil.to_yaml(data_list, get_data_dir("to_yaml.yaml"))
 
     def test_from_yaml(self):
-        data = YamlFileUtil.to_dict(get_data_dir("to_yaml.yaml"))
+        data = FileUtil.from_yaml(get_data_dir("to_yaml.yaml"))
         print(data)
 
     def test_to_prop(self):
         # data_list = self.test_init_user_data()
         data = {'name': '测试用户0', 'birth_day': "2022-10-10", 'address': {"city": 1}}
-        PropFileUtil.to_file(data, get_data_dir("to_prop.application"))
+        FileUtil.to_prop(data, get_data_dir("to_prop.application"))
 
     def test_from_prop(self):
-        data = PropFileUtil.to_dict(get_data_dir("to_prop.application"))
+        data = FileUtil.from_prop(get_data_dir("to_prop.application"))
         print(data)
 
     def test_to_xmind(self):
         data_list = self.test_init_area_data()
         data = class_dict_util.class_to_dict(data_list)
-        XmindFileUtil.to_file(data, get_data_dir("to_xmind.yaml"), key="area_name")
+        FileUtil.to_xmind(data, get_data_dir("to_xmind.yaml"), key="area_name")
 
     def test_from_xmind(self):
-        data = XmindFileUtil.to_dict(get_data_dir("to_xmind.yaml"))
+        data = FileUtil.from_xmind(get_data_dir("to_xmind.yaml"))
         print(data)

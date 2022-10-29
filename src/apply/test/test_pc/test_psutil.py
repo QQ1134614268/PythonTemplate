@@ -6,7 +6,7 @@ import unittest
 
 import schedule as schedule
 
-from apply.issure_pc.model import NetInfo, PidInfo, Base
+from apply.test.test_pc.model import Base, PidInfo, NetInfo
 from conf.db_conf import localhost_test_engine, localhost_test_session
 
 

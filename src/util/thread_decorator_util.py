@@ -7,6 +7,13 @@ from threading import Thread
 
 from time import sleep
 
+from conf.base_obj import Human
+
+
+class Env(Human):
+
+    pass
+
 
 def async_task(f):
     def wrapper(*args, **kwargs):
@@ -15,6 +22,20 @@ def async_task(f):
 
     return wrapper
 
+
+#  todo todo - 多进程,线程, 队列, task, demo, spark,kafka, 转文件,读文件, 装饰器,  file-util,
+#  任务分配, 函数-- hash
+#  资源设置, 系统配置, 内存, io(网络),cpu
+#  mapreduce中环境配置-- 图片脚本,非规律参数.
+#  异步
+#  结果聚合
+#  异常处理, 稳定的
+#  日志追踪, 每一步结果,缓存数据
+#  读写文件, json
+#  环境 -- 回滚操作,异常,取消,
+#  验证数据完整性, 入参出参
+#  定时任务
+#  场景: 图片脚本, 数据清洗
 
 if __name__ == '__main__':
     @async_task

@@ -1,4 +1,4 @@
-from apply.issure_shell.shell import run_3306, exec_profile
+from apply.issue.issure_shell.shell import run_3306, exec_profile
 
 if __name__ == '__main__':
     run_3306(3306)
