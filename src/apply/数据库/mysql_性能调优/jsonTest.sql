@@ -1,4 +1,4 @@
-# jsonTest
+-- jsonTest
 -- 创建测试表
 -- drop table if exists tab_json;
 CREATE TABLE `tab_json` (
@@ -65,6 +65,8 @@ SELECT * from tab_json WHERE JSON_CONTAINS(data-> '$[*].city[*].name', '"徐州"
 
 SELECT * from tab_json WHERE JSON_CONTAINS(data-> '$.jsonArr[*].name', '"tom"'); -- 正确
 
+SELECT * from tab_json WHERE JSON_CONTAINS(data-> '$.jsonArr[1].name', '"tom"'); -- 正确
+
 SELECT * from tab_json WHERE JSON_CONTAINS(data -> '$.jsonArr','[{"name": "jerry"}, {"name": "tom"}]'); -- 正确
 
 SELECT * from tab_json WHERE JSON_CONTAINS(data, '"jerry"', '$.jsonObj.name');
@@ -78,3 +80,8 @@ SELECT * from tab_json WHERE JSON_CONTAINS(data, '"徐州"', '$.*.city.*.name');
 SELECT * from tab_json WHERE JSON_CONTAINS(data->'$.*.city.*.name', '"徐州"'); -- 错误
 
 SELECT * from tab_json WHERE JSON_CONTAINS(data->'$.*.city[*].name', '"徐州"'); -- 错误
+
+-- ‘$.*’	返回全部json
+-- ‘$.title’	返回key=”title”的数据
+-- ‘$**.text’	返回所有最底层key=”text”的数据
+-- ‘$.content[*].item1[*]’	返回key=content的list的key=item1的list的所有内容
