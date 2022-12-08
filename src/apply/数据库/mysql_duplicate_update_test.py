@@ -17,7 +17,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import Insert
 
-from conf.db_conf import localhost_test_url
+from config.db_conf import localhost_test_url
 
 Base = declarative_base()
 

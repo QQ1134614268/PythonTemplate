@@ -5,7 +5,7 @@ from sqlalchemy import Column, Date
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
-from conf.db_conf import localhost_test_engine, localhost_test_session
+from config.db_conf import localhost_test_engine, localhost_test_session
 
 Base = declarative_base()
 

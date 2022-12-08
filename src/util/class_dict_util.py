@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, date
 from enum import Enum
 
-from conf.time_conf import DATE_TIME_FORMAT, DATE_FORMAT
+from config.time_conf import DATE_TIME_FORMAT, DATE_FORMAT
 
 
 def class_to_dict(obj):

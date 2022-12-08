@@ -8,8 +8,8 @@ from os import path
 
 import yaml
 
-from conf.config import DATA_DIR
-from conf.json_config import MyJsonEncoder
+from config.conf import DATA_DIR
+from config.json_config import MyJsonEncoder
 
 
 def get_data_dir(file_path):

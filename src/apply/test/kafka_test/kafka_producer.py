@@ -6,7 +6,7 @@
 from kafka import KafkaProducer, KafkaAdminClient
 from kafka.admin import NewTopic
 
-from conf.kafka_conf import GGOK_HOST, MY_TOPIC1
+from config.kafka_conf import GGOK_HOST, MY_TOPIC1
 
 
 def create_topic(client, topic):

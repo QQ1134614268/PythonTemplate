@@ -7,11 +7,10 @@ from threading import Thread
 
 from time import sleep
 
-from conf.base_obj import Human
+from config.base_obj import Human
 
 
 class Env(Human):
-
     pass
 
 

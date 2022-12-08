@@ -12,8 +12,8 @@ from unittest import TestCase
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import declarative_base
 
-from conf.db_conf import localhost_test_session
-from conf.model import BaseTable
+from config.db_conf import localhost_test_session
+from config.model import BaseTable
 
 Base = declarative_base()
 

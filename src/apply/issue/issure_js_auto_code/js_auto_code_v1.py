@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from apply.issue.issure_js_auto_code.model import MysqlColumns, JsForm
-from conf.db_conf import localhost_test_session, localhost_oa_session
+from config.db_conf import localhost_test_session, localhost_oa_session
 
 
 class TestAutoCode(TestCase):
