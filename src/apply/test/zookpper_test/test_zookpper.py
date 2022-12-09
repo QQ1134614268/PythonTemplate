@@ -3,7 +3,7 @@ from unittest import TestCase
 import time
 from kazoo.client import KazooClient
 
-from conf.config import GGOK_ZOOKEEPER_HOST
+from config.conf import GGOK_ZOOKEEPER_HOST
 
 
 class TestZookeeper(TestCase):

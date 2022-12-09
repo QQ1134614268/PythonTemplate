@@ -7,7 +7,7 @@ import unittest
 import schedule as schedule
 
 from apply.test.test_pc.model import Base, PidInfo, NetInfo
-from conf.db_conf import localhost_test_engine, localhost_test_session
+from config.db_conf import localhost_test_engine, localhost_test_session
 
 
 class Pc(unittest.TestCase):

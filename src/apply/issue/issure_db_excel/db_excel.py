@@ -4,8 +4,8 @@ from unittest import TestCase
 import pandas
 
 from apply.issue.issure_db_excel.models import MysqlColumns, MysqlTables
-from conf.config import DATA_DIR
-from conf.db_conf import localhost_oa_session
+from config.conf import DATA_DIR
+from config.db_conf import localhost_oa_session
 
 
 class TestDbToExcel(TestCase):

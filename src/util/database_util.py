@@ -5,7 +5,8 @@
 """
 import unittest
 
-from conf.db_conf import DB, localhost_test_session
+from config.db_conf import DB, localhost_test_session
+
 
 def exec_sql(curr_session, sql):
     result = curr_session.execute(sql)

@@ -5,7 +5,7 @@ import psutil
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from conf.config import DEBUG_MODE
+from config.conf import DEBUG_MODE
 from util.cache_util import to_json_file
 
 env = {

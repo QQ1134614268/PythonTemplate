@@ -6,7 +6,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from conf.config import DEBUG_MODE
+from config.conf import DEBUG_MODE
 
 HOST = "127.0.0.1"
 PORT = "3306"

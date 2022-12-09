@@ -8,8 +8,8 @@ from datetime import datetime
 
 import time
 
-from conf.config import FILE_FORMAT
-from conf.json_config import MyJsonEncoder
+from config.conf import FILE_FORMAT
+from config.json_config import MyJsonEncoder
 
 
 # json yaml prop

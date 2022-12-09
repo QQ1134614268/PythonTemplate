@@ -9,7 +9,7 @@ import uuid
 from datetime import date, datetime
 from enum import Enum
 
-from conf.time_conf import DATE_TIME_FORMAT, DATE_FORMAT
+from config.time_conf import DATE_TIME_FORMAT, DATE_FORMAT
 
 
 class MyJsonEncoder(json.JSONEncoder):

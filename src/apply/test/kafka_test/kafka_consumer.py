@@ -5,7 +5,7 @@
 """
 from kafka import KafkaConsumer
 
-from conf.kafka_conf import GGOK_HOST, MY_TOPIC1
+from config.kafka_conf import GGOK_HOST, MY_TOPIC1
 
 if __name__ == '__main__':
     # auto_offset_reset : 'earliest',  'latest

@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from apply.数据库.mysql_性能.models import User, Base, Order, OrderInfo, Goods
 from apply.数据库.mysql_性能.util import get_id
-from conf.db_conf import localhost_test_engine, localhost_test_session
+from config.db_conf import localhost_test_engine, localhost_test_session
 
 
 # 根据model 生成存储过程,根据类型生成字段

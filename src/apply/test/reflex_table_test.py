@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, Column, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
-from conf.db_conf import localhost_test_url
+from config.db_conf import localhost_test_url
 from util.my_util import Data
 
 Base = declarative_base()
