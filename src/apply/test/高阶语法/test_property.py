@@ -1,5 +1,8 @@
 class Student(object):
 
+    def __init__(self):
+        self._score = None
+
     @property
     def score(self):
         return self._score
@@ -14,6 +17,9 @@ class Student(object):
 
 
 class Student2(object):
+
+    def __init__(self):
+        self._score = None
 
     def get_score(self):
         return self._score

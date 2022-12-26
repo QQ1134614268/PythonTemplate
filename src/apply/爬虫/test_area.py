@@ -56,9 +56,14 @@ class Test(TestCase):
                         datas.append(data)
                     time.sleep(1)
 
-    def get_response(self, url, attr):
+    @staticmethod
+    def get_response(url, attr):
+        print("开始访问 ", url)
         response = requests.get(url)
         response.encoding = 'utf-8'  # 编码转换
+        # print("访问url ", url, "返回值: \n", response.text)
+        if response.status_code != 200:
+            raise Exception("访问url " + url + "返回值: \n" + response.text)
         soup = BeautifulSoup(response.text, 'lxml')
         table = soup.find_all('tbody')[1].tbody.tbody.table
         if attr:
