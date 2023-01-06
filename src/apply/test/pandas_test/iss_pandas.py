@@ -16,7 +16,7 @@ class TestPandas(unittest.TestCase):
 
         path = r"D:\桌面文件夹\新建文件夹"
         files = []
-        float_regx = re.compile("^(\d+)(\.\d+)?$")
+        float_regx = re.compile(r"^(\d+)(\.\d+)?$")
         for main_dir, sub_dir_list, sub_file_list in os.walk(path):
             for file in sub_file_list:
                 if file.endswith(".hp"):
