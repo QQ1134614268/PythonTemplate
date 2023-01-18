@@ -12,7 +12,7 @@ from unittest import TestCase
 
 import psutil
 
-from apply.test.test_pc.model import PidInfo
+from apply.test.test_pc_info.model import PidInfo
 
 
 # todo

@@ -30,3 +30,7 @@ oracle_url = f"oracle+cx_oracle://{quote(ORACLE_NAME)}:{quote(ORACLE_PASSWORD)}@
 oracle_engine = create_engine(oracle_url)
 time_zone = "%2B10:00"
 time_zone_url = f'mysql+mysqlconnector://{quote(USERNAME)}:{quote(PASSWORD)}@{HOST}:{PORT}/test?time_zone={time_zone}'
+
+test_128 = f"""mysql+pymysql://root:{quote("123456")}@172.16.6.128:3306/coastal-system?charset=utf8mb4"""
+test_engine_128 = create_engine(test_128, echo=DEBUG_MODE)
+test_session_128 = sessionmaker(bind=test_engine_128)()

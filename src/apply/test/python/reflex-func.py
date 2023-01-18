@@ -18,11 +18,11 @@ def my_func():
     print(words)
 
 
-def get_func_varnames(func):
+def get_func_var_names(func):
     func_vars = func.__code__.co_varnames
     print(func_vars)
 
 
 if __name__ == "__main__":
     test_get_func_name()
-    get_func_varnames(my_func)
+    get_func_var_names(my_func)

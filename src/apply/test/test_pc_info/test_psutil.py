@@ -6,7 +6,7 @@ import unittest
 
 import schedule as schedule
 
-from apply.test.test_pc.model import Base, PidInfo, NetInfo
+from apply.test.test_pc_info.model import Base, PidInfo, NetInfo
 from config.db_conf import localhost_test_engine, localhost_test_session
 
 
