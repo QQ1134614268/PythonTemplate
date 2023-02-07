@@ -25,7 +25,7 @@ class Img(BaseTable):
     }
     name = Column(String(64))
     description = Column(String(64))
-    img = Column(String(64))
+    imgUrl = Column(String(64))
     parent_id = Column(Integer)
     type_id = Column(Integer)
 
@@ -75,7 +75,7 @@ class TestAutoCode(TestCase):
                     localhost_test_session.add(home)
                     localhost_test_session.commit()
                 else:
-                    vo = Img(name="", description=img, type_id=1, parent_id=home.id, img=img)
+                    vo = Img(name="", description=img, type_id=1, parent_id=home.id, imgUrl=img)
                     localhost_test_session.add(vo)
                     localhost_test_session.commit()
 
