@@ -5,9 +5,9 @@
 """
 import json
 import random
+import time
 
 import requests
-import time
 
 
 def get_one_page(url):
@@ -36,21 +36,15 @@ def parse_one_page(html):
 
 # 保存数据到文本文档
 
-def save_to_txt():
+def save_to_txt(file):
     for i in range(1, 1001):
         url = 'http://m.maoyan.com/mmdb/comments/movie/248566.json?_v_=yes&offset=' + str(i)
         html = get_one_page(url)
         print('正在保存第%d页。' % i)
         for item in parse_one_page(html):
-            with open('xie_zheng.txt', 'a', encoding='utf-8') as f:
-                f.write(
-                    item['date'] + ',' + item['nickname'] + ',' + item['city'] + ',' + str(item['rate']) + ',' + item[
-                        'comment'] + '\n')
+            with open(file, 'a', encoding='utf-8') as f:
+                f.write(f"""{item['date']},{item['nickname']},{item['city']},{item['rate']},{item['comment']}\n""", )
         time.sleep(5 + float(random.randint(1, 100)) / 20)
-
-
-if __name__ == '__main__':
-    save_to_txt()
 
 
 # 二、数据处理
@@ -72,4 +66,5 @@ def xie_zheng(infile, outfile):
 
 
 if __name__ == '__main__':
+    save_to_txt('xie_zheng.txt')
     xie_zheng('xie_zheng.txt', 'xie_zheng2.txt')

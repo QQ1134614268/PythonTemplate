@@ -5,29 +5,36 @@
 """
 import os
 import os.path
+from datetime import datetime
 from os import listdir
 from os.path import abspath, join
 from unittest import TestCase
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import declarative_base
 
 from config.db_conf import localhost_test_session
-from config.model import BaseTable
 
 Base = declarative_base()
 
 
-class Img(BaseTable):
+class Img(Base):
     __tablename__ = 'img'
     __table_args__ = {
         'schema': 'jiangxin'
     }
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
+
     name = Column(String(64))
     description = Column(String(64))
     img = Column(String(64))
     parent_id = Column(Integer)
     type_id = Column(Integer)
+
+    create_time = Column(DateTime, default=datetime.now, comment="创建时间")
+    update_time = Column(DateTime, default=datetime.now, onupdate=datetime.now, comment="修改时间")
+    create_by = Column(Integer, default="-1", comment="创建者id")
+    update_by = Column(Integer, default="-1", comment="修改者id")
 
 
 # 递归遍历目录
