@@ -81,6 +81,10 @@ SELECT * from tab_json WHERE JSON_CONTAINS(data->'$.*.city.*.name', '"徐州"');
 
 SELECT * from tab_json WHERE JSON_CONTAINS(data->'$.*.city[*].name', '"徐州"'); -- 错误
 
+-- UPDATE
+UPDATE tab_json SET data =JSON_SET(data,'$[0].name', JSON_EXTRACT(data, '$[0].name')+'2') WHERE id = 2;
+UPDATE tab_json SET data = JSON_REMOVE(data, '$[0]') WHERE id = 183;
+
 -- ‘$.*’	返回全部json
 -- ‘$.title’	返回key=”title”的数据
 -- ‘$**.text’	返回所有最底层key=”text”的数据

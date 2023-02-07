@@ -38,17 +38,17 @@ class Test(TestCase):
                 localhost_test_session.add(province_vo)
                 localhost_test_session.commit()
                 trs = self.get_response(province_url, None)
-                for tr in trs[1:]:  # 循环每个市
-                    city_code = tr.find_all('td')[0].string
-                    city_name = tr.find_all('td')[1].string
-                    city_url = base_url + tr.find_all('td')[1].a.get('href')
+                for tr2 in trs[1:]:  # 循环每个市
+                    city_code = tr2.find_all('td')[0].string
+                    city_name = tr2.find_all('td')[1].string
+                    city_url = base_url + tr2.find_all('td')[1].a.get('href')
                     trs = self.get_response(city_url, None)
                     city_vo = Area(area_name=str(city_name), parent_id=province_vo.id)
                     localhost_test_session.add(city_vo)
                     localhost_test_session.commit()
-                    for tr in trs[1:]:  # 循环每个区
-                        county_code = tr.find_all('td')[0].string
-                        county_name = tr.find_all('td')[1].string
+                    for tr1 in trs[1:]:  # 循环每个区
+                        county_code = tr1.find_all('td')[0].string
+                        county_name = tr1.find_all('td')[1].string
                         data = [province_name, city_code, city_name, county_code, county_name]
                         county_vo = Area(area_name=str(county_name), parent_id=city_vo.id)
                         localhost_test_session.add(county_vo)
