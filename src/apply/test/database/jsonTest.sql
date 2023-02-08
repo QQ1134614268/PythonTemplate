@@ -1,91 +1,72 @@
 -- jsonTest
 -- 创建测试表
--- drop table if exists tab_json;
-CREATE TABLE `tab_json` (
+-- drop table if exists json_test;
+CREATE TABLE `json_test` (
  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
- `data` json DEFAULT NULL COMMENT 'json字符串',
+ `obj` json DEFAULT NULL COMMENT '国家详情(json对象)',
+ `arr` json DEFAULT NULL COMMENT '省列表(json数组)',
  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- 新增数据
--- INSERT INTO `test`.`tab_json`(`id`, `data`) VALUES (1, '{"id": "1", "name": "david", "jsonArr": [{"name": "jerry"}, {"name": "tom"}], "jsonObj": {"name": "jerry"}}');
--- INSERT INTO `test`.`tab_json`(`id`, `data`) VALUES (2, '[{"city": [{"name": "深圳"}, {"name": "珠海"}], "name": "广东"}, {"city": [{"name": "常州"}, {"name": "徐州"}], "name": "江苏"}]');
+INSERT INTO `json_test`(`obj`, `arr`) VALUES ('{"number":2,"name":"china"}',  '[{"city": [{"name": "深圳市"}, {"name": "珠海市"}], "name": "广东省"}, {"city": [{"name": "常州市"}, {"name": "徐州市"}], "name": "江苏省"}]' );
 
--- 查询 JSON_EXTRACT 对tab_json表使用json_extract函数 如果查询没有的key,返回的是NULL
-select * from tab_json;
+select * from json_test;
 
-SELECT JSON_EXTRACT('{"a": 1, "b": 2, "c": [3, 4, 5]}', '$.c[*]') =JSON_ARRAY(3, 4, 5);
+-- JSON_EXTRACT(json_doc, path[, path] ...) 如果查询没有的key,返回的是NULL
+select JSON_EXTRACT(obj,'$.name') from json_test;
+SELECT obj -> '$.name' from json_test;
+SELECT obj ->> '$.name' from json_test;
 
-select JSON_EXTRACT(data,'$.name') from tab_json;
+SELECT JSON_EXTRACT(arr, '$[*].city[*].name') from json_test;
+SELECT JSON_EXTRACT(arr, '$[*].name') from json_test;
+SELECT arr -> '$[*].name' from json_test; # json数组类型
+SELECT arr ->> '$[*].name' from json_test; # 字符串类型
 
-SELECT JSON_EXTRACT(data, '$[*].city[*].name') from tab_json;
 
-select json_extract(json_extract(data,'$.data'),'$.name') from tab_json where json_extract(data,'$.name') = 'Mike';
+SELECT obj -> '$.*' from json_test ;
+SELECT obj -> '$.number' from json_test ;
+SELECT JSON_EXTRACT(obj, '$.number','$.name') from json_test ;
 
-SELECT JSON_CONTAINS(JSON_ARRAY('0','1'), '"0"')  ; -- 正确
 
--- JSON_EXTRACT
-SELECT * from tab_json WHERE JSON_EXTRACT(data, '$.id') ='1' ; -- 正确
+-- 条件查询
+SELECT * from json_test WHERE JSON_EXTRACT(obj, '$.name') ='china' ;
+SELECT * from json_test WHERE JSON_EXTRACT(arr, '$[*].name')= JSON_ARRAY('广东省', '江苏省'); # 数组类型
+SELECT * from json_test WHERE arr ->> '$[*].name'= '["广东省", "江苏省"]'; # 字符串类型
+SELECT * from json_test WHERE obj -> '$.name' = '"china"';
+SELECT * from json_test WHERE obj ->> '$.name' = 'china';
 
-SELECT * from tab_json WHERE JSON_EXTRACT(data, '$.jsonObj.name') ='jerry';  -- 正确
+-- 条件查询 嵌套json查询 -- JSON_CONTAINS(target, candidate[, path])
+SELECT * from json_test WHERE JSON_CONTAINS(obj -> '$.name', '"china"');
+SELECT * from json_test WHERE JSON_CONTAINS(obj, '"china"','$.name');
+SELECT * from json_test WHERE JSON_CONTAINS(obj, '{"name":"china"}');
 
-SELECT * from tab_json WHERE JSON_EXTRACT(data, '$.jsonArr[*].name') =JSON_ARRAY('jerry', 'tom');
 
-SELECT * from tab_json WHERE JSON_EXTRACT(data, '$[*].name')= JSON_ARRAY('广东', '江苏');
+SELECT * from json_test WHERE JSON_CONTAINS(arr ,'{"city": [{"name": "深圳市"}, {"name": "珠海市"}]}');
+SELECT * from json_test WHERE JSON_CONTAINS(arr -> '$[0].name', '"广东省"');
+SELECT * from json_test WHERE JSON_CONTAINS(arr -> '$[*].city[*].name', '"徐州市"');
 
-SELECT * from tab_json WHERE JSON_EXTRACT(data, '$.jsonArr') = JSON_ARRAY(JSON_OBJECT('name', 'jerry'), JSON_OBJECT('name', 'tom'));  -- 正确
-
-SELECT JSON_EXTRACT(data, '$.jsonArr[*].name') from tab_json ; -- 正确
-
-SELECT data->'$.jsonArr[*].name' from tab_json;  -- 正确
-
-SELECT data->'$.jsonObj.name' from tab_json;  -- 正确
-
-SELECT data->>'$.jsonObj.name' from tab_json;  -- 正确
-
-SELECT * from tab_json WHERE data->>'$.jsonObj.name' = 'jerry';  -- 正确
-
-SELECT * from tab_json WHERE data->>'$.jsonArr[*].name' ='tom';  -- 错误
+-- UPDATE
+UPDATE json_test SET obj = JSON_SET(obj,'$.name2','china2') ;
+UPDATE json_test SET obj = JSON_REMOVE(obj, '$.name2');
 
 -- 构造json
 SELECT JSON_OBJECT('name', 'tom', 'age', 12);
 
-SELECT JSON_ARRAY('tom', 'cat');
+SELECT JSON_ARRAY('1', '2');
 
 SELECT JSON_ARRAY(JSON_OBJECT('name', 'jerry'),  JSON_OBJECT('name', 'tom'));
 
-SELECT JSON_ARRAY(1, 2), JSON_ARRAY(2, 1), JSON_ARRAY(1, 2)=JSON_ARRAY(1, 2),  JSON_ARRAY(1, 2)=JSON_ARRAY(2, 1); -- array 顺序参与比较
+SELECT JSON_ARRAY(1, 2)=JSON_ARRAY(2, 1), JSON_ARRAY(1, 2)=JSON_ARRAY(1, 2); -- array 顺序参与比较
 
-
--- 条件查询 嵌套json查询
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data, '{"name":"江苏"}'); -- 正确
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data-> '$[*].city[*].name', '"徐州"');  -- 正确
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data-> '$.jsonArr[*].name', '"tom"'); -- 正确
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data-> '$.jsonArr[1].name', '"tom"'); -- 正确
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data -> '$.jsonArr','[{"name": "jerry"}, {"name": "tom"}]'); -- 正确
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data, '"jerry"', '$.jsonObj.name');
-
--- JSON_EXTRACT(json_doc, path[, path] ...)
--- JSON_CONTAINS(target, candidate[, path])
-SELECT * from tab_json WHERE JSON_CONTAINS(data, '"徐州"', '$[*].city[*].name');  -- 错误
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data, '"徐州"', '$.*.city.*.name');  -- 错误
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data->'$.*.city.*.name', '"徐州"'); -- 错误
-
-SELECT * from tab_json WHERE JSON_CONTAINS(data->'$.*.city[*].name', '"徐州"'); -- 错误
-
--- UPDATE
-UPDATE tab_json SET data =JSON_SET(data,'$[0].name', JSON_EXTRACT(data, '$[0].name')+'2') WHERE id = 2;
-UPDATE tab_json SET data = JSON_REMOVE(data, '$[0]') WHERE id = 183;
-
--- ‘$.*’	返回全部json
--- ‘$.title’	返回key=”title”的数据
--- ‘$**.text’	返回所有最底层key=”text”的数据
--- ‘$.content[*].item1[*]’	返回key=content的list的key=item1的list的所有内容
+-- jsonpPath
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三"},{"name":"李四"}], "info": {"money":100}}', '$.*');
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三"},{"name":"李四"}], "info": {"money":100}}', '$.name');
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三"},{"name":"李四"}], "info": {"money":100}}', '$**.name');
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*]');
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*].book');
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*].book[*]');
+-- ‘$.*’	返回全部key的value
+-- ‘$.name’	返回key=”name”的数据
+-- ‘$**.name’	返回所有最底层key=”name”的数据
+-- ‘$.auth[*].book[*]’	返回key=auth的list的key=book的list的所有内容
