@@ -35,7 +35,7 @@ class Filed:
         self.Comment = Comment
 
 
-class TestMysql(unittest.TestCase):
+class TestReflexTable(unittest.TestCase):
 
     def setUp(self):
         # 创建对象的基类:

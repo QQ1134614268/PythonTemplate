@@ -4,9 +4,9 @@ import unittest
 import schedule
 
 
-class Pc(unittest.TestCase):
+class TestSchedule(unittest.TestCase):
     def test1(self):
-        schedule.every(2).seconds.do(Pc.job)  # 每10秒执行一次
+        schedule.every(2).seconds.do(TestSchedule.job)  # 每10秒执行一次
 
         # schedule.every(5).minutes.do(job, name)
         # schedule.every().hour.do(job, name)

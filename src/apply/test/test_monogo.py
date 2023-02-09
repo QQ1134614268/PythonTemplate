@@ -3,7 +3,7 @@ import unittest
 import pymongo
 
 
-class MongodbTest(unittest.TestCase):
+class TestMongodb(unittest.TestCase):
     def setUp(self) -> None:
         self.client = pymongo.MongoClient('mongodb://localhost:27017/')
 
