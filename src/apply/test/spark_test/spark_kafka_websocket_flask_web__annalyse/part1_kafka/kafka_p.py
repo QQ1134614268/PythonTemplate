@@ -8,7 +8,9 @@ import time
 
 from kafka import KafkaProducer
 
-producer = KafkaProducer(bootstrap_servers='192.168.147.128:9092')
+from config.kafka_conf import KAFKA_GGOK
+
+producer = KafkaProducer(bootstrap_servers=KAFKA_GGOK)
 
 zhandian = ['火车东站', '火车南站', '火车北站']
 
@@ -21,7 +23,7 @@ for i in range(10000):
     zhou6 = random.randint(70, 90)
     zhou7 = random.randint(80, 100)
     che_zhan = random.choice(zhandian)
-    s = "{},{},{},{},{},{},{},{}".format(che_zhan, zhou1, zhou2, zhou3, zhou4, zhou5, zhou6, zhou7)
+    s = f"{che_zhan},{zhou1},{zhou2},{zhou3},{zhou4},{zhou5},{zhou6},{zhou7}"
     print(s)
     producer.send('bigdata', bytes(s, encoding="utf8"))
     time.sleep(1)

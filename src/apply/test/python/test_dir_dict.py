@@ -19,6 +19,7 @@ class Child(Parent):
     bb = 1
 
     def __init__(self):
+        super().__init__()
         self.chi = 1
 
     def aa_func_child(self):

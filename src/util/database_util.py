@@ -59,7 +59,7 @@ def get_unique_cols(curr_session, db, tb_name):
     return [item["column_name"] for item in res_to_dic(res)]
 
 
-class Test(unittest.TestCase):
+class TestDb(unittest.TestCase):
     def test_get_tables(self):
         print(get_tables(localhost_test_session, DB))
 

@@ -22,7 +22,7 @@ def async_task(f):
     return wrapper
 
 
-#  todo todo - 多进程,线程, 队列, task, demo, spark,kafka, 转文件,读文件, 装饰器,  file-util,
+# todo - 多进程,线程, 队列, task, demo, spark,kafka, 转文件,读文件, 装饰器,  file-util,
 #  任务分配, 函数-- hash
 #  资源设置, 系统配置, 内存, io(网络),cpu
 #  mapreduce中环境配置-- 图片脚本,非规律参数.

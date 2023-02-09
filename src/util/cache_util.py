@@ -46,9 +46,6 @@ def get_new_file_name(file_name=""):
     return f"{file_name}_{datetime.now().strftime(FILE_FORMAT)}.json"
 
 
-# todo to_json pandas.to_json
-
-
 if __name__ == '__main__':
     @to_json_file()
     def add():

@@ -34,8 +34,6 @@ def conn_thread():
             time.sleep(10)
 
 
-# end def
-
 def send_thread():
     global socks
     while True:
@@ -50,10 +48,9 @@ def send_thread():
         time.sleep(1)
 
 
-# end def
+if __name__ == '__main__':
+    conn_th = threading.Thread(target=conn_thread, args=())
+    send_th = threading.Thread(target=send_thread, args=())
 
-conn_th = threading.Thread(target=conn_thread, args=())
-send_th = threading.Thread(target=send_thread, args=())
-
-conn_th.start()
-send_th.start()
+    conn_th.start()
+    send_th.start()

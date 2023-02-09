@@ -10,7 +10,7 @@ from apply.test.test_pc_info.model import Base, PidInfo, NetInfo
 from config.db_conf import localhost_test_engine, localhost_test_session
 
 
-class Pc(unittest.TestCase):
+class TestPsutil(unittest.TestCase):
     def test_init_table(self):
         Base.metadata.create_all(localhost_test_engine)
         # Base.metadata.drop_all(localhost_test_engine)

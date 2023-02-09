@@ -7,7 +7,9 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from kafka import KafkaConsumer
 
-app = Flask(__name__,template_folder='.')
+from config.kafka_conf import KAFKA_GGOK
+
+app = Flask(__name__, template_folder='.')
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 thread = None
@@ -15,7 +17,7 @@ thread = None
 
 # 接收到消息就调用test_message方法，test_message是定义在web_socket对象上的js函数
 def background_thread():
-    consumer = KafkaConsumer('result', bootstrap_servers=['127.0.0.1:9092'])
+    consumer = KafkaConsumer('result', bootstrap_servers=[KAFKA_GGOK], group_id="KEY")
     for msg in consumer:
         data_json = msg.value.decode('utf8')
         socketio.emit('test_message', {'data': data_json})

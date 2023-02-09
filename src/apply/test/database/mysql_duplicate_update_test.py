@@ -6,10 +6,6 @@
 import re
 import unittest
 
-# engine 参数语法 :id
-# session 参数语法 %(id)s
-# connection
-# cursors
 from sqlalchemy import create_engine, Column, Integer, String, text
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.ext.compiler import compiles
@@ -30,6 +26,10 @@ class TestTable(Base):
     name2 = Column(String(64))
 
 
+# engine 参数语法 :id
+# session 参数语法 %(id)s
+# connection
+# cursors
 class TestMysql(unittest.TestCase):
 
     def setUp(self):

@@ -1,89 +1,55 @@
-# 设置 test runner
-
-# unittest mock pytest nose2
-# todo 数据驱动模块 parameterized ddt; pytest 自动支持; mock
-import pytest as pytest
-import unittest
-
-
-# 示例：
-# 首先，我们观察这三个测试用例，我们会发现，三个测试用例除了入口参数需要变化，
-# 其测试执行语句都是相同的，因此，为了简化测试代码，我们可以使用数据驱动测试的理论将三个方法写作一个方法
-
-# 未使用数据驱动测试的代码：
-class BasicTestCase(unittest.TestCase):
-    def test1(self, num1):
-        num = num1 + 1
-        # self.assertEqual(8, num)
-        print('number:', num)
-
-    def test2(self, num2):
-        num = num2 + 1
-        print('number:', num)
-
-    def test3(self, num3):
-        num = num3 + 1
-        print('number:', num)
-
-
-# # 使用数据驱动测试的代码，执行效果与上文代码相同此处只需要了解大概框架，详细步骤下文会解释
-# @ddt
-# class BasicTestCase(unittest.TestCase):
-#     @data('666', '777', '888')
-#     def test(self, num):
-#         print('数据驱动的number:', num)
-
-
-@pytest.mark.parametrize("test_input,expected", [("3+5", 8), ("2+4", 6), ("6*9", 42)])
-def test_eval(test_input, expected):
-    assert eval(test_input) == expected
-
-    # assertEqual、assertNotEqual、assertTrue、assertFalse、assertIn、assertNotIn 等。
-
-
-# w1.py
-def weather():
-    '''天气接口'''
-    pass
-
-
-def weather_result():
-    '''模拟天气接口返回值'''
-    result = weather()
-    if result['result'] == '雪':
-        print('下雪了！！！')
-    elif result['result'] == '雨':
-        print('下雨了！！！')
-    elif result['result'] == '晴天':
-        print('晴天！！！！')
-    else:
-        print('返回值错误！')
-    return result['status']
-
-
 import unittest
 from unittest import mock
 
+from ddt import ddt, data, unpack
 
-# 导入接口文件
+
+# unittest 组织成类, 自带的, 被(pytest)拓展
+# pytest 支持数据驱动?? 插件丰富(生成报告,发邮件)
+# ddt 配合unittest, 数据驱动
+
+# todo 个人使用 unittest,配合ddt??
+
+# pycharm 设置 test runner
+@ddt  # ddt是用来装饰类的，需要与data装饰器一起使用
+class TestDdt(unittest.TestCase):
+
+    def add(self, num1, num3):
+        return num1 + num3
+
+    def test(self):
+        """没有数据驱动的测试"""
+        assert self.add(1, 2), 3
+        assert self.add(1, -2), -1
+
+    @data('666', '777', '888')
+    def test1(self, num):
+        res = str(num)
+        print('数据驱动的number:', res)
+
+    @data([1, 2], [1, -2])
+    @unpack
+    def test_add(self, num1, num2):
+        assert self.add(num1, num2), 3
+        assert self.add(1, -2), -1
+
+    @mock.patch(target="test_ddt.add")
+    def test_01(self, mock_add):
+        # mock: 调用mock的方法只返回给定的值
+        mock_add.return_value = 2
+
+        statues = add(100, 200)
+        self.assertEqual(statues, 2)
 
 
-# class Test01(unittest.TestCase):
-#
-#     @mock.patch(target="weather")
-#     def test_01(self, mock_login):
-#         '''下雪了'''
-#         mock_login.return_value = {'result': "雪", 'status': '下雪了！'}
-#         statues = weather()
-#         self.assertEqual(statues, '下雪了！')
-#
-#     @mock.patch(target='weather')
-#     def test_02(self, mock_login):
-#         '''下雨了！'''
-#         mock_login.return_value = {'result': "雨", 'status': '下雨了！'}
-#         statues = weather()
-#         self.assertEqual(statues, '下雨了！')
+def add(num1, num2):
+    return num1 + num2
 
 
 if __name__ == '__main__':
+    # 运行的时候光标的位置放在 test_add 方法中了，导入且使用ddt后，运行时需要先识别装饰的类，将光标放在方法内的话，测试用例仅会执行当前的方法，ddt无法识别到类，运行就会出错。
+
+    # 将光标放到方法外，则运行通过；
+    # 加main方法，再运行，也会运行通过；
+    # 点击py文件，右击运行，也会运行通过
     unittest.main()

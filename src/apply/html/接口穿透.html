@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>test</title>
-    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
@@ -17,37 +17,37 @@
 <body>
 <div id="app2" style="height: 100vh">
     <el-tabs v-model="activeName">
-        <el-tab-pane label="配置" name="config">
-            <el-form :model="form">
-                <el-form-item label="token">
-                    <el-input v-model="token" name="token" autocomplete="on"></el-input>
-                </el-form-item>
-                <el-form-item label="url">
-                    <el-input v-model="url" name="url" autocomplete="on"></el-input>
-                </el-form-item>
-                <el-form-item label="转换关键字">
-                    <el-checkbox v-model="need_trans">转换关键字</el-checkbox>
-                </el-form-item>
-                <input type="submit" @click="remember" value="保存配置"></input>
-            </el-form>
-        </el-tab-pane>
         <el-tab-pane label="sql执行" name="exec">
-            <div style="display: flex; justify-content: space-around">
-                <div style="width: 20%; ">
-                    <div v-for="sql in sql_history"><a @click="this.sql=sql">{{sql}}</a></div>
+            <div>
+                <el-form :model="history">
+                    <el-form-item label="token">
+                        <el-input v-model="token" name="token" autocomplete="on" style="width: 300px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="url">
+                        <el-input v-model="url" name="url" autocomplete="on" style="width: 300px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="转换关键字">
+                        <el-radio v-model="need_trans">转换关键字</el-radio>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div style="display: flex; justify-content: center">
+                {{ sql_history }}
+                <div style="width: 20%; border: #0b9ef2 solid 1px ;height: 300px">
+                    <div v-for="history in sql_history" style="border: aquamarine solid 1px; margin: 1px;">
+                        <a @click="this.history=history">
+                            <div style=" width: 100%">{{ history.sql }}</div>
+                        </a>
+                    </div>
                 </div>
                 <div style="width: 50%; display: flex;flex-direction: column">
-                    <textarea v-model="sql" rows="10" autocomplete="on">
-                    </textarea>
+                    <textarea v-model="history.sql" rows="10" autocomplete="on"> </textarea>
                     <div>
                         <el-button @click="searchData" type="primary" size="mini" style="float: right"> 确定</el-button>
                     </div>
                 </div>
                 <div style="width: 20%; ">
-                    <div><span class="span_key">token: </span><span>{{token}}</span></div>
-                    <div><span class="span_key">url: </span><span>{{url}}</span></div>
-                    <div><span class="span_key">need_trans: </span><span>{{need_trans}}</span></div>
-                    <div><span class="span_key">翻译后sql: </span><span>{{trans_sql}}</span></div>
+                    <div><span class="span_key">翻译后sql: </span><span>{{ history.trans_sql }}</span></div>
                 </div>
             </div>
         </el-tab-pane>
@@ -68,60 +68,78 @@
     // import axios from "axios";
     //
     // Vue.use(axios);
+    class History {
+        constructor(url, token, sql, need_trans, trans_sql) {
+            this.url = url
+            this.token = token
+            this.sql = sql
+            this.need_trans = need_trans
+            this.trans_sql = trans_sql
+        }
+    }
+
+    class HistoryTable {
+        static  historyTable = []
+
+        static add(rowData) {
+            this.historyTable.push(rowData)
+            this.save()
+        }
+
+        static save() {
+            localStorage.setItem("history_table", JSON.stringify(this.historyTable));
+        }
+
+        static getByIndex(index) {
+            this.historyTable = JSON.parse(localStorage.getItem("history_table"))
+            if (this.historyTable.length === 0) {
+                return new History();
+            }
+            return this.historyTable[index]
+        }
+
+        static get() {
+            let tableStr = localStorage.getItem("history_table") || "[]"
+            this.historyTable = JSON.parse(tableStr)
+            return this.historyTable
+        }
+    }
 
     let t = new Vue(
         {
             el: '#app2',
             data: {
-                form: {},
-                token: '',
-                url: '',
-                need_trans: true,
-                sql: "",
                 kafka: '',
 
                 activeName: "exec",
                 tableData: [],
                 header: [],
-                trans_sql: "",
-                history_hset: {},
-                sql_history: [],
+                sql_history: [
+                    new History()
+                ],
+                history: new History()
             },
             methods: {
                 remember() {
-                    this.sql_history = this.to_history("sql_history", this.sql)
-                    this.to_history("token", this.token)
-                    this.to_history("url", this.url)
-                    this.to_history("need_trans", this.need_trans)
-                },
-                to_history(id, data) {
-                    let history_hset = JSON.parse(localStorage.getItem("history_hset"));
-                    let arr = history_hset.get(id)
-                    if (!arr) {
-                        history_hset[id] = []
-                        arr = history_hset[id]
-                    }
-                    if (!arr.index(data)) {
-                        arr.unshift(data)
-                        arr = arr.splice(0, 6)
-                    }
-                    localStorage.setItem("history_hset", JSON.stringify(history_hset));
-                    return arr
+                    let rowData = new History(this.url, this.token, this.sql, this.need_trans, this.trans_sql);
+                    HistoryTable.add(rowData)
+                    console.log(123)
                 },
                 init() {
-                    this.history_hset = JSON.parse(localStorage.getItem("history_hset") || "{}")
-
-                    this.sql_history = this.history_hset["sql_history"]
-                    this.token = this.history_hset["token"][0]
-                    this.url = this.history_hset["url"][0]
-                    this.need_trans = this.history_hset["need_trans"][0]
+                    this.sql_history = HistoryTable.get()
+                    debugger
+                    let history = this.sql_history[0];
+                    this.$forceUpdate()   ;
+                    this.token = history.token
+                    this.url = history.url
+                    this.need_trans = history.need_trans
                 },
                 trans_sql_func() {
                     this.trans_sql = this.sql
 
                     let tmp_sql = this.sql
                     tmp_sql = tmp_sql.toUpperCase()
-                    while (tmp_sql.indexOf("FROM") != -1) {
+                    while (tmp_sql.indexOf("FROM") !== -1) {
                         let index = tmp_sql.toUpperCase().indexOf("FROM")
                         let old = tmp_sql.substring(index, index + 4)
                         tmp_sql = tmp_sql.replace(old, "fro2")
@@ -135,7 +153,7 @@
                     if (this.need_trans) {
                         data.sql = this.trans_sql
                     }
-                    let res = await this.post(data, this.url)
+                    let res = await this.post(this.url, data)
                     this.tableData = res.data.data
                     let obj = this.tableData[0]
                     this.header = Object.keys(obj)
@@ -147,7 +165,7 @@
                     //然后将列标题放在一个div块中，注意块的宽度一定要100%，否则表格显示不完全
                     return h('span', {class: 'table-head', style: {width: '100%'}}, [column.label])
                 },
-                post(data, url) {
+                post(url, data) {
                     return new axios({
                             method: 'POST',
                             url: url,
@@ -170,6 +188,9 @@
                         }
                     )
                 },
+            },
+            created() {
+                this.init()
             },
             watch: {
                 sql() {

@@ -4,16 +4,16 @@
 @Description:
 """
 
+import time
 import unittest
 
-import time
 from elasticsearch.client import Elasticsearch
 
 
 # elasticsearch中查询类型，term、match、match_all、multi_match、range、bool、boosting等区别
 # https://blog.csdn.net/LeoHan163/article/details/126433158
 
-class Es(unittest.TestCase):
+class TestEs(unittest.TestCase):
 
     def setUp(self) -> None:
         # import os
@@ -21,6 +21,9 @@ class Es(unittest.TestCase):
 
         self.test_index = "test_index_db"
         self.es = Elasticsearch(hosts=['ggok.top'])
+
+    def tear_down(self):
+        self.es.close()
 
     def test_main(self):
         es = self.es
@@ -178,5 +181,17 @@ class Es(unittest.TestCase):
             }
         })
 
-    def tear_down(self):
-        self.es.close()
+# Relational DB          Elasticsearch
+# 数据库(database)         索引(indices)
+# 表(tables)                 types
+# 行(rows)                   documents
+# 字段(columns)              fields
+#
+#
+# method           url地址                                    描述
+# PUT     localhost:9200/索引名称/类型名称/文档id        创建文档（指定文档id）
+# POST    localhost:9200/索引名称/类型名称 创建文档      （随机文档id）
+# POST    localhost:9200/索引名称/类型名称/文档id/_update   修改文档
+# DELETE  localhost:9200/索引名称/类型名称/文档id           删除文档
+# GET     localhost:9200/索引名称/类型名称/文档id           查询文档通过文档id
+# POST    localhost:9200/索引名称/类型名称/_search         查询所有数

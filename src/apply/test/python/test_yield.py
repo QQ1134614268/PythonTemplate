@@ -16,7 +16,7 @@ def test_2(num):
         print("接收:", msg)
 
 
-class TestMysql(unittest.TestCase):
+class TestYield(unittest.TestCase):
     def test_for(self):
         a = fib(30)
         for i in a:

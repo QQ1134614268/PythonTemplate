@@ -11,7 +11,7 @@ import pandas as pd
 from unittest import TestCase
 
 
-class TestAutoCode(TestCase):
+class TestPandas(TestCase):
     def test_Series(self):
         emp = ['01', '02', '03', '04', '05', '06']
         name = ['小乔', '孙策', '刘备', '赵云', '哪吒', '张飞']

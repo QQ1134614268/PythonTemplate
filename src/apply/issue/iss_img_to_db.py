@@ -47,7 +47,7 @@ def traversal_files(path):
             traversal_files(dir1)
 
 
-class TestAutoCode(TestCase):
+class TestImgToDB(TestCase):
 
     def test_run(self):
         env = {
@@ -78,7 +78,7 @@ class TestAutoCode(TestCase):
             home = ""
             for index, img in enumerate(os.listdir(dir1)):
                 if index == 0:
-                    home = Img(name=dir1[dir1.rindex("\\") + 1:], description=img, type_id=1, parent_id=0, img=img)
+                    home = Img(name=dir1[dir1.rindex("\\") + 1:], description=img, type_id=1, parent_id=0, imgUrl=img)
                     localhost_test_session.add(home)
                     localhost_test_session.commit()
                 else:

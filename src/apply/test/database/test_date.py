@@ -45,7 +45,7 @@ def exec_sql(sql):
         print(response)
 
 
-class TestMysql(TestCase):
+class TestMysqlDate(TestCase):
     def setUp(self):
         engine = create_engine(time_zone_url, echo=True)
         # Base.metadata.drop_all(engine)

@@ -8,23 +8,6 @@ from sqlalchemy.orm import sessionmaker
 from config.conf import DEBUG_MODE
 from util.cache_util import to_json_file
 
-env = {
-    "arg": {
-        "port": 3306,
-    },
-    "server": {
-        "cpu_percent": None,
-        "memory_max": None,
-        "memory_free": None,
-        "memory_percent": None,
-        "total_connection": None
-    },
-    "process": {
-        "pid": None,
-        "cpu_percent": None
-    }
-}
-
 
 def get_pid(port):
     for net_info in psutil.net_connections():

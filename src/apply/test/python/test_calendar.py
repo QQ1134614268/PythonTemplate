@@ -22,7 +22,7 @@ class Calendar(Base):
     half_year = Column(INTEGER, comment="半年")
 
 
-class Test(TestCase):
+class TestCalendar(TestCase):
     def test_pre(self):
         ...
         Base.metadata.drop_all(localhost_test_engine)

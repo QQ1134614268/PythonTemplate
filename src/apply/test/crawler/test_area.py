@@ -19,7 +19,7 @@ class Area(Base):
     parent_id = Column(INTEGER, index=True, comment="父级id")
 
 
-class Test(TestCase):
+class TestArea(TestCase):
     def test_pre(self):
         ...
         # Base.metadata.drop_all(localhost_test_engine)

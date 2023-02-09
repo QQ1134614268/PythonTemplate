@@ -9,9 +9,11 @@ from pyspark.sql.functions import concat_ws
 from pyspark.sql.functions import split
 from pyspark.sql.functions import window
 
+from config.kafka_conf import KAFKA_GGOK
+
 if __name__ == "__main__":
     # broker地址
-    bootstrapServers = "192.168.147.128:9092"
+    bootstrapServers = KAFKA_GGOK
     # subscribe：订阅
     subscribeType = "subscribe"
     # 主题
