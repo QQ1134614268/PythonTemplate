@@ -8,7 +8,8 @@ from confluent_kafka.admin import AdminClient, NewTopic
 
 kafka_topic_hik_car = "hik-car"
 kafka_topic_AisTrack = "AisTrack"
-kafka_host_201 = "172.16.6.201:9092"
+kafka_topic_alarm_warn_info = "alarm-warn-info"
+kafka_host_201 = "172.16.6.202:9092"
 kafka_topic_test_0000 = "test_0000"
 
 
