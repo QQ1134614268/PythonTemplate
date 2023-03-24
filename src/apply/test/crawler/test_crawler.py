@@ -8,7 +8,7 @@ class TestCrawler(unittest.TestCase):
 
     def test_is_holiday(self):
 
-        url = f"http://api.goseek.cn/Tools/holiday?date={time.strftime('%Y%m%d', time.localtime(time.time()))}"
+        url = f"https://api.goseek.cn/Tools/holiday?date={time.strftime('%Y%m%d', time.localtime(time.time()))}"
         res = request.urlopen(url)
         data = res.read()
         data = str(data, encoding="utf-8")

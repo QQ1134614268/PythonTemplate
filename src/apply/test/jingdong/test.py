@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-from appium import webdriver
 from time import sleep
+
+from appium import webdriver
 
 
 def login():
     try:
-        desired_caps = {}
-        desired_caps['platformName'] = 'Android'
-        desired_caps['platformVersion'] = '6.0.1'
-        desired_caps['deviceName'] = 'Galaxy S6'
-        desired_caps['appPackage'] = 'dji.go.v4'
-        desired_caps['appActivity'] = 'dji.pilot.main.activity.DJILauncherActivity'
+        desired_caps = {
+            'platformName': 'Android',
+            'platformVersion': '6.0.1',
+            'deviceName': 'Galaxy S6',
+            'appPackage': 'dji.go.v4',
+            'appActivity': 'dji.pilot.main.activity.DJILauncherActivity'
+        }
         driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
 
         driver.find_element_by_name('我').click()
