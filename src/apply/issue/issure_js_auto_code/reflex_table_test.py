@@ -22,17 +22,17 @@ class RightManage(Base):
 
 
 class Filed:
-    def __init__(self, Field, Type, Collation, Null, Default, Extra, Privilege, Key, Comment):
-        self.Field = Field
-        self.Type = Type
-        self.Collation = Collation
-        self.Null = Null
-        self.Key = Key
-        self.Default = Default
-        self.Extra = Extra
-        self.Privilege = Privilege
-        self.Key = Key
-        self.Comment = Comment
+    def __init__(self, field, type, collation, null, default, extra, privilege, key, comment):
+        self.field = field
+        self.type = type
+        self.collation = collation
+        self.null = null
+        self.key = key
+        self.default = default
+        self.extra = extra
+        self.privilege = privilege
+        self.key = key
+        self.comment = comment
 
 
 class TestReflexTable(unittest.TestCase):
@@ -49,10 +49,11 @@ class TestReflexTable(unittest.TestCase):
         data = {}
         for it in ret:
             vo = Filed(*it)
-            data[vo.Field] = self.get_data(vo.Type)
+            data[vo.field] = self.get_data(vo.type)
         print(str(data).replace("'", '"'))
 
-    def get_data(self, f_type):
+    @staticmethod
+    def get_data(f_type):
         all_list = re.findall(r"\d+", f_type)
         length = 4
         if all_list:

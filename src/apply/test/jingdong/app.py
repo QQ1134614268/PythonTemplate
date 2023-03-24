@@ -32,7 +32,7 @@ driver.add_cookie({'name': 'foo', 'value': 'bar'})
 print("f all ")
 driver.get_cookies()
 print(str(driver.get_cookies()))
-driver.add_cookie({'name': 'BAIDUID', 'value': 'AAAAAAAAAAAAAA:FG=1'})
+driver.add_cookie({'name': 'BAIDUID', 'value': 'AAAA:FG=1'})
 print("add   BAIDUID ")
 print(str(driver.get_cookie("BAIDUID")))
 print("f add all ")
@@ -56,8 +56,8 @@ try:
     buttons = driver.find_element_by_id(u"com.jd.lib.login:id/pg").send_keys("XXX")
     sleep(3)
     buttons = driver.find_element_by_name(u"登录").click()
-except:
-    pass
+except Exception as e:
+    print(e)
 sleep(3)
 buttons = driver.find_element_by_id("com.jingdong.app.mall:id/bik").click()
 # 搜索

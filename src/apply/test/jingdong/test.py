@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
-from appium import webdriver
 from time import sleep
+
+from appium import webdriver
 
 
 def login():
+    desired_caps = {'platformName': 'Android', 'platformVersion': '6.0.1', 'deviceName': 'Galaxy S6',
+                    'appPackage': 'dji.go.v4', 'appActivity': 'dji.pilot.main.activity.DJILauncherActivity'}
+    driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
     try:
-        desired_caps = {}
-        desired_caps['platformName'] = 'Android'
-        desired_caps['platformVersion'] = '6.0.1'
-        desired_caps['deviceName'] = 'Galaxy S6'
-        desired_caps['appPackage'] = 'dji.go.v4'
-        desired_caps['appActivity'] = 'dji.pilot.main.activity.DJILauncherActivity'
-        driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
-
         driver.find_element_by_name('我').click()
         driver.find_element_by_name('登录').click()
         driver.find_element_by_name('请输入注册邮箱').send_keys('account')
@@ -33,7 +29,7 @@ def login():
 
 
 if __name__ == '__main__':
-    if (True == login()):
+    if login():
         print("该条用例执行成功")
     else:
         print("该条用例执行失败")

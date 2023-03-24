@@ -6,8 +6,8 @@ BEGIN
     DECLARE count INT DEFAULT 1;
     set @insert_sql =
             "INSERT INTO `performance_user_t`(id, name, sex, create_time, update_time, create_by, update_by) value ";
-    set @exesql = "";
-    set @exedata = "";
+    set @exec_sql = "";
+    set @exec_data = "";
 
     while count < num
         do
@@ -20,24 +20,24 @@ BEGIN
             set i = i + 1;
             if i % 1000 = 0
             then
-                set @exedata = SUBSTRING(@exedata, 2);
-                set @exesql = concat("insert into csvimp(name,age,sex) values ", @exedata);
-                prepare stmt from @exesql;
+                set @exec_data = SUBSTRING(@exec_data, 2);
+                set @exec_sql = concat("insert into csvimp(name,age,sex) values ", @exec_data);
+                prepare stmt from @exec_sql;
                 execute stmt;
                 DEALLOCATE prepare stmt;
-                set @exedata = "";
+                set @exec_data = "";
             end if;
         end while;
 
-    if length(@exedata) > 0
+    if length(@exec_data) > 0
     then
-        set @exedata = SUBSTRING(@exedata, 2);
-        set @exesql = concat("insert into csvimp(name,age,sex) values ", @exedata);
+        set @exec_data = SUBSTRING(@exec_data, 2);
+        set @exec_sql = concat("insert into csvimp(name,age,sex) values ", @exec_data);
 
         /*
-        set @exesql = concat("select \"", @exesql, "\" from dual");
+        set @exec_sql = concat("select \"", @exesql, "\" from dual");
         */
-        prepare stmt from @exesql;
+        prepare stmt from @exec_sql;
         execute stmt;
         DEALLOCATE prepare stmt;
     end if;

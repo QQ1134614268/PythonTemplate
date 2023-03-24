@@ -25,7 +25,7 @@ ORACLE_NAME = "system"
 ORACLE_PASSWORD = "oracle"
 ORACLE_IP = "127.0.0.1"
 ORACLE_PORT = "15210"
-ORACLE_DB = "helowin"
+ORACLE_DB = "helloWin"
 oracle_url = f"oracle+cx_oracle://{quote(ORACLE_NAME)}:{quote(ORACLE_PASSWORD)}@{ORACLE_IP}:{ORACLE_PORT}/?service_name={ORACLE_DB}"
 oracle_engine = create_engine(oracle_url)
 time_zone = "%2B10:00"

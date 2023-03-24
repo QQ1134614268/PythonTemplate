@@ -4,7 +4,6 @@
 @Description:
 """
 
-import json
 import os
 import subprocess
 from datetime import datetime
@@ -49,18 +48,18 @@ def get_proc(pat: str = None):
         process.memory_percent()
         try:
             cmdline = " ".join(process.cmdline())
+            if pat:
+                if pat in cmdline:
+                    process_list.append(PidInfo(
+                        pid=process.pid, cmdline=cmdline, create_time=datetime.now(),
+                    ))
+            else:
+                if pat in cmdline:
+                    process_list.append(PidInfo(
+                        pid=process.pid, cmdline=cmdline, create_time=datetime.now(),
+                    ))
         except psutil.AccessDenied as e:
             print(e)
-        if pat:
-            if pat in cmdline:
-                process_list.append(PidInfo(
-                    pid=process.pid, cmdline=cmdline, create_time=datetime.now(),
-                ))
-        else:
-            if pat in cmdline:
-                process_list.append(PidInfo(
-                    pid=process.pid, cmdline=cmdline, create_time=datetime.now(),
-                ))
     return process_list
 
 
@@ -85,7 +84,6 @@ def get_stack(pid):
     # num_threads
     # io_counters
     # memory_maps
-    pid = 4260
     cmd = f"pstack {pid}"
     # res = os.system(cmd)
     # print(res)

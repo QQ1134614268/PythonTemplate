@@ -2,8 +2,8 @@ import datetime
 import random
 from unittest import TestCase
 
-from apply.database.mysql_性能.models import User, Base, Order, OrderInfo, Goods
-from apply.database.mysql_性能.util import get_id
+from apply.test.test_mysql.performance_model.models import User, Base, Order, OrderInfo, Goods
+from apply.test.test_mysql.performance_model.util import get_id
 from config.db_conf import localhost_test_engine, localhost_test_session
 
 
@@ -116,7 +116,8 @@ class TestMysql(TestCase):
         cursor.callproc('insert_performance_user_t', (10000000,))
         connection.commit()
 
-    def _table_arg(self, _id=None, create_time=None, create_by=None):
+    @staticmethod
+    def _table_arg(_id=None, create_time=None, create_by=None):
         return {
             "id": _id,
             "create_time": create_time,

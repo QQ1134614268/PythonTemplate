@@ -12,7 +12,7 @@ from config.kafka_conf import KAFKA_GGOK
 
 producer = KafkaProducer(bootstrap_servers=KAFKA_GGOK)
 
-zhandian = ['火车东站', '火车南站', '火车北站']
+site = ['火车东站', '火车南站', '火车北站']
 
 for i in range(10000):
     zhou1 = random.randint(10, 15)
@@ -22,7 +22,7 @@ for i in range(10000):
     zhou5 = random.randint(60, 70)
     zhou6 = random.randint(70, 90)
     zhou7 = random.randint(80, 100)
-    che_zhan = random.choice(zhandian)
+    che_zhan = random.choice(site)
     s = f"{che_zhan},{zhou1},{zhou2},{zhou3},{zhou4},{zhou5},{zhou6},{zhou7}"
     print(s)
     producer.send('bigdata', bytes(s, encoding="utf8"))

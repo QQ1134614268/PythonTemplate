@@ -51,9 +51,9 @@ class TestAutoCode(TestCase):
         data = {
             "list": rows
         }
-        Form.to_file(data, f"{table}.vue".format(table), os.path.dirname(__file__), "templates/vue.template")
+        Form.to_file(data, f"{table}.vue", os.path.dirname(__file__), "templates/vue.template")
 
-    def test_run_all(self):
+    def test_run_vue_js(self):
         tables = Form.get_tables("oa")
         for table in tables:
             table_name = table["TABLE_NAME"]
@@ -80,20 +80,18 @@ class TestAutoCode(TestCase):
         data = {
             "list": table_infos
         }
-        Form.to_file(data, "tmp/routes.js", "templates/routes.template")
+        Form.to_file(data, "tmp/routes.js", os.path.dirname(__file__), "templates/routes.template")
 
     def test_run_config_js(self):
         tables = Form.get_tables("oa")
         table_infos = []
         for table in tables:
             table_name = table["TABLE_NAME"]
-            table_upper_caml = to_upper_camel(table_name)
             table_infos.append({
-                "tableUpperCaml": table_upper_caml,
                 "tableLowerCaml": to_lower_camel(table_name),
                 "tableConst": to_snake(table_name).upper(),
             })
         data = {
             "list": table_infos
         }
-        Form.to_file(data, "tmp/config.js", "templates/config.template")
+        Form.to_file(data, "tmp/config.js", os.path.dirname(__file__), "templates/config.template")

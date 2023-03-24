@@ -23,8 +23,8 @@ def get_series(url_file, series_name, series_path):
             url = url.replace("\n", "")
             if not url.endswith("m3u8") or not url.startswith("http"):
                 continue
-            videoPath = os.path.join(series_path, series_name + "_" + str(count) + ".ts")
-            get_video(url, videoPath)
+            video_path = os.path.join(series_path, series_name + "_" + str(count) + ".ts")
+            get_video(url, video_path)
 
 
 def get_video(m3u6_url, file_path):

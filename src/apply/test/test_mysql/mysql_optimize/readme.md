@@ -10,16 +10,16 @@
     
 2. 子查询
 
-3. order by 
+3. order by
 
 4. group by
 
 sql_no_cache
 
 
-优化策略 
+优化策略:
    1. from 小表驱动 
    2. 索引
    3. 子查询
    4. group by 后 join
-   5. 先limit
+   5. 连表分页, 先limit

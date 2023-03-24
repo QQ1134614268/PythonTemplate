@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Enum, MetaData, String, Text, PrimaryKeyConstraint, Integer, DateTime
+from sqlalchemy import Column, Text, Integer, DateTime
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -17,12 +17,12 @@ class BaseTable(Base):
 
 class PidInfo(BaseTable):
     __tablename__ = 'pid_info'
-    pid = Column(String(64))
+    pid = Column(Integer)
     cmdline = Column(Text)
 
 
 class NetInfo(BaseTable):
     __tablename__ = 'net_info'
-    pid = Column(String(64))
+    pid = Column(Integer)
     laddr = Column(Text)
     raddr = Column(Text)

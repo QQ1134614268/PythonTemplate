@@ -14,7 +14,8 @@ from ddt import ddt, data, unpack
 @ddt  # ddt是用来装饰类的，需要与data装饰器一起使用
 class TestDdt(unittest.TestCase):
 
-    def add(self, num1, num3):
+    @staticmethod
+    def add(num1, num3):
         return num1 + num3
 
     def test(self):

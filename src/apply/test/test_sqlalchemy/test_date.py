@@ -35,23 +35,13 @@ class TestDate(BaseTable):
     date_time_str = Column(String)
 
 
-def exec_sql(sql):
-    response = session.execute(sql)
-    try:
-        res = [dict(zip(item.keys(), item)) for item in response]
-        print(res)
-        return res
-    except:
-        print(response)
-
-
 class TestMysqlDate(TestCase):
+
     def setUp(self):
         engine = create_engine(time_zone_url, echo=True)
         # Base.metadata.drop_all(engine)
         # Base.metadata.create_all(engine)
-        global session;
-        session = sessionmaker(bind=engine)()
+        self.session = sessionmaker(bind=engine)()
         # exec_sql("show VARIABLES like '%time_zone%'; ")
         # exec_sql("set time_zone = '+03:00';")
         # exec_sql("show VARIABLES like '%time_zone%'; ")
@@ -64,17 +54,26 @@ class TestMysqlDate(TestCase):
         # mysql 默认 SYSTEM
 
         new_time = datetime(2021, 1, 1, 12, 00, 00)
-        session.add(
+        self.session.add(
             TestDate(
                 date=datetime.now(),
                 time=datetime.now(),
-                datetime=datetime.now(),
+                date_time=datetime.now(),
                 date_time_str="2000-01-01 00:00:00",
             )
         )
-        session.commit()
+        self.session.commit()
         # sql2 = "set time_zone = '+12:00';"
         # exec_sql(sql2)
 
-        vos = session.query(TestDate).all()
-        print()
+        vos = self.session.query(TestDate).all()
+        print(vos)
+
+    def exec_sql(self, sql):
+        response = self.session.execute(sql)
+        try:
+            res = [dict(zip(item.keys(), item)) for item in response]
+            print(res)
+            return res
+        except Exception as e:
+            print(e)

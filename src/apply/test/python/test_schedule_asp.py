@@ -1,12 +1,12 @@
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from pytz import timezone
-from apscheduler.schedulers.background import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
-
 import unittest
 
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.schedulers.background import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
+from pytz import timezone
 
-class Pc(unittest.TestCase):
+
+class TestScheduleAsp(unittest.TestCase):
     def test1(self):
         executors = {
             'default': ThreadPoolExecutor(10),
@@ -20,8 +20,8 @@ class Pc(unittest.TestCase):
         # 实例调度器对象
         scheduler = BlockingScheduler(executors=executors, job_defaults=job_defaults,
                                       timezone=timezone('Asia/Shanghai'))
-        # 每分钟第30秒执行一次
-        scheduler.add_job(func=Pc.job, trigger=CronTrigger(second=30))  # trigger = ``date``, ``interval`` or ``cron``
+        # 每分钟第30秒执行一次 # trigger = ``date``, ``interval`` or ``cron``
+        scheduler.add_job(func=TestScheduleAsp.job, trigger=CronTrigger(second=30))
 
         print("crontab run~")
         scheduler.start()

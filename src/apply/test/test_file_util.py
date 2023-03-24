@@ -18,14 +18,16 @@ class XmindVO:
 
 
 class User:
-    def __init__(self, name=None, birth_day=None, address_list=[]):
+    def __init__(self, name=None, birth_day=None, address_list=None):
+        if address_list is None:
+            address_list = []
         self.name = name
         self.birth_day = birth_day
         self.address_list = address_list
 
 
 class Address:
-    def __init__(self, province=None, city=None, county=None, info=None, ):
+    def __init__(self, province=None, city=None, county=None, info=None):
         self.province = province
         self.city = city
         self.county = county

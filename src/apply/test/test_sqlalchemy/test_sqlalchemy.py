@@ -5,12 +5,12 @@
 """
 from unittest import TestCase
 
-from sqlalchemy import Column, String, Integer, create_engine, Boolean
+from sqlalchemy import Column, String, Integer, create_engine, Boolean, func
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from config.db_conf import localhost_test_url
+from config.db_conf import localhost_test_url, localhost_test_session
 
 Base = declarative_base()
 
@@ -52,3 +52,12 @@ class TestSqlalchemy(TestCase):
         res = self.engine.execute(sql, {"id": 1, "name": "test"})
         result2 = res.fetchall()  # 获取全部
         print(result2)
+
+    def test_func(self):
+        res = localhost_test_session.query(TestUser).order_by(func.desc(TestUser.id)).first()
+        print(res)
+        res = localhost_test_session.query(func.max(TestUser.id), func.min(TestUser.id)).scalar()
+        print(res)
+
+        # .limit(1)
+        # .first()

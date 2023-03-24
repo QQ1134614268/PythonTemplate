@@ -15,7 +15,8 @@ class BaiduFanyi:
         response = requests.post(url, data=data, headers=self.headers)
         return json.loads(response.content.decode())
 
-    def get_ret(self, dict_response):  # 提取翻译的结果
+    @staticmethod
+    def get_ret(dict_response):  # 提取翻译的结果
         ret = dict_response["trans"][0]["dst"]
         print("result is :", ret)
 
@@ -36,6 +37,6 @@ class BaiduFanyi:
 
 
 if __name__ == '__main__':
-    trans_str = input("请输入翻译内容:")
-    baidu_fanyi = BaiduFanyi(trans_str)
+    content = input("请输入翻译内容:")
+    baidu_fanyi = BaiduFanyi(content)
     baidu_fanyi.run()

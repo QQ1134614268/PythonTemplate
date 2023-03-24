@@ -18,6 +18,7 @@ class TestAutoCode(TestCase):
             MysqlColumns.TABLE_SCHEMA == "oa",
             MysqlColumns.TABLE_NAME == "user"
         ).all()
+        print(vos)
 
         # Base.metadata.create_all(localhost_test_engine)
         # Base.metadata.drop_all(localhost_test_engine)

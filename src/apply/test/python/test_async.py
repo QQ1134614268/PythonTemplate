@@ -46,5 +46,5 @@ class TestAsync(unittest.TestCase):
     def test_loop_task(self):
         # 异步
         loop = asyncio.get_event_loop()
-        tasks = [test_a() for i in range(5)]
+        tasks = [test_a() for _ in range(5)]
         loop.run_until_complete(asyncio.wait(tasks))

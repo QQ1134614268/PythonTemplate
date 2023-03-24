@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <script type="text/javascript"
@@ -9,8 +9,8 @@
     </script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function () {
-            namespace = "/wechat";
-            var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+            let  namespace = "/wechat";
+            let socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
             socket.emit("message", {"data": "zhangsan"});
             socket.emit("message", {"data": "666"});
             socket.emit("message_response", {"data": "666"});
@@ -34,6 +34,7 @@
             // });
         });
     </script>
+    <title></title>
 </head>
 
 <body>

@@ -1,4 +1,4 @@
- # loc的意思是 label-location based indexer for selection by label。
+# loc的意思是 label-location based indexer for selection by label。
 # iloc的意思是integer-location based indexing for selection by position
 # 这两种不同的索引暴露了Series的本质，就是pandas对象本质上是字典和列表的混合，这点很重要
 
@@ -9,3 +9,5 @@
   empty, 
   loc iloc at iat
   ndim shape size
+
+#todo 整理test_numpy, test_pandas

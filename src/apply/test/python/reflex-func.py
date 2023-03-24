@@ -12,8 +12,8 @@ def test_get_func_name():
 
 def my_func():
     lis = []
-    dic = dict()
     res = lis + ['get', 'func', 'vars']
+    print(res)
     words = "Life is short, You need Python!"
     print(words)
 

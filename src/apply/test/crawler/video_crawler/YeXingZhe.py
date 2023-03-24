@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 
-import requests
 import time
+
+import requests
 from requests.adapters import HTTPAdapter
 
 
@@ -33,8 +34,8 @@ def get_video():
             with open("{}.ts".format(count), 'ab') as f:
                 f.write(res.content)
                 f.flush()
-        except Exception:
-            print(video_url)
+        except Exception as e:
+            print(video_url, e)
         count += 1
 
 
@@ -48,7 +49,8 @@ def retry_get(url, timeout, headers, retry_count=3):
             return res
         else:
             return retry_get(url, timeout, headers, retry_count - 1)
-    except Exception:
+    except Exception as e:
+        print(e)
         return retry_get(url, timeout, headers, retry_count - 1)
 
 

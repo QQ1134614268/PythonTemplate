@@ -30,7 +30,6 @@ FROM (
            and data_label = 0
          GROUP BY scr.fund_id
      ) t3 ON t1.fund_id = t3.fund_id
-WHERE 1 = 1
 ORDER BY sum_fund_id_rz_balance DESC
 LIMIT 10
 

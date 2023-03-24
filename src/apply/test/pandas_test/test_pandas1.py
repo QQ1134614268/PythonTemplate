@@ -3,8 +3,11 @@ import pandas as pd
 from pandas import Series, DataFrame
 
 ser = Series([1, 2, 3])
+print(ser)
 ser = Series(np.array([1, 2, 3]))
+print(ser)
 ser = Series({"a": 1, "b": 1})
+print(ser)
 ser = Series({"a": 1, "b": 1}, index=["a", "b", "d"])  # index 筛选,不补全
 
 print({
@@ -46,21 +49,24 @@ print({
     "df7.iloc[0:2]": df7.iloc[0:2],
 })
 
-df = pd.DataFrame(np.random.random(4, 5), columns=list("ABCDE"), index=range(1, 5))
+df = pd.DataFrame(np.random.random((4, 5)), columns=list("ABCDE"), index=range(1, 5))
+print(df)
 
 df.drop(["A"], axis=1)  # 选取 , inplace=True
 df.drop(1, inplace=True)  # inplace=True 原地改变
 ret = df.pop('B')  # 原地改变
+print(ret)
 df["F"] = "f"
 df["G"] = df["c"][:2]  # NaN 补全
 df.insert(0, "i0", pd.Series([1, 2]))  # 插入
 
 df = pd.DataFrame(np.random.randn(8, 4), index=pd.date_range('1/1/2022', periods=8), columns=list("ABCD"))
 index = df.index  # 时间类型index, 不可赋值
-index[1:3]
+r = index[1:3]
+print(r)
 index.delete([0, 2])
 index.drop(2)
-index.insert((1, "k5"))
+index.insert(1, "k5")
 
 index_a = pd.Index([1, 2, 3])
 index_b = pd.Index([2, 3, 4])
@@ -70,12 +76,17 @@ index_a.difference(index_b)  # 差集
 index_a.intersection(index_b)  # 交集
 
 df = pd.DataFrame(np.random.randn(8, 4), index=pd.date_range('1/1/2022', periods=8), columns=list("ABCD"))
-df.loc['2022-01-01']
-df.loc['2022-01-01': '2022-01-04', ['A', 'C']]
-df.loc[df['A'] > 0]  # 选取 filter condition
+r = df.loc['2022-01-01']
+print(r)
+r = df.loc['2022-01-01': '2022-01-04', ['A', 'C']]
+print(r)
+r = df.loc[df['A'] > 0]  # 选取 filter condition
+print(r)
 
-df.iloc[0]
-df.iloc[[0, 4], 1:3]
+r = df.iloc[0]
+print(r)
+r = df.iloc[[0, 4], 1:3]
+print(r)
 # df.iloc[df['A']>0]
 
 # 移动窗口 分组, 组内函数 count
@@ -88,7 +99,9 @@ df.cov()
 
 s1 = Series(np.random.randn(10), index=pd.date_range("1/1/2022", 10))
 ret = s1.cumsum().rolling(window=3)
-ret.mean()[2:5]
+print(ret)
+print(ret.mean()[2:5])
+
 
 pd.DataFrame(np.random.randn(10, 4), index=pd.date_range("1/1/2022", periods=10), columns=list("ABCD"))
 

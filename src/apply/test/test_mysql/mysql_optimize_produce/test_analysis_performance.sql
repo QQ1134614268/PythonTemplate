@@ -23,8 +23,6 @@ LEFT JOIN performance_order_t t1 on t1.user_id=performance_user_t.id
 LEFT JOIN performance_order_info_t on performance_order_info_t.order_id=t1.id
 LIMIT 100;
 
-
-
 EXPLAIN SELECT * FROM (SELECT * from performance_user_t LIMIT 10)t1
 LEFT JOIN performance_order_t on performance_order_t.user_id=t1.id
 LEFT JOIN performance_order_info_t on performance_order_info_t.order_id=performance_order_t.id;

@@ -64,8 +64,11 @@ SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三"},{"name":"李�
 SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三"},{"name":"李四"}], "info": {"money":100}}', '$.name');
 SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三"},{"name":"李四"}], "info": {"money":100}}', '$**.name');
 SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*]');
-SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*].book');
-SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*].book[*]');
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*].book'); # 嵌套数组
+SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1","mysql"]},{"name":"李四","book": ["book1","mysql"]}], "info": {"money":100}}', '$.auth[*].book[*]'); # 取出值
+
+# book 是对象; '$.auth[*].book[*].size' # 异常
+SELECT JSON_EXTRACT('{"auth":[{"book":{"size":[1,2,3]}}]}', '$.auth[*].book.size'), JSON_EXTRACT('{"auth":[{"book":{"size":[1,2,3]}}]}', '$.auth[*].book.size[*]') ;
 -- ‘$.*’	返回全部key的value
 -- ‘$.name’	返回key=”name”的数据
 -- ‘$**.name’	返回所有最底层key=”name”的数据

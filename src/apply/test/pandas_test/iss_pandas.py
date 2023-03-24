@@ -58,7 +58,7 @@ class TestPandas(unittest.TestCase):
         print(res)
         print(index)
 
-    def test_filter_康健街(self):
+    def test_filter_3(self):
         in_file = r'内江帧码-清洗.csv'
         df_iterator = pd.read_csv(in_file, chunksize=100000)
         out_file = r'内江帧码-康健街.csv'

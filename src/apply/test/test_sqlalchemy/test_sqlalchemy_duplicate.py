@@ -30,7 +30,7 @@ class TestTable(Base):
 # session 参数语法 %(id)s
 # connection
 # cursors
-class TestMysql(unittest.TestCase):
+class TestSqlalchemyDuplicate(unittest.TestCase):
 
     def setUp(self):
         # 创建对象的基类:
@@ -52,7 +52,7 @@ class TestMysql(unittest.TestCase):
         self.session.commit()
 
     def test_engine(self):
-        sql2 = '''INSERT INTO test_t(id,name2)
+        sql2 = '''INSERT INTO test_t(id, name2)
                    VALUES (%(id)s,%(name2)s) 
                    ON DUPLICATE KEY UPDATE name2 = VALUES(name2)
                 '''
@@ -64,25 +64,25 @@ class TestMysql(unittest.TestCase):
         sql1 = '''INSERT INTO test_t(id,name2)VALUES (:id,:name2) ON DUPLICATE KEY UPDATE name2 = VALUES(name2)'''
         sql2 = '''INSERT INTO test_t(id,name2)VALUES (%(id)s,%(name2)s) ON DUPLICATE KEY UPDATE name2 = VALUES(name2)'''
 
-        RE_INSERT_VALUES = re.compile(
+        re_insert_values = re.compile(
             r"\s*((?:INSERT|REPLACE)\b.+\bVALUES?\s*)" +
             r"(\(\s*(?:%s|%\(.+\)s)\s*(?:,\s*(?:%s|%\(.+\)s)\s*)*\))" +
             r"(\s*(?:ON DUPLICATE.*)?);?\s*\Z",
             re.IGNORECASE | re.DOTALL)
         # sql执行  批量 或者循环
         # venv/Lib/site-packages/pymysql/cursors.py:193
-        m = RE_INSERT_VALUES.match(sql1)  # 匹配简单表达式
+        m = re_insert_values.match(sql1)  # 匹配简单表达式
         print(bool(m))
-        m = RE_INSERT_VALUES.match(sql2)  # 不匹配,mysql循环执行插入
+        m = re_insert_values.match(sql2)  # 不匹配,mysql循环执行插入
         print(bool(m))
 
     def test_model0(self):
         # 参考: https://stackoverflow.com/questions/6611563/sqlalchemy-on-duplicate-key-update
         @compiles(Insert)
-        def append_string(insert, compiler, **kw):
-            s = compiler.visit_insert(insert, **kw)
-            if 'append_string' in insert.kwargs:
-                return s + " " + insert.kwargs['append_string']
+        def append_string(insert_stmt, compiler, **kw):
+            s = compiler.visit_insert(insert_stmt, **kw)
+            if 'append_string' in insert_stmt.kwargs:
+                return s + " " + insert_stmt.kwargs['append_string']
             return s
 
         data = [{'id': 1, "name2": 363}, {'id': 2, "name2": 3}]

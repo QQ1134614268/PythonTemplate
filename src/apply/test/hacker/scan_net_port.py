@@ -45,8 +45,8 @@ class TestHacker(unittest.TestCase):
                     rvc = requests.get(net_path, headers=headers, timeout=8)
                     if rvc.status_code == 200:
                         print('[*]', net_path)
-                except:
-                    print('[-]远程主机强迫关闭了一个现有的连接')
+                except Exception as e:
+                    print('[-]远程主机强迫关闭了一个现有的连接',e)
 
     # 端口扫描
     @staticmethod

@@ -12,20 +12,20 @@
 </div>
 </body>
 <script type="application/javascript">
-    var ws = null;
+    let ws = null;
     ws = new WebSocket("ws://127.0.0.1:80/socket_api/websocket/1");
     ws.onmessage = function (messageEvent) {
         console.log(messageEvent.data);
-        var ptag = document.createElement("h1");
-        var message = JSON.parse(messageEvent.data);
-        ptag.innerText = message.from_user + " : " + message.message;
-        document.getElementById("chat_list").appendChild(ptag);
+        let pTag = document.createElement("h1");
+        let message = JSON.parse(messageEvent.data);
+        pTag.innerText = message.from_user + " : " + message.message;
+        document.getElementById("chat_list").appendChild(pTag);
     };
 
 
     function send() {
-        var message = document.getElementById("send_str").value;
-        var send_str = {
+        let message = document.getElementById("send_str").value;
+        let send_str = {
             route: "/user/chat",
             data: {
                 id: 1,
@@ -33,13 +33,13 @@
                 message: message
             }
         };
-        var json_send_str = JSON.stringify(send_str);
+        let json_send_str = JSON.stringify(send_str);
 
         console.log(json_send_str);
         ws.send(json_send_str);
 
-        var ptag = document.createElement("h6");
-        ptag.innerText = message;
-        document.getElementById("chat_list").appendChild(ptag);
+        let pTag = document.createElement("h6");
+        pTag.innerText = message;
+        document.getElementById("chat_list").appendChild(pTag);
     }
 </script>
