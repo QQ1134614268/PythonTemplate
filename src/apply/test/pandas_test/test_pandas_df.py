@@ -88,6 +88,7 @@ class TestPandas(TestCase):
         print("apply----", df["a"].apply(lambda x: x + 5))
         print("窗口函数", df.cumsum().rolling(window=3).mean())
         # print("窗口函数", s1.rolling(window=3).apply(lambda x: x + 1)) # todo bug
+        print("# DataFrame 协方差", df.cov())
 
         print("group-head-----", df.groupby('b').describe())
         print(
@@ -103,4 +104,3 @@ class TestPandas(TestCase):
                 "transform": df.groupby('b').transform('mean'),
             }, sep='\n'
         )
-        print("# DataFrame 协方差", df.cov())
