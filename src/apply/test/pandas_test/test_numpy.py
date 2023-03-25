@@ -4,7 +4,21 @@ import numpy as np
 
 
 class TestNumpy(TestCase):
-    def test_Series(self):
+    def test_np_create(self):
+        print(
+            {
+                "np.array": np.array([[1, 2, 3], [4, 5, 6]]),
+                "np.empty": np.empty((2, 3)),
+                "np.ones": np.ones(3),
+                "np.random": np.random.random(size=(2, 3)),
+                "np.linspace": np.linspace(1, 10, 5),  # 1-10之间 取5个点
+                "np.full": np.full((2, 3), 3),
+                "np.eye": np.eye(3),
+                "np.ones_like": np.ones_like(3),
+            }
+        )
+
+    def test_np_prop(self):
         arr = np.arange(0, 12, 1)
         print({
             "arr": arr,
@@ -18,42 +32,30 @@ class TestNumpy(TestCase):
             "arr[[3,2,4]": arr[[3, 2, 4]],  # 选取
         }, sep="\n")
 
-        arr = np.array([[1, 2, 3], [4, 5, 6]])
-        print(arr)
-        arr = np.empty((2, 3))
-        print(arr)
-        arr = np.ones(3)
-        print(arr)
-        arr = np.random.random((2, 3))
-        print(arr)
-        arr = np.linspace(1, 10, 5)  # 1-10之间 取5个点
-        print(arr)
-        arr = np.full((2, 3), 5)  # 1-10之间 取5个点
-        print(arr)
-        # arr = np.ones_like((2, 3))
-        arr = np.eye(3)
-        print(arr)
-        arr = np.arange(0, 12, 1).reshape((3, 2, 2))  # .flat() 转一维
-        # 选取
+    def test_np_select(self):
+        arr = np.arange(0, 12, 1).reshape((3, 2, 2))
+        # 选取  # 下标 条件 选取
         print(
             {
                 "arr": arr,
-                "arr[1][1][0]": arr[1][1][0],
-                "arr[1, 1, 0]": arr[1, 1, 0],
-                "arr[arr < 1]": arr[arr < 1],  # 选取
-                "arr[[1, 3, 2], [2, 1, 1]]": arr[[1, 3, 2], [2, 1, 1]]  # 选取
+                "arr[1]": arr[1],
+                "arr[1][1]": arr[1][1],
+                "arr[1][1][0]": arr[1][1][1],
+                "arr[1, 1, 1]": arr[1, 1, 1],
+                "arr[arr < 6]": arr[arr < 6],  # 选取
+                "arr[[1, 1, 0], [1, 1, 1]]": arr[[1, 1, 0], [1, 1, 1]]  # 选取
             }
-        )  # 下标 条件 选取
+        )
 
+    def test_np_operation(self):
+        arr = np.arange(0, 12, 1).reshape(3, 4)  #
         #  flat 迭代
         for item in arr.flat:
             print(item)
 
         # 加减乘除
-        arr = np.arange(0, 12, 2).reshape(3, 2)  #
-        arr2 = np.ones((3, 2))
-        print(arr2)
-        arr = arr + 1
-        print(arr)
-        arr = arr + arr2
-        print(arr)
+        print({
+            "+ 1": arr + 1,
+            "+ self": arr + arr,
+            "* 3": arr * 3,
+        })

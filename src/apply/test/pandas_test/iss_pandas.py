@@ -41,14 +41,14 @@ class TestPandas(unittest.TestCase):
             if not df.empty:
                 print()
             if index == 0:  # % 10000  _{index // 10000}
-                out_file = f'内江帧码-清洗.csv'
+                out_file = f'小江帧码-清洗.csv'
                 df.to_csv(out_file, index=False)
             else:
                 df.to_csv(out_file, mode='a', index=False, header=False)
 
     def test_assert(self):
         index = 0
-        in_file = r'内江帧码-清洗.csv'
+        in_file = r'小江帧码-清洗.csv'
         res = set()
         with open(in_file, 'r', encoding="utf-8") as f:
             for index, line in enumerate(f):
@@ -59,9 +59,9 @@ class TestPandas(unittest.TestCase):
         print(index)
 
     def test_filter_3(self):
-        in_file = r'内江帧码-清洗.csv'
+        in_file = r'小江帧码-清洗.csv'
         df_iterator = pd.read_csv(in_file, chunksize=100000)
-        out_file = r'内江帧码-康健街.csv'
+        out_file = r'小江帧码-康健街.csv'
         names = {
             '康健街实验幼儿园城南园借新建天网',
         }  # '汉安大道与西林大道交汇处（两人脸）',
@@ -75,9 +75,9 @@ class TestPandas(unittest.TestCase):
                 df.to_csv(out_file, mode='a', index=False, header=False)
 
     def test_base64(self):
-        in_file = r'内江帧码-康健街2.csv'
+        in_file = r'小江帧码-康健街2.csv'
         df = pd.read_csv(in_file, dtype=str)
         df["imsi"] = df['imsi'].apply(lambda x: base64.b64encode(x.encode("utf-8")).decode(encoding="utf-8"))
         # data2 = data2.loc[data2["imsi"].apply(lambda x: re.search(regex, x) is not None)]
-        out_file = r'内江帧码-康健街-base64.csv'
+        out_file = r'小江帧码-康健街-base64.csv'
         df.to_csv(out_file, index=False)
