@@ -82,15 +82,11 @@ class TestPandas(TestCase):
         print("=====")
         print(df)
 
-    def test_df_mapReduce(self):
+    def test_df_groupBy(self):
         # 移动窗口 分组, 组内函数 count
         df = pd.DataFrame(np.random.randint(0, 5, (10, 4)), columns=list("abcd"), index=range(10))
-        print("apply----", df["a"].apply(lambda x: x + 5))
-        print("窗口函数", df.cumsum().rolling(window=3).mean())
-        # print("窗口函数", s1.rolling(window=3).apply(lambda x: x + 1)) # todo bug
-        print("# DataFrame 协方差", df.cov())
 
-        print("group-head-----", df.groupby('b').describe())
+        print("group-head-----", df.groupby('b').describe(), sep="\n")
         print(
             {
                 "groupby": df.groupby('b'),
@@ -99,8 +95,24 @@ class TestPandas(TestCase):
                 "count": df.groupby('b').count(),
                 "reset_index": df.groupby('b').count().reset_index(),
                 "mean": df.groupby(['a', 'b']).mean(),
-                # "agg": df.groupby(df['b']).agg(lambda x: x + 1), # todo bug
-                # "agg_mean": df.groupby(df['b']).agg([lambda x: x + 1, 'mean']),
                 "transform": df.groupby('b').transform('mean'),
             }, sep='\n'
         )
+
+    def test_df_window(self):
+        def print_1(x):
+            print("print_1", type(x), x)
+            return 1
+
+        df = pd.DataFrame(np.random.randint(0, 5, (10, 4)), columns=list("abcd"), index=range(10))
+
+        print("apply----", df["a"].apply(lambda x: x + 5))
+
+        print("窗口函数", df.cumsum().rolling(window=3).mean())
+        print("窗口函数2", df.rolling(window=3).apply(lambda x: print_1(x)))  # x 为 pandas.Series
+        print("窗口函数3", df.rolling(window=3).apply(lambda x: print_1(x), raw=True))  # x 为 numpy.ndarray
+        print("窗口函数4", df['b'].rolling(window=3).apply(lambda x: print_1(x), raw=True))  # x 为 numpy.ndarray
+        print("窗口函数5", df.groupby(df['b']).agg(lambda x: print_1(x)))
+        print("窗口函数6", df.groupby(df['b']).agg([lambda x: print_1(x), 'mean']))
+
+        print("# DataFrame 协方差", df.cov())
