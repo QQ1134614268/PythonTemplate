@@ -1,8 +1,10 @@
 import json
+import threading
 from queue import Queue
 from unittest import TestCase
 
 import requests
+import time
 from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
@@ -46,15 +48,17 @@ class TestMmsi(TestCase):
         for vo in vos:
             task.put(vo)
 
-        # t = []
-        # for i in range(16):
-        #     t1 = threading.Thread(target=self.for_que, args=(task,))
-        #     t.append(t1)
-        # for i in t:
-        #     i.start()
-        # while True:
-        #     time.sleep(0.1)
-        self.for_que(task)
+        # todo 保存报错,, session多线程不安全??
+
+        # todo 队列, 线程分布式
+        t = []
+        for i in range(16):
+            t1 = threading.Thread(target=self.for_que, args=(task,))
+            t.append(t1)
+        for i in t:
+            i.start()
+        while True:
+            time.sleep(0.1)
 
     def test_main2(self):
         # vos = localhost_test_session.query(Mmsi).filter(Mmsi.data.is_(None)).all()
