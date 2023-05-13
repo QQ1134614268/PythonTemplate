@@ -7,13 +7,23 @@ import json
 import unittest
 import uuid
 from datetime import datetime
+from xml.etree import ElementTree
 
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, func, Text
 from sqlalchemy.orm import declarative_base
 
 from config.db_conf import localhost_test_engine, localhost_test_session
 
 Base = declarative_base()
+
+
+class CameraLog(Base):
+    __tablename__ = 'camera_log'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
+    channel_no = Column(String(64), comment="通道")
+    xml_txt = Column(Text, comment="通道")
+    report_time = Column(Text, comment="上报时间")
 
 
 class CameraEvent(Base):
@@ -105,3 +115,13 @@ class TestCameraEvent(unittest.TestCase):
             localhost_test_session.add_all(day_list)
             localhost_test_session.commit()
         print(f"---------{len(day_list)}--------------")
+
+    def test_xml(self):
+        with open("C:\\Users\\Administrator\\Desktop\\out.xml.log", mode="r") as f2:
+            for line in f2.readlines():
+                with open("tmp.xml", mode="w") as f3:
+                    f3.write(line)
+                tree = ElementTree.parse("tmp.xml")
+                root = tree.getroot()
+                print(tree, root, root.tag, root.attrib, root.text, root.tail, root.getchildren())
+
