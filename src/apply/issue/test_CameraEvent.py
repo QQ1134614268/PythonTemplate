@@ -3,13 +3,13 @@
 @Time: 2021/7/12
 @Description:
 """
-import json
+import re
 import unittest
-import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import List
 from xml.etree import ElementTree
 
-from sqlalchemy import Column, Integer, String, DateTime, func, Text
+from sqlalchemy import Column, Integer, String, DateTime, func, Text, JSON
 from sqlalchemy.orm import declarative_base
 
 from config.db_conf import localhost_test_engine, localhost_test_session
@@ -22,22 +22,20 @@ class CameraLog(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
     channel_no = Column(String(64), comment="通道")
-    xml_txt = Column(Text, comment="通道")
-    report_time = Column(Text, comment="上报时间")
+    xml_txt = Column(Text, comment="xml内容")
+    report_time = Column(DateTime, comment="上报时间")
 
 
 class CameraEvent(Base):
     __tablename__ = 'camera_event'
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
-    batch_id = Column(String(64), comment="批量id")
-    current_time = Column(DateTime, comment="当前时间")
-    termination_time = Column(DateTime, comment="时间")
     topic = Column(String(64), comment="topic")
-    name = Column(String(64), comment="名称")
-    value = Column(String(64), comment="值")
     time = Column(DateTime, comment="预警时间")
-    channel = Column(String(64), comment="通道")
+    data = Column(JSON, comment="上报时间")
+    camera_log_id = Column(Integer, comment="camera_log表id")
+    channel_no = Column(String(64), comment="通道id")
+    report_time = Column(DateTime, comment="上报时间")
 
 
 class TestCameraEvent(unittest.TestCase):
@@ -46,82 +44,109 @@ class TestCameraEvent(unittest.TestCase):
         Base.metadata.drop_all(localhost_test_engine)
         Base.metadata.create_all(localhost_test_engine)
 
-    def test_to_db(self):
-        max_time = localhost_test_session.query(func.max(CameraEvent.time)).scalar()
-
+    def test_xml_db(self):
+        camera_log_max_id = localhost_test_session.query(func.max(CameraEvent.camera_log_id)).scalar() or 0
+        camera_log_vos: List[CameraLog] = localhost_test_session.query(CameraLog).filter(
+            CameraLog.id > camera_log_max_id).all()
         res_list = []
-        with open(r"C:\Users\Administrator\Desktop\out.log", encoding="utf-8") as f:
-            lines = f.readlines()
-            for line in lines:
-                data = json.loads(line)
-                _id = str(uuid.uuid1())
-                params = data["params"]
-                events = params["events"]
-                for e in events:
-                    for v in e["value"]:
-                        v["topic"] = e["topic"]
-                        v["current_time"] = datetime.fromtimestamp(params["current_time"])
-                        # time.localtime(params["current_time"])
-                        # datetime. params["current_time"] * 1000
-                        v["termination_time"] = datetime.fromtimestamp(params["termination_time"])
-                        # params["termination_time"] * 1000
-                        v["batch_id"] = _id
-                        v["time"] = datetime.fromtimestamp(v["time"])
-                        if not max_time or v["time"] > max_time:
-                            res_list.append(CameraEvent(**v))
-        self.save_all(res_list)
+        for vo in camera_log_vos:
+            new1 = re.sub(r"(<\w*?:)", "<", vo.xml_txt)
+            new2 = re.sub(r"(</\w*?:)", "</", new1)
+            envelop_ele = ElementTree.XML(new2)
+            body_ele = envelop_ele.find('Body')
+            notify_ele = body_ele.find('Notify')
+            notify_meg_ele_list = notify_ele.findall('NotificationMessage')
+            for notify_meg_ele in list(notify_meg_ele_list):
+                topic_ele = notify_meg_ele.find('Topic')
+                topic = topic_ele.text
+                message_ele = notify_meg_ele.find('Message')
+                message_ele_list = message_ele.findall('Message')
+                for message_ele in list(message_ele_list):
+                    data = {"source": [], "data": [], "key": [], }
+                    utc_time = message_ele.attrib.get("UtcTime")
+                    time = datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
 
-    def test_to_db2(self):
-        max_time = localhost_test_session.query(func.max(CameraEvent.time)).scalar()
+                    source_ele = message_ele.find("Source")
+                    if source_ele:
+                        for item in list(source_ele.findall("SimpleItem")):
+                            data.get("source").append(item.attrib)
 
-        res_list = []
-        with open("C:\\Users\\Administrator\\Desktop\\out.json.log", encoding="utf-8") as f:
-            lines = f.readlines()
-            for line in lines:
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                    _id = str(uuid.uuid1())
-                    notification_message = data.get("body", {}).get("notificationMessage", [])
-                    for messageItem in notification_message:
-                        topic = messageItem.get("topic", {}).get("value")
-                        for item in messageItem.get("message", []):
-                            utc_time = datetime.strptime(item.get("utcTime"), "%Y-%m-%dT%H:%M:%SZ")
-                            for item2 in item.get("source", {}).get("simpleItem", []):
-                                if not max_time or utc_time > max_time:
-                                    res_list.append(
-                                        CameraEvent(
-                                            topic=topic,
-                                            batch_id=_id,
-                                            time=utc_time,
-                                            name=item2.get("name"),
-                                            value=item2.get("value"),
-                                            channel=item2.get("value", "-")[-1:]
-                                        )
-                                    )
+                    data_ele = message_ele.find("Data")
+                    if data_ele:
+                        for item in list(data_ele.findall("SimpleItem")):
+                            data.get("data").append(item.attrib)
 
-                except Exception as e:
-                    print(line)
-                    print(e)
+                    key_ele = message_ele.find("Key")
+                    if key_ele:
+                        for item in list(key_ele.findall("SimpleItem")):
+                            data.get("key").append(item.attrib)
 
-        self.save_all(res_list)
-
-    @staticmethod
-    def save_all(day_list):
-        if day_list:
-            day_list.sort(key=lambda x: x.time)
-            # day_list = sorted(day_list, key=lambda x: x.time)
-            localhost_test_session.add_all(day_list)
+                    res_list.append(
+                        CameraEvent(topic=topic, time=time, data=data, channel_no=vo.channel_no,
+                                    camera_log_id=vo.id))
+        if res_list:
+            localhost_test_session.add_all(res_list)
             localhost_test_session.commit()
-        print(f"---------{len(day_list)}--------------")
+        print(f"---------{len(res_list)}--------------")
 
-    def test_xml(self):
-        with open("C:\\Users\\Administrator\\Desktop\\out.xml.log", mode="r") as f2:
-            for line in f2.readlines():
-                with open("tmp.xml", mode="w") as f3:
-                    f3.write(line)
-                tree = ElementTree.parse("tmp.xml")
-                root = tree.getroot()
-                print(tree, root, root.tag, root.attrib, root.text, root.tail, root.getchildren())
+    def test_log_db(self):
+        max_time = localhost_test_session.query(func.max(CameraLog.report_time)).scalar()
 
+        res_list = []
+        with open(r"C:\Users\Administrator\Desktop\out.xml.log", encoding="utf-8") as f:
+            lines = f.readlines()
+            for line in lines:
+                arr = re.split("预警: 视频通道编号:| 预警-内容: ", line)
+                date_str = re.search(r'UtcTime.*?"(.*?)T', line).groups()[0]
+                time_str = re.search(r'(.{8})', line).groups()[0]
+                report_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
+                if not max_time or report_time > max_time:
+                    res_list.append(CameraLog(channel_no=arr[1], xml_txt=arr[2], report_time=report_time))
+        if res_list:
+            localhost_test_session.add_all(res_list)
+            localhost_test_session.commit()
+        print(f"---------{len(res_list)}--------------")
+
+    # def test_xml_db(self):
+    #     camera_log_max_id = localhost_test_session.query(func.max(CameraEvent.camera_log_id)).scalar() or 0
+    #     camera_log_vos: List[CameraLog] = localhost_test_session.query(CameraLog).filter(
+    #         CameraLog.id > camera_log_max_id).all()
+    #     res_list = []
+    #     for vo in camera_log_vos:
+    #         namespace = dict([node for _, node in ElementTree.iterparse(StringIO(vo.xml_txt), events=['start-ns'])])
+    #         envelop_ele = ElementTree.XML(vo.xml_txt)
+    #         body_ele = envelop_ele.find('env:Body', namespace)
+    #         notify_ele = body_ele.find('wsnt:Notify', namespace)
+    #         notify_meg_ele_list = notify_ele.findall('wsnt:NotificationMessage', namespace)
+    #         for notify_meg_ele in list(notify_meg_ele_list):
+    #             topic_ele = notify_meg_ele.find('wsnt:Topic', namespace)
+    #             topic = topic_ele.text
+    #             message_ele = notify_meg_ele.find('wsnt:Message', namespace)
+    #             message_ele_list = message_ele.findall('tt:Message', namespace)
+    #             for message_ele in list(message_ele_list):
+    #                 data = {"source": [], "data": [], "key": [], }
+    #                 utc_time = message_ele.attrib.get("UtcTime")
+    #                 time = datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
+    #
+    #                 source_ele = message_ele.find("tt:Source", namespace)
+    #                 if source_ele:
+    #                     for item in list(source_ele.findall("tt:SimpleItem", namespace)):
+    #                         data.get("source").append(item.attrib)
+    #
+    #                 data_ele = message_ele.find("tt:Data", namespace)
+    #                 if data_ele:
+    #                     for item in list(data_ele.findall("tt:SimpleItem", namespace)):
+    #                         data.get("data").append(item.attrib)
+    #
+    #                 key_ele = message_ele.find("tt:Key", namespace)
+    #                 if key_ele:
+    #                     for item in list(key_ele.findall("tt:SimpleItem", namespace)):
+    #                         data.get("key").append(item.attrib)
+    #
+    #                 res_list.append(
+    #                     CameraEvent(topic=topic, time=time, data=json.dumps(data), channel_no=vo.channel_no,
+    #                                 camera_log_id=vo.id))
+    #     if res_list:
+    #         localhost_test_session.add_all(res_list)
+    #         localhost_test_session.commit()
+    #     print(f"---------{len(res_list)}--------------")
