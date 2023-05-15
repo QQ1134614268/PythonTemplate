@@ -68,17 +68,17 @@ class TestPandas(TestCase):
     def test_df_operation(self):  # 加减 赋值
         df = pd.DataFrame(np.arange(0, 6).reshape((2, 3)), columns=list("ABC"), index=range(1, 3))
         # df.copy()
-        df["F"] = "f"
-        df["G"] = df["A"][:1]  # NaN 补全
-        print(df)
-        df.insert(0, "H", pd.Series([1, 2]))  # 插入  insert(self, loc, column, value)
+        df["D"] = "d"
+        df["E"] = df["A"][:1]  # NaN 补全
+        df.insert(5, "F", pd.Series([1, 2]))  # 插入  insert(self, loc, column, value)
         print(df)
 
-        print("----------")  # 选取
+        print("----删除------")  #
         print(df.drop(labels=["A"], axis=1, index=None, columns=None, inplace=False))  # 去除A列后的 df; inplace 原地修改
-        print(df.pop('C'))  # 原地改变
 
+        print(df.columns.delete([1]))
         print(df.index.delete([1]))
+        print(df.pop('A'))  # 原地改变
         print("=====")
         print(df)
 
