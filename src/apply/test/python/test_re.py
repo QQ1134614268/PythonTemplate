@@ -34,7 +34,7 @@ class TestRe(unittest.TestCase):
         print(ret)
 
     def test_search(self):
-        # search 从字符串中匹配; 可以一次匹配多个; ()代表分组,类似模板; group 是()中的取值; 匹配第一个,
+        # search 从字符串中匹配, 找出一个,()代表分组,可以一次匹配多个分组;类似模板; group 是()中的取值;
         # search后 group groups 取值
         # m.group() == m.group(0)== 所有匹配的字符
 
@@ -51,7 +51,6 @@ class TestRe(unittest.TestCase):
         print("groupdict", res.groupdict())
 
     def test_search2(self):
-
         text = '我电话号，分别是13343454523， 13341154523，13341152223'
 
         print(re.search(r'(\d{11})', text).groups())
@@ -86,3 +85,6 @@ class TestRe(unittest.TestCase):
             village___,
             "北京西城区小县")
         print(ret)
+
+    def test_2(self):
+        print(re.findall(r'<\w*?:|</\w*?:', "<wsa:a>aa<wsa:a>aa</wsa:a></wsa:a>"))
