@@ -6,7 +6,7 @@ import functools
 import unittest
 
 
-# todo
+# 装饰器
 
 # https://www.jianshu.com/p/30a8e723efdc
 # def 装饰 def

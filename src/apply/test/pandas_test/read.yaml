@@ -9,5 +9,3 @@
   empty, 
   loc iloc at iat
   ndim shape size
-
-#todo 整理test_numpy, test_pandas

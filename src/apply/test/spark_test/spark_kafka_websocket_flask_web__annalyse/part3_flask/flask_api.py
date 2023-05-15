@@ -3,13 +3,15 @@
 @Time: 2022/3/4
 @Description:
 """
+import os
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from kafka import KafkaConsumer
 
-from config.kafka_conf import KAFKA_GGOK
+from apply.test.spark_test.spark_kafka_websocket_flask_web__annalyse.spark_kafka_conf import KAFKA_LOCAL
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__, template_folder=os.path.abspath(os.path.dirname(__file__)))
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 thread = None
@@ -17,7 +19,7 @@ thread = None
 
 # 接收到消息就调用test_message方法，test_message是定义在web_socket对象上的js函数
 def background_thread():
-    consumer = KafkaConsumer('result', bootstrap_servers=[KAFKA_GGOK], group_id="KEY")
+    consumer = KafkaConsumer('result', bootstrap_servers=[KAFKA_LOCAL], group_id="KEY")
     for msg in consumer:
         data_json = msg.value.decode('utf8')
         socketio.emit('test_message', {'data': data_json})

@@ -8,9 +8,9 @@ import time
 
 from kafka import KafkaProducer
 
-from config.kafka_conf import KAFKA_GGOK
+from apply.test.spark_test.spark_kafka_websocket_flask_web__annalyse.spark_kafka_conf import KAFKA_LOCAL
 
-producer = KafkaProducer(bootstrap_servers=KAFKA_GGOK)
+producer = KafkaProducer(bootstrap_servers=KAFKA_LOCAL)
 
 site = ['火车东站', '火车南站', '火车北站']
 

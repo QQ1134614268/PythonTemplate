@@ -8,8 +8,6 @@ from ddt import ddt, data, unpack
 # pytest 支持数据驱动?? 插件丰富(生成报告,发邮件)
 # ddt 配合unittest, 数据驱动
 
-# todo 个人使用 unittest,配合ddt??
-
 # pycharm 设置 test runner
 @ddt  # ddt是用来装饰类的，需要与data装饰器一起使用
 class TestDdt(unittest.TestCase):
