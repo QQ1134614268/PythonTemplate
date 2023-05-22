@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>web-socket-demo</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="https://cdn.bootcss.com/element-ui/2.4.5/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.4.5/theme-chalk/index.css" rel="stylesheet">
+
+    <script src="https://cdn.bootcss.com/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+<div id="app" style="min-height: 100vh">
+    <el-tabs v-model="active">
+        <el-tab-pane label="News">
+            <div>
+                <el-button @click="submit"> 订阅</el-button>
+                <el-button @click="unSubmit"> 取消订阅</el-button>
+            </div>
+            <div>
+
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="SysAnno">
+
+        </el-tab-pane>
+    </el-tabs>
+</div>
+<script>
+    let t = new Vue(
+        {
+            el: '#app',
+            data: {
+                active: "",
+                topics: [""],
+                newsHistory: [],
+                sysAnnoHistory: [],
+                client: null
+            },
+            methods: {
+                init() {
+                    let url = "http://127.0.0.1:8080/ws?token=1";
+                    let socket = io.connect(url);
+                    socket.on('connect', function () {
+                        console.log("connect")
+                        socket.emit('ws/test', {data: 'I\'m connected!'});
+                        socket.emit("ws/test", {"data": "zhangsan"});
+                        socket.emit("ws/test", {"data": "666"});
+                        socket.emit("ws/test", {"data": "666"});
+                        socket.emit("json", JSON.stringify({"data": "666"}));
+                        socket.emit("json", 1);
+                        socket.emit("event2", 1, 2, 3);
+                        socket.emit("event3", 222);
+                    });
+                    socket.on('pushNews', function (data) {
+                        console.log('pushMsg', data)
+                    });
+                    socket.on('pushMsg', function (data) {
+                        console.log('pushMsg', data)
+                    });
+                },
+            },
+            created() {
+                this.init()
+            }
+        }
+    )
+</script>
+</body>
+<style>
+</style>
+</html>
