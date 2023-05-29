@@ -25,7 +25,7 @@ socketio = SocketIO(app)
 
 @app.route('/')
 def index():
-    return render_template('index_socketio.html')
+    return render_template('template/index_socketio.html')
 
 
 @app.route('/create_msg')
@@ -49,6 +49,12 @@ def my_event(json):
 
 @socketio.on('json')
 def handle_json(json):
+    print('json: ' + str(json))
+    send(json, json=True)
+
+
+@socketio.on('sub_event')
+def sub_event(json):
     print('json: ' + str(json))
     send(json, json=True)
 
