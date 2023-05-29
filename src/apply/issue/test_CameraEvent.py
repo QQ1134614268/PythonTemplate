@@ -45,9 +45,28 @@ class TestCameraEvent(unittest.TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test_xml_db(self):
-        camera_log_max_id = localhost_test_session.query(func.max(CameraEvent.camera_log_id)).scalar() or 0
-        camera_log_vos: List[CameraLog] = localhost_test_session.query(CameraLog).filter(
-            CameraLog.id > camera_log_max_id).all()
+        max_time = localhost_test_session.query(func.max(CameraLog.report_time)).scalar()
+
+        res_list = []
+        with open(r"C:\Users\Administrator\Desktop\out.xml.log", encoding="utf-8") as f:
+            lines = f.readlines()
+            for line in lines:
+                arr = re.split("预警: 视频通道编号:| 预警-内容: ", line)
+                date_str = re.search(r'UtcTime.*?"(.*?)T', line).groups()[0]
+                time_str = re.search(r'(.{8})', line).groups()[0]
+                report_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
+                if not max_time or report_time > max_time:
+                    res_list.append(CameraLog(channel_no=arr[1], xml_txt=arr[2], report_time=report_time))
+        if res_list:
+            localhost_test_session.add_all(res_list)
+            localhost_test_session.commit()
+        print(f"---------{len(res_list)}--------------")
+
+        # 日志分析
+        max_time = localhost_test_session.query(func.max(CameraEvent.time)).scalar()
+        max_id = localhost_test_session.query(func.max(CameraEvent.camera_log_id)).scalar() or 0
+        camera_log_vos: List[CameraLog] = localhost_test_session.query(CameraLog).filter(CameraLog.id > max_id).all()
+
         res_list = []
         for vo in camera_log_vos:
             new1 = re.sub(r"(<\w*?:)", "<", vo.xml_txt)
@@ -80,73 +99,11 @@ class TestCameraEvent(unittest.TestCase):
                     if key_ele:
                         for item in list(key_ele.findall("SimpleItem")):
                             data.get("key").append(item.attrib)
-
-                    res_list.append(
-                        CameraEvent(topic=topic, time=time, data=data, channel_no=vo.channel_no,
-                                    camera_log_id=vo.id))
+                    if not max_time or time > max_time:
+                        res_list.append(
+                            CameraEvent(topic=topic, time=time, data=data, channel_no=vo.channel_no,
+                                        camera_log_id=vo.id, report_time=vo.report_time))
         if res_list:
             localhost_test_session.add_all(res_list)
             localhost_test_session.commit()
         print(f"---------{len(res_list)}--------------")
-
-    def test_log_db(self):
-        max_time = localhost_test_session.query(func.max(CameraLog.report_time)).scalar()
-
-        res_list = []
-        with open(r"C:\Users\Administrator\Desktop\out.xml.log", encoding="utf-8") as f:
-            lines = f.readlines()
-            for line in lines:
-                arr = re.split("预警: 视频通道编号:| 预警-内容: ", line)
-                date_str = re.search(r'UtcTime.*?"(.*?)T', line).groups()[0]
-                time_str = re.search(r'(.{8})', line).groups()[0]
-                report_time = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S")
-                if not max_time or report_time > max_time:
-                    res_list.append(CameraLog(channel_no=arr[1], xml_txt=arr[2], report_time=report_time))
-        if res_list:
-            localhost_test_session.add_all(res_list)
-            localhost_test_session.commit()
-        print(f"---------{len(res_list)}--------------")
-
-    # def test_xml_db(self):
-    #     camera_log_max_id = localhost_test_session.query(func.max(CameraEvent.camera_log_id)).scalar() or 0
-    #     camera_log_vos: List[CameraLog] = localhost_test_session.query(CameraLog).filter(
-    #         CameraLog.id > camera_log_max_id).all()
-    #     res_list = []
-    #     for vo in camera_log_vos:
-    #         namespace = dict([node for _, node in ElementTree.iterparse(StringIO(vo.xml_txt), events=['start-ns'])])
-    #         envelop_ele = ElementTree.XML(vo.xml_txt)
-    #         body_ele = envelop_ele.find('env:Body', namespace)
-    #         notify_ele = body_ele.find('wsnt:Notify', namespace)
-    #         notify_meg_ele_list = notify_ele.findall('wsnt:NotificationMessage', namespace)
-    #         for notify_meg_ele in list(notify_meg_ele_list):
-    #             topic_ele = notify_meg_ele.find('wsnt:Topic', namespace)
-    #             topic = topic_ele.text
-    #             message_ele = notify_meg_ele.find('wsnt:Message', namespace)
-    #             message_ele_list = message_ele.findall('tt:Message', namespace)
-    #             for message_ele in list(message_ele_list):
-    #                 data = {"source": [], "data": [], "key": [], }
-    #                 utc_time = message_ele.attrib.get("UtcTime")
-    #                 time = datetime.strptime(utc_time, "%Y-%m-%dT%H:%M:%SZ") + timedelta(hours=8)
-    #
-    #                 source_ele = message_ele.find("tt:Source", namespace)
-    #                 if source_ele:
-    #                     for item in list(source_ele.findall("tt:SimpleItem", namespace)):
-    #                         data.get("source").append(item.attrib)
-    #
-    #                 data_ele = message_ele.find("tt:Data", namespace)
-    #                 if data_ele:
-    #                     for item in list(data_ele.findall("tt:SimpleItem", namespace)):
-    #                         data.get("data").append(item.attrib)
-    #
-    #                 key_ele = message_ele.find("tt:Key", namespace)
-    #                 if key_ele:
-    #                     for item in list(key_ele.findall("tt:SimpleItem", namespace)):
-    #                         data.get("key").append(item.attrib)
-    #
-    #                 res_list.append(
-    #                     CameraEvent(topic=topic, time=time, data=json.dumps(data), channel_no=vo.channel_no,
-    #                                 camera_log_id=vo.id))
-    #     if res_list:
-    #         localhost_test_session.add_all(res_list)
-    #         localhost_test_session.commit()
-    #     print(f"---------{len(res_list)}--------------")
