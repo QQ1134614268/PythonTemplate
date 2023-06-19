@@ -6,11 +6,11 @@
 
 # todo tcpdump
 1. 根据ip/网段
-
+tcpdump -i enp0s20f0u1 -s 0 -w out.pcap src host 44.39.52.214
 2. 根据端口
 
 3. 根据协议
-tcpdump -i any -s 0 -w out.pcap
+tcpdump -i enp0s20f0u1 -s 0 -w out.pcap
 
 
 tcpdump tcp -i eth1 -t -s 0 -c 100 and dst port != 22 and src net 192.168.1.0/24 -w out.pcap
@@ -20,21 +20,21 @@ tcpdump -i any host 44.39.19.14 -s0 -vv -w vcnapi.pcap
 # 运算符 and or not && || ! ()
 
 # tcpdump 过滤
-tcpdump -i eth0 -s 0 -w a.cap      #监听网络接口字节为0保存到a.cap文件中
-tcpdump -r a.cap                   #来读取a.cap文件内容
-tcpdump -A -r a.cap  #以ASCII格式打印出所有的分组并且读取此文件
-tcpdump -X -r a.cap  #以十六进制格式打印出所有的分组并且读取此文件
+tcpdump -i eth0 -s 0 -w out.pcap     #监听网络接口字节为0保存到out.pcap文件中
+tcpdump -r out.pcap                  #来读取a.cap文件内容
+tcpdump -A -r out.pcap #以ASCII格式打印出所有的分组并且读取此文件
+tcpdump -X -r out.pcap #以十六进制格式打印出所有的分组并且读取此文件
 tcpdump -i eth0 tcp port 22 # 只抓TCP,22端口的包,这里我们用nc来连一下另一台虚拟机的22端口
 
-tcpdump port 53 -r http.cap #50端口
-tcpdump -n -r http.cap | awk '{print $3}'| sort -u #-n 是不对域名做解析,只以IP地址的形式来显示;awk '{print $3}'显示第三列的内容;sort -u 筛选掉重复的内容
-tcpdump -n src host 145.254.160.237 -r http.cap # 只有数据包的来源IP(源)145.254.160.237是这个的才提取
-tcpdump -n dst host 145.254.160.237 -r http.cap #只有数据包是这个目标地址145.254.160.237才显示出来
-tcpdump -n port 53 -r http.cap #50端口
-tcpdump -nX port 80 -r http.cap #16进制显示80端口的信息
-tcpdump -A -n 'tcp[13]=24' -r http.cap #ascll码 只显示tcp13位为24的
+tcpdump port 53 -r out.pcap #50端口
+tcpdump -n -r out.pcap | awk '{print $3}'| sort -u #-n 是不对域名做解析,只以IP地址的形式来显示;awk '{print $3}'显示第三列的内容;sort -u 筛选掉重复的内容
+tcpdump -n src host 145.254.160.237 -r out.pcap # 只有数据包的来源IP(源)145.254.160.237是这个的才提取
+tcpdump -n dst host 145.254.160.237 -r out.pcap #只有数据包是这个目标地址145.254.160.237才显示出来
+tcpdump -n port 53 -r out.pcap #50端口
+tcpdump -nX port 80 -r out.pcap #16进制显示80端口的信息
+tcpdump -A -n 'tcp[13]=24' -r out.pcap #ascll码 只显示tcp13位为24的
 
-tcpdump -i eth0 'port 1111' -c 3 -r cp.pcap # 即可进行流量回放;
+tcpdump -i eth0 'port 1111' -c 3 -r out.pcap # 即可进行流量回放;
 
 # 参数:
 
