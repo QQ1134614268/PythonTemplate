@@ -1,18 +1,15 @@
 #!/usr/bin/python
-#-*- coding:utf8 -*-
+# -*- coding:utf8 -*-
+import zlib
 
 from scapy.all import *
-import collections
-import os
-import re
-import sys
-import zlib
 
 # 指定保存图片的目录和pcap文件的路径
 OUTDIR = '/home/kali/D/pictures'
 PCAPS = '/home/kali/D'
 # Response命名元组，数据包头header，载荷payload
-Response = collections.namedtuple('Response',['header','payload'])
+Response = collections.namedtuple('Response', ['header', 'payload'])
+
 
 # 获取数据包头（读取原始HTTP流量，将数据头单独切出来）
 def get_header(payload):

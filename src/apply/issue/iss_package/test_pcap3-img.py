@@ -1,8 +1,9 @@
 #!/usr/bin/python
 #-*- coding:utf8 -*-
 
-import cv2
 import os
+
+import cv2
 
 ROOT = '/home/kali/D/pictures'
 FACES = '/home/kali/D/faces'

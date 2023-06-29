@@ -97,7 +97,6 @@ c_type = OrderedDict([
     ('void *', 'P'),
 ])
 
-
 # python16进制转十进制数据
 def intToHex(message):
     message_type = dict(zip([str(_) for _ in range(10)] + ['a', 'b', 'c', 'd', 'e', 'f'], range(16)))

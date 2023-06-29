@@ -13,6 +13,20 @@ tcpdump -A -n 'tcp[13]=24' -r http.cap #ascll码 只显示tcp13位为24的
 
 tcpdump i- eth0 'port 1111' -c 3 -r cp.pcap 即可进行流量回放。
 
+# 其他 过滤
+tcp.stream == 5
+tcp.options.sack
+tcp.analysis.out_of_order
+tcp.analysis.retransmission
+tcp.flags.reset == 1
+
+# 时间过滤
+frame.time >= "2023-01-00 10:10:10"
+
+# 长度过滤
+ip.len == 100 # 除了以太网头固定长度14，从IP Header到IP payload的总长度
+frame.len == 119 # 整个数据包长度，从ethernet层开始到最后
+
 
 
 -A 以ASCII格式打印出所有分组，并将链路层的头最小化。

@@ -3,10 +3,8 @@
 @Time: 2023/6/15
 @Description:
 """
-import sqlite3
-from unittest import TestCase
-
 import subprocess
+from unittest import TestCase
 
 import cv2
 import numpy as np
@@ -30,8 +28,8 @@ class TestCv2(TestCase):
 
         cv2.destroyAllWindows()
         cv2.CAP_INTELPERC_IMAGE
-    def test_run2(self):
 
+    def test_run2(self):
         # opencv-python-headless  不能显示图像
         # opencv-python
 
