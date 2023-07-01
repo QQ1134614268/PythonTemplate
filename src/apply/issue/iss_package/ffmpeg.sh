@@ -1,81 +1,113 @@
-# ffmpeg 推流
+# 语法结构: ffmpeg 输入配置 -i 输入地址 输出配置 输出地址
 
 # ffmpeg 拉流
+ffmpeg -i input.mp4 output.mp4
+ffmpeg -i rtmp://127.0.0.1/live/123456 -c copy out.flv
+# ffmpeg 推流
+ffmpeg -re -i input.mp4 -vcodec copy -f flv rtmp://127.0.0.1/live/123456
+ffmpeg -re -i D:/4DC8C5E0.mp4 -c copy -f flv rtmp://127.0.0.1/live/123456
+ffmpeg -f gdigrab -i desktop -vcodec libx264 -pix_fmt yuv420p -t 300 -y -f flv out.mp4 # 录屏推流
 
-ffmpeg -re -i /Users/binny/ffmpeg/killer.mp4 -vcodec copy -f flv rtmp://localhost:1935/live/room1
-ffplay rtmp://localhost:1935/live/room1
+#
+-i:
+  input.mp4 # 本地文件
+  rtsp://xxx # rtsp 地址
+  http://xxx # http 地址
+  desktop # 桌面, 可以与
+  "0"  # 推流摄像头
+  "1"  # 推流麦克风
+  "0:1"  # 摄像头 + 麦克风
+  0:1 # 摄像头 + 麦克风
+  video="摄像头名称" # 根据摄像头名称播放, 摄像头名称是查询得到的
+-f: # 当输入配置 指定采集
+  avfoundation
+  gdigrab # 使用gdi录屏
+  dshow
+-f libx264 # 当为输出配置, 指定编码
 
+-vcodec:
+  copy # 与原来一样
+  libx264 # h264编码
+-acodec
+  libfaac
+  libmp3lame
+-an # 没有音频
+-vn # 没有视频
 
-# 语法结构: ffmpeg 输入配置 -i 输入地址 输出配置 输出地址
-ffmpeg -re -i fight.mp4 -f flv rtmp://192...........
-ffmpeg -list_devices true -f dshow -i dummy 寻找可用摄像头
-ffplay -f dshow -i video="摄像头名称" # 此处的摄像头名称是由上条命令执行后查询得到的
-ffmpeg -f dshow -i video="摄像头名称" -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -f flv 推流地址
-ffmpeg -f dshow -i video="摄像头名称" -framerate 25 -bufsize 1000000k -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -acodec libfaac -f flv 推流地址
-#-framerate 25  推流帧率
-#-preset:v ultrafast -tune:v zerolatency -acodec libfaac ：最快推流配置
+-pixel_format uyvy422 # 更改像素格式
 
-ffplay -i "拉流地址" -fflags nobuffer  # 拉流播放视频 nobuffer为实时播放
-ffmpeg -i "拉流地址" "输出地址" # 如ffmpeg -i https://xxx out.mp4
-ffplay -i "拉流地址" -vf scale=320:240 ##更改拉流视频的分辨率 以320:240分辨率为例
+-s 1280x800 # 分辨率 frame size
+-ss 10 # 10秒后开始
 
-ffmpeg -i "输入视频" -fflags nobuffer -t 60 -ss 0 "输出地址"# 视频截取 代表截取输入视频从0秒到60秒的片段，保存到输出地址。
-ffmpeg -i "视频地址" -fflags nobuffer -update 1 -y -t 200 -ss 1 -r 1 -f image2 图片输出地址 #定时截图（不断截图后更新一张图片）
-#  -ss n ： n秒后开始截图
-#  -r n ： 每秒截n帧
-#  -t n ： 截n秒
-#其他：-q:v ：图片质量 -vframes：指定抽取的帧数
-ffmpeg -i fight.mp4 -r 1 -t 200 -ss 1 -f image2 out%d.jpg
-ffmpeg -i test.mp4 test.gif # 格式转换
-ffmpeg -i input.mp4 -an -filter:v "setpts=0.5*PTS" output.mp4 # 视频变速 视频转为两倍速：
-ffmpeg -i input.mp4 -r 10 output.mp4 #改变视频帧率 通过输出配置-r设置，例如将输入视频转换为10帧率的输出视频
-ffmpeg -ss 00:00:30 -t 60 -i src.mp4 -codec copy out.mp4 # 视频剪辑 例如，从第30秒开始，截一分钟：
+-r: # 帧速率
+  25 # 帧率25, FPS;
+  30000/1001
+-re # 与原来一样, 否则最大速度推送
+-framerate 25  # 推流帧率
+-preset ultrafast
+-preset:v ultrafast
 
-ffmpeg -i input.mp4 -vf vflip out.mp4 # 视频旋转 上下翻转
-ffmpeg -i input.mp4 -vf hflip out.mp4 # 左右翻转
-ffmpeg -i input.mp4 -vf transpose=1 out.mp4 # 顺时针90°
-ffmpeg -i input.mp4 -vf transpose=2 out.mp4 # 逆时针90°
+-ar 44100
+-ac 1
+
+-vsync 2
+-vf:
+  format=yuv444p,crop=426:240:507:339
+  scale=320:240 # 更改拉流视频的分辨率 以320:240分辨率为例
+  crop=1280:720:0:120 # 视频尺寸裁剪 crop后的参数，宽：高：起始x：起始y
+  vflip # 上下翻转
+  hflip # 左右翻转
+-vframes 30 # 指定抽取的帧数 30帧
+-capture_cursor 1
+-b:v 1M
+-b:a 128K
+-b # 指定比特率, 默认 VBR
+-vb # 视频比特率
+-c:v ibvpx-vp9 #
+-c:a libopus
+-c copy # 复制流 ; 输出流和输入流相同的编解码器
+-tune:v zerolatency
+
+-an # 去掉音频
+-vn # 去掉视频
+
+其他:
+ffmpeg -i input.mp4 -r 10 output.mp4 # 输出配置 -r 改变视频帧率，例如将输入视频转换为10帧率的输出视频
+ffmpeg -ss 00:00:30 -t 60 -i input.mp4 -codec copy out.mp4 # 视频剪辑 例如，从第30秒开始，截一分钟：
+ffmpeg -i input.mp4 -fflags nobuffer -t 60 -ss 0 out.mp4 # 视频截取 代表截取输入视频从0秒到60秒的片段，保存到输出地址。
+ffmpeg -i input.mp4 -vf vflip out.mp4 # 视频旋转 vflip: 上下翻转; hflip: 左右翻转; transpose=1 : 顺时针90°; transpose=2 : 逆时针90°;
 ffmpeg -i input.mp4 -vf crop=1280:720:0:120 out.mp4 # 视频尺寸裁剪 crop后的参数，宽：高：起始x：起始y
+ffmpeg -list_devices true -f dshow -i dummy 寻找可用摄像头
+ffmpeg -f dshow -i video="摄像头名称" -framerate 25 -bufsize 1000000k -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -acodec libfaac -f flv out.mp4
+ffmpeg -i input.mp4 -ss 00:00:00 -t 10 out.mp4 # 裁剪:
+ffmpeg -f concat -i inputs.txt out.flv # 合并 inputs.txt内容是 一行行的文件路径 file "/home/input.mp4"
 
-# 快退 快进
-# 裸的H264码流，如果实现快进快退必须基于 I 帧才能实现：在播放前对整个码流进行统计，总共有多少帧，所有的 I 帧在什么位置。在播放的时候，再根据用户快进或快退的位置判断相邻最近的 I 帧在什么位置，然后从那一个 I 帧开始解码播放。
-ffmpeg -i input.mkv -filter:v "setpts=0.5*PTS" output.mkv
-ffmpeg -i input.mkv -r 16 -filter:v "setpts=0.25*PTS" output.mkv
-ffmpeg -i input.mkv -filter:v "setpts=2.0*PTS" output.mkv
-ffmpeg -i input.mkv -filter:a "atempo=2.0" -vn output.mkv
-ffmpeg -i input.mkv -filter:a "atempo=2.0,atempo=2.0" -vn output.mkv
-ffmpeg -i input.mkv -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mkv
+# 转图片
+ffmpeg -i input.mp4 test.gif # 转gif
+ffmpeg -i input.mp4 -fflags nobuffer -update 1 -y -t 200 -ss 1 -r 1 -f image2 out%d.jpg # 定时截图（不断截图后更新一张图片）
+ffmpeg -i input.mp4 -r 1 -t 10 -ss 0 -f image2 out%d.jpg
+ffmpeg -i input.mp4 -r 1 -f image2 # 视频转图片:
+
+# 图片转视频:
+ffmpeg -i image-%3d.jpeg out.mp4
 
 
-//推流桌面 - 只有桌面内容
-ffmpeg -f avfoundation -pixel_format uyvy422 -i "1" -f flv rtmp://localhost:1935/live/room1
+# 快退 快进 裸的H264码流，如果实现快进快退必须基于 I 帧才能实现：在播放前对整个码流进行统计，总共有多少帧，所有的 I 帧在什么位置。在播放的时候，再根据用户快进或快退的位置判断相邻最近的 I 帧在什么位置，然后从那一个 I 帧开始解码播放。
+# filter map
+ffmpeg -i input.mp4 -filter:v "setpts=0.5*PTS" output.mp4 # 视频变速 视频转为两倍速：
+ffmpeg -i input.mp4 -r 16 -filter:v "setpts=0.25*PTS" output.mp4
+ffmpeg -i input.mp4 -filter:v "setpts=2.0*PTS" output.mp4
+ffmpeg -i input.mp4 -filter:a "atempo=2.0" -vn output.mp4
+ffmpeg -i input.mp4 -filter:a "atempo=2.0,atempo=2.0" -vn output.mp4
+ffmpeg -i input.mp4 -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mp4
 
-ffmpeg -f avfoundation -i "1" -vcodec libx264 -preset ultrafast -acodec libfaac -f flv rtmp://localhost:1935/live/room1
-//推流摄像头
-ffmpeg -f avfoundation -framerate 30 -video_size 1280x720 -i  "0"  -vcodec libx264 -acodec libfaac -f flv rtmp://localhost:1935/live/room1
-//只推流麦克风
-ffmpeg -f avfoundation -i ":0" -vcodec libx264 -preset ultrafast -acodec libmp3lame -ar 44100 -ac 1 -f flv rtmp://localhost:1935/live/room1
-//摄像头+麦克分
-ffmpeg -f avfoundation -framerate 30 -video_size 1280x720 -i "0:0" -vcodec libx264 -preset ultrafast -acodec libmp3lame -ar 44100 -ac 1 -f flv rtmp://localhost:1935/live/room1
 
-ffmpeg -f avfoundation -framerate 30 -video_size 1280x720 -i "0:0" -vsync 2 -vcodec libx264 -preset ultrafast -acodec libmp3lame -ar 44100 -ac 1 -b:v 1M -b:a 128K -f flv rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -framerate 30 -video_size 640x480 -i  "0" -vcodec libx264 -preset ultrafast -acodec libfaac -f flv rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -framerate 30 -video_size 640x480 -i  "0" -vcodec libx264 -acodec libfaac -f flv  rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -framerate 30 -video_size 640x480 -i  "0"  \-c:v libx264 -preset ultrafast -acodec libfaac -f flv  rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -framerate 30 -video_size 640x480 -i  "0"  -vcodec libx264 -preset ultrafast -acodec libfaac -f flv  rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -framerate 30 -video_size 640x480 -i  "0"  -pixel_format nv12 -preset ultrafast -acodec libfaac -f flv rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -framerate 30 -video_size 1280x720 -i  "0"  -vf format=yuv444p,crop=426:240:507:339 -preset ultrafast -acodec libfaac -f flv  rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -capture_cursor 1 -i 1:0 -r 30000/1001 -s 1280x800 -vsync 2 -c:v libvpx-vp9 -c:a libopus -b:v 1M -b:a 128K capture.webm -f flv rtmp://localhost:1935/live/room1
-
-ffmpeg -f avfoundation -pixel_format uyvy422 -i "1" -f flv rtmp://localhost:1935/live/room1
-
+# 播放
+ffplay -i input.mp4
+ffplay rtmp://localhost:1935/live/room1
+ffplay -i input.mp4 -vf scale=320:240 # 更改拉流视频的分辨率 以320:240分辨率为例
+ffplay -f dshow -i video="摄像头名称" # 此处的摄像头名称是由上条命令执行后查询得到的
+ffplay -i input.mp4 -fflags nobuffer  # 拉流播放视频 nobuffer为实时播放
 
 ####
 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>flv3</title>
+    <link rel="stylesheet" href="./css/element.index.css">
+    <script src="./js/vue.2.6.12.js"></script>
+    <script src="./js/element-ui.index.js"></script>
+    <script src="./js/axios.js"></script>
+    <script src="./js/flv.js"></script>
+
+    <!--    <link rel="stylesheet" href="vue-virtual-scroller/dist/vue-virtual-scroller.css"/>-->
+    <!--    <script src="vue-virtual-scroller/dist/vue-virtual-scroller.min.js"></script>-->
+
+</head>
+<body>
+<div id="app" style="min-height: 100vh">
+    <el-form>
+        <el-form-item label="token">
+            <el-input v-model="url" style="width: 50%"></el-input>
+        </el-form-item>
+        <el-button @click="submit" type="success">确认</el-button>
+    </el-form>
+    <video id="player1" muted autoplay="autoplay" preload="auto" controls="controls">
+    </video>
+</div>
+<script>
+    let v = new Vue(
+        {
+            el: '#app',
+            data: {
+                url: ""
+            },
+            methods: {
+                submit() {
+                    if (!this.url) {
+                        return
+                    }
+                    if (flvjs.isSupported()) {
+                        let videoElement = document.getElementById('player1');
+                        let flvPlayer = flvjs.createPlayer({
+                            type: 'flv',
+                            url: this.url
+                        });
+                        flvPlayer.attachMediaElement(videoElement);
+                        flvPlayer.load();
+                        //flvPlayer.play();
+                    } else {
+                        alert("浏览器不支持flvjs")
+                    }
+                },
+
+                post(url, params, data) {
+                    return new axios({
+                            method: 'POST',
+                            url: url,
+                            params: params,
+                            data: data,
+                            headers: {
+                                Authorization: this.history.token,
+                            }
+                        }
+                    )
+                },
+                get(params, url) {
+                    return new axios({
+                            method: 'GET', url: url, params: params, headers: {Authorization: this.history.token}
+                        }
+                    )
+                },
+            },
+            created() {
+                // this.init()
+            },
+        }
+    );
+</script>
+</body>
+<style>
+</style>
+</html>

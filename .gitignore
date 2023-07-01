@@ -16,3 +16,6 @@ data/log
 
 
 venv/*
+
+*.mp4
+*.log
