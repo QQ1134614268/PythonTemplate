@@ -1,4 +1,5 @@
-# 语法: tcpdump option proto dir type
+# 语法: tcpdump option [ expression ]
+#    expression(proto dir type):
 #      option: -i -w 等
 #      proto: 协议 ip tcp udp 等, 不支持应用协议 http sip
 #      dir: 方向 src dst
@@ -27,9 +28,9 @@ ip.len == 100 # 除了以太网头固定长度14，从IP Header到IP payload的�
 frame.len == 119 # 整个数据包长度，从ethernet层开始到最后
 
 
-tcpdump tcp -i eth1 -t -s 0 -c 100 and dst port != 22 and src net 192.168.1.0/24 -w out.pcap
-
-tcpdump -i any host 44.39.19.14 -s0 -vv -w vcnapi.pcap
+tcpdump host 44.39.52.214 -i any -s 0 -vv -w 0612-1.pcap
+tcpdump src net 44.39.52.0/24 -i any -s 0 -w rtp_port.pcap
+tcpdump \( src net 44.39.52.0/24 or port 5060 \) and udp -i any -s 0 -vv -w test_01.pcap
 
 # 运算符 and or not && || ! ()
 
@@ -52,7 +53,7 @@ tcpdump -i eth0 'port 1111' -c 3 -r out.pcap # 即可进行流量回放;
 
 # 参数:
 
--i any # 指定网络接口, 不指定为一个网络接口 eth0, any 任意
+-i any # 指定网络接口, 不指定为第一个网络接口 eth0, any 任意
 -s 0 # 指定包大小, 0 不限制大小
 -vv 输出详细的报文信息
 -r 从指定的文件中读取包, 这些包一般通过-w选项产生

@@ -4,8 +4,7 @@
 ffmpeg -i input.mp4 output.mp4
 ffmpeg -i rtmp://127.0.0.1/live/123456 -c copy out.flv
 # ffmpeg 推流
-ffmpeg -re -i input.mp4 -vcodec copy -f flv rtmp://127.0.0.1/live/123456
-ffmpeg -re -i D:/4DC8C5E0.mp4 -c copy -f flv rtmp://127.0.0.1/live/123456
+ffmpeg -re -i /home/input.mp4 -c copy -f flv rtmp://127.0.0.1/live/123456 # 推流到流媒体踢
 ffmpeg -f gdigrab -i desktop -vcodec libx264 -pix_fmt yuv420p -t 300 -y -f flv out.mp4 # 录屏推流
 
 #
@@ -31,8 +30,9 @@ ffmpeg -f gdigrab -i desktop -vcodec libx264 -pix_fmt yuv420p -t 300 -y -f flv o
 -acodec
   libfaac
   libmp3lame
--an # 没有音频
--vn # 没有视频
+
+-an # 去掉音频
+-vn # 去掉视频
 
 -pixel_format uyvy422 # 更改像素格式
 
@@ -68,8 +68,6 @@ ffmpeg -f gdigrab -i desktop -vcodec libx264 -pix_fmt yuv420p -t 300 -y -f flv o
 -c copy # 复制流 ; 输出流和输入流相同的编解码器
 -tune:v zerolatency
 
--an # 去掉音频
--vn # 去掉视频
 
 其他:
 ffmpeg -i input.mp4 -r 10 output.mp4 # 输出配置 -r 改变视频帧率，例如将输入视频转换为10帧率的输出视频
@@ -80,7 +78,7 @@ ffmpeg -i input.mp4 -vf crop=1280:720:0:120 out.mp4 # 视频尺寸裁剪 crop后
 ffmpeg -list_devices true -f dshow -i dummy 寻找可用摄像头
 ffmpeg -f dshow -i video="摄像头名称" -framerate 25 -bufsize 1000000k -vcodec libx264 -preset:v ultrafast -tune:v zerolatency -acodec libfaac -f flv out.mp4
 ffmpeg -i input.mp4 -ss 00:00:00 -t 10 out.mp4 # 裁剪:
-ffmpeg -f concat -i inputs.txt out.flv # 合并 inputs.txt内容是 一行行的文件路径 file "/home/input.mp4"
+ffmpeg -f concat -safe 0 -i inputs.txt -c copy out.mp4 # 合并 inputs.txt内容是 一行行的文件路径: file /home/input.mp4
 
 # 转图片
 ffmpeg -i input.mp4 test.gif # 转gif

@@ -9,14 +9,13 @@
     <script src="./js/vue.2.6.12.js"></script>
     <script src="./js/element-ui.index.js"></script>
     <script src="./js/axios.js"></script>
-    <script src="./js/flv.js"></script>
 
     <!--    <link rel="stylesheet" href="vue-virtual-scroller/dist/vue-virtual-scroller.css"/>-->
     <!--    <script src="vue-virtual-scroller/dist/vue-virtual-scroller.min.js"></script>-->
 
 </head>
 <body>
-<div id="app" style="min-height: 100vh" class="test">
+<div id="app" style="min-height: 100vh">
     {{ time }}
 </div>
 <script>
@@ -42,15 +41,14 @@
                             url: url,
                             params: params,
                             data: data,
-                            headers: {
-                                Authorization: this.history.token,
-                            }
                         }
                     )
                 },
                 get(params, url) {
                     return new axios({
-                            method: 'GET', url: url, params: params, headers: {Authorization: this.history.token}
+                            method: 'GET',
+                            url: url,
+                            params: params
                         }
                     )
                 },
@@ -62,9 +60,4 @@
     );
 </script>
 </body>
-<style>
-    .test{
-
-    }
-</style>
 </html>
