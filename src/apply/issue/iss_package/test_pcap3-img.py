@@ -1,6 +1,4 @@
-#!/usr/bin/python
-#-*- coding:utf8 -*-
-
+# -*- coding:utf8 -*-
 import os
 
 import cv2
@@ -8,6 +6,7 @@ import cv2
 ROOT = '/home/kali/D/pictures'
 FACES = '/home/kali/D/faces'
 TRAIN = '/home/kali/D/training'
+
 
 # 检查每张图片并确认里面是否有人脸，对于有人脸的图片
 # 在人脸周围画一个方框，然后存储为另一张新图片
@@ -17,7 +16,7 @@ def detect(srcdir=ROOT, tgtdir=FACES, train_dir=TRAIN):
         if not fname.upper().endswith('.JPEG'):
             continue
         fullname = os.path.join(srcdir, fname)
-        newname = os.path.join(tgtdir,fname)
+        newname = os.path.join(tgtdir, fname)
         # 使用OpenCV的计算视觉库cv2来读取图片
         img = cv2.imread(fullname)
         if img is None:
@@ -40,9 +39,10 @@ def detect(srcdir=ROOT, tgtdir=FACES, train_dir=TRAIN):
 
         for x1, y1, x2, y2 in rects:
             # 在人脸周围画一圈绿色方框
-            cv2.rectangle(img,(x1, y1),(x2, y2),(127,256,0),2)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (127, 256, 0), 2)
         # 将画了方框的新图片存储到指定目录中
         cv2.imwrite(newname, img)
+
 
 if __name__ == '__main__':
     detect()
