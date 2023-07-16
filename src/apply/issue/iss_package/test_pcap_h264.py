@@ -122,7 +122,6 @@ class Package(Base):
 
 
 class PS(Packet):
-    # eg: HTTP:
     name = "PS"
     fields_desc = [
         # 0~3字节: 为0x 00 00 01 ba，表示当前为PSH头部 #I帧附加信息:20~23: 为0x 00 00 01 bb,表示当前为I帧附件信息
@@ -197,6 +196,12 @@ class PS(Packet):
         BitField('ps_m_crc_3', 8, 0xDC),
         BitField('ps_m_crc_4', 8, 0xDC),
 
+    ]
+
+
+class PES(Packet):
+    name = "PES"
+    fields_desc = [
         # PES
         BitField('pes_start_code', 24, 0x000001),
         BitField('pes_stream_id', 8, 0x000001),
