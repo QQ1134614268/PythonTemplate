@@ -309,11 +309,11 @@ class TestPcap(TestCase):
 
             if pck.haslayer("PS"):
                 ps: PS = pck["PS"]
-                package.ps_start_code = ip.chksum
+                package.ps_start_code = ps.chksum
 
-            if pck.haslayer("H264"):
-                ps: PS = pck["H264"]
-                package.ps_start_code = ip.chksum
+            # if pck.haslayer("PES"):
+            #     pes: PES = pck["PES"]
+            #     package.ps_start_code = pes.chksum
             print(package)
             localhost_test_session.add(package)
             localhost_test_session.commit()
