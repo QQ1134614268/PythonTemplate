@@ -3,21 +3,31 @@
 @Time: 2023/6/15
 @Description:
 """
-from dataclasses import dataclass
 from unittest import TestCase
 
-from scapy.fields import BitField, BitFieldLenField
-from scapy.layers.http import HTTP
-from scapy.layers.inet import IP, UDP, TCP
+from scapy.fields import BitField
+from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
-from scapy.packet import Packet
+from scapy.packet import Packet, Raw
+from scapy.utils import PcapReader, rdpcap
+from sqlalchemy import BLOB
 from sqlalchemy import Column, Text
+from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import declarative_base
+
+from config.db_conf import localhost_test_engine
+
+Base = declarative_base()
 
 
-@dataclass()
-class H264:
+class Package(Base):
+    __tablename__ = 'package'
     # 原始数据
+    id = Column(INTEGER, primary_key=True, comment="id")
+    raw = Column(BLOB, comment="原始数据")
+
+    # 其值为6，则为TCP，其值为17，则为UDP。
 
     # 数据链路层
     time: str
@@ -49,8 +59,9 @@ class H264:
     tcp_dst_port = Column(Text, comment="目标端口号, 16bit")
     tcp_seq = Column(Text, comment="序号, 32bit")
     tcp_ack = Column(Text, comment="确认号, 32bit")
-    tcp_offset = Column(Text,
-                        comment="数据偏移, 4bit")  # Offset：报头长度，4位，给出报头中 32bit 字的数目。需要这个值是因为任选字段的长度是可变的。这个字段占 4bit,即TCP 最多有 60（15*4） 字节的首部
+    # Offset：报头长度，4位，给出报头中 32bit 字的数目。
+    # 需要这个值是因为任选字段的长度是可变的。这个字段占 4bit,即TCP 最多有 60（15*4） 字节的首部
+    tcp_offset = Column(Text, comment="数据偏移, 4bit")
     tcp_reserve = Column(Text, comment="保留, 6bit")
     tcp_flag_urg = Column(Text, comment="urg 标识, 1bit")
     tcp_flag_ack = Column(Text, comment="ack 标识, 1bit")
@@ -106,91 +117,105 @@ class H264:
     ps_sys_std_len = Column(Text, comment="std缓存器尺寸标识, 13bit,")
     ps_sys_stream = Column(Text, comment="流识别, 8bit,")
     # h264 层
-
     # 帧 -- 合并
 
 
 class PS(Packet):
     # eg: HTTP:
-
-    # GB28181 对RTP 传输的数据负载类型有规定（参考GB28181 附录B），负载类型中96-127
-    # RFC2250 建议96 表示PS 封装，建议97 为MPEG-4，建议98 为H264
-
-    # [PSH][PS system header][PSM][PES header][ES] 关键帧
-    # [PSH][PES header][ES][PES header][ES]
-
-    # 若PTS_DTS_flags == ‘10’，则说明只有PTS，起始码为0010；若PTS_DTS_flags == ‘11’，则PTS和DTS都存在，PTS的起始码为0011，DTS的起始码为0001；(PTS的起始码后2个bit与flag相同)
-    # PTS = （PTS1 & 0x0e) << 29 + (PTS2 & 0xfffe) << 14 + (PTS3 & 0xfffe ) >> 1
-    # DTS规则与PTS一致，一般PES header data length是10+填充位，其他可选字段大都不存在，解封装的时候，先计算PES长度，再计算PES header data长度，最后计算出ES的长度及起始位置，计算工时如下：
-    # ESlen = PESlen-2-1-pes_header_data_length
-    # PES包头之后，紧跟着就是原始的视频帧数据(ES)或者音频数据
-
-    # pack_start_code:起始码，占位32bit，标识PS包的开始，固定为0x000001BA
-    #
-    # ‘01’字段：占位2bit
-    #
-    # SCR字段：占位46bit，其中包含42bit的SCR值和4个bit的marker_bit值；其中SCR值由system_clock_reference_base和system_clock_reference_extension两部分组成,字节顺序依次是：
-    #
-    # (1) system_clock_reference_base [32…30]：占位3bit
-    #
-    # (2) marker_bit：占位1bit
-    #
-    # (3) system_clock_reference_base [29…15]：占位15bit
-    #
-    # (4) marker_bit：占位1bit
-    #
-    # (5) system_clock_reference_base [14…0]：占位15bit
-    #
-    # (6) marker_bit：占位1bit
-    #
-    # (7) system_clock_reference_extension：占位9bit
-    #
-    # (8) marker_bit：占位1bit
-    #
-    # program_mux_rate字段：速率值字段，占位22bit，正整数，表示P-STD接收此字段所在包的PS流的速率；这个值以每秒50字节作为单位；禁止0值；
-    #
-    # Marker_bit：标记字段，占位1bit，固定为’1’；
-    #
-    # Marker_bit：标记字段，占位1bit，固定为’1’；
-    #
-    # Reserved字段：保留字段，占位5bit；
-    #
-    # pack_stuffing_length字段：长度字段，占位3bit；规定了此字段之后填充字段的长度；
-    #
-    # stuffing_byte：填充字段，固定为0xFF；长度由前一字段确定
-
     name = "PS"
     fields_desc = [BitField('start_code', 2, 2),  # 起始码，占位4bit; 000001BA/000001BB/000001BC/000001E0 | 000001BA/000001E0
                    BitField('PTS', 0, 1),  # PTS[32…30]：占位3bit；
-                   BitField('marker_bit', 0, 1),  # 占位1bit；
-                   BitFieldLenField('PTS', None, 4, count_of='sync'),  # 占位15bit；
-                   BitField('marker_bit', 0, 1),  # 占位1bit；
-                   BitFieldLenField('PTS', None, 4, count_of='sync'),  # 占位15bit；
                    BitField('marker_bit', 0, 1),  # 占位1bit；
                    ]  # noqa: E501
 
 
 class TestPcap(TestCase):
+    def test_pre(self):
+        ...
+        # Base.metadata.drop_all(localhost_test_engine)
+        Base.metadata.create_all(localhost_test_engine)
+
     def test1(self):
-        # 过滤
+        packets = rdpcap('test_out_export_h264.pcapng')
+        for pck in packets[0:10]:
+            package = Package()
+            pck.raw = pck
+            print(pck, pck.time, isinstance(pck, Ether), isinstance(pck, IP), isinstance(pck, Raw))
+            if pck.haslayer(Ether.name):
+                ether: Ether = pck[Ether.name]
+                package.time = ether.time
+            if pck.haslayer(IP.name):
+                ip: IP = pck[IP.name]
+                package.ip_version = ip.version
+                package.ip_header_len = ip.ihl
+                package.ip_ser = ip.tos
+                package.ip_total_len = ip.len
+                package.ip_flag = ip.id
+                package.ip_flag2 = ip.flags  # ["MF", "DF", "evil"]
+                package.ip_offset = ip.frag
+                package.ip_live_time = ip.ttl
+                package.ip_prop = ip.proto
+                package.ip_check = ip.chksum
+                package.ip_src = ip.src
+                package.ip_dst = ip.dst
+                package.ip_other = ip.options
+            if pck.haslayer(UDP.name):
+                udp: UDP = pck[UDP.name]
+                package.udp_src_port = udp.sport
+                package.udp_dst_port = udp.dport
+                package.udp_len = udp.len
+                package.udp_check = udp.chksum
+            if pck.haslayer(TCP.name):
+                tcp: TCP = pck[TCP.name]
+                package.tcp_src_port = tcp.sport
+                package.tcp_dst_port = tcp.dport
+                package.tcp_seq = tcp.seq
+                package.tcp_ack = tcp.ack
+                package.tcp_offset = tcp.dataofs
+                package.tcp_reserve = tcp.reserved
+                package.tcp_flag_urg = tcp.flags
+                package.tcp_flag_ack = tcp.flags
+                package.tcp_flag_psh = tcp.flags
+                package.tcp_flag_pst = tcp.flags
+                package.tcp_flag_syn = tcp.flags
+                package.tcp_flag_fin = tcp.flags
+                package.tcp_window = tcp.window
+                package.tcp_check = tcp.chksum
+                package.tcp_emergency = tcp.urgptr
+                package.tcp_other = tcp.options
 
-        # 解析,
-        pck = Ether()
-        ip_pck: IP = pck.getlayer(1)
-        udp_pck: UDP = ip_pck.getlayer(1)
-        rtp_pck: RTP = udp_pck.getlayer(1)
-        ps_pck: PS = rtp_pck.getlayer(1)
-        h264_pck: H264 = rtp_pck.getlayer(1)
+            if pck.haslayer(RTP.name):
+                rtp: RTP = pck[RTP.name]
+                package.rtp_version = rtp.version
+                package.rtp_p_padding = rtp.padding
+                package.rtp_x_extend = rtp.extension
+                package.rtp_cc = rtp.numsync
+                package.rtp_flag = rtp.marker
+                package.rtp_payload_type = rtp.payload_type
+                package.rtp_seq = rtp.sequence
+                package.rtp_timestamp = rtp.timestamp
+                package.rtp_ssrc = rtp.sourcesync
+                package.rtp_csrc = rtp.sync
 
-        # 结果
+            if pck.haslayer("PS"):
+                ps: PS = pck["PS"]
+                package.ps_start_code = ip.chksum
 
-        # 过滤组合, 保存文件
+            if pck.haslayer("H264"):
+                ps: PS = pck["H264"]
+                package.ps_start_code = ip.chksum
+            print(package)
 
-    def test_http(self):
-        # 过滤
-
-        # 解析,
-        pck = Ether()
-        ip_pck: IP = pck.getlayer(1)
-        tcp_pck: TCP = ip_pck.getlayer(1)
-        http_pck: HTTP = tcp_pck.getlayer(1)
+    def test2(self):
+        with PcapReader("test_out_export_h264.pcapng") as reader:
+            for pck in reader:
+                print(pck, pck.time, isinstance(pck, Ether), isinstance(pck, IP), isinstance(pck, Raw))
+                pck.show()
+                # str(pck).encode("HEX")
+                # pck.add_payload()
+                # pck.build_ps()
+                # pck.haslayer()
+                # pck.add_underlayer()
+                # pck.payload_guess
+                # pck.layers()
+                # print(pck)

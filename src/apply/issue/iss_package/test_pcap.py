@@ -3,30 +3,61 @@
 @Time: 2023/6/15
 @Description:
 """
-import csv
 from unittest import TestCase
 
-import pcapng
 from scapy.all import *
-from scapy.layers.inet import IP, TCP, UDP, ICMP
+from scapy.layers.dhcp6 import DHCP6OptIA_PD, DHCP6OptIAPrefix, DHCP6OptIA_NA, DHCP6OptClientId, DHCP6_Solicit
+from scapy.layers.http import HTTP
+from scapy.layers.inet import IP, TCP, ICMP
+from scapy.layers.inet import UDP
 from scapy.layers.inet6 import IPv6
-from scapy.layers.l2 import Loopback, Ether
+from scapy.layers.l2 import Ether
+from scapy.layers.l2 import Loopback
 
 
 class TestPcap(TestCase):
-    def test1(self):
-        ip = IP(src="10.0.0.1")
-        ip.dst = "10.0.0.2"
-        l3: IP = IP() / TCP()
-        l2: Ether = Ether() / l3
-        l4: IP = l2.getlayer(1)
-        l5: TCP = l2.getlayer(2)
+    def test0(self):
+        # 构造报文
+        ether = Ether(dst='00:0c:29:47:f3:2f', src='c8:3a:35:09:ef:a1', type=0x86dd)
+        ip = IP(src="10.0.0.1", dst="example.com")
+        print(hexdump(ip))
+        print(raw(ip))
+        print(Ether(raw(ip)))
+        # pkt.decode_payload_as（） 更改有效负载的解码方式
 
-        IP(dst=RandIP())
-        IP(dst="example.com")
-        Ether(dst=RandMAC())
+        # p = IP()/TCP()/"AAAA"
+        # tcp=p[TCP]
+        # tcp.underlayer
+        # <IP  frag=0 proto=TCP |<TCP  |<Raw  load='AAAA' |>>>
+        # tcp.payload
+        # <Raw  load='AAAA' |>
+
+        udp = UDP(sport=546, dport=547)
+        # dhcpv6 = DHCP6(msgtype = 1)
+        dhcpv6 = DHCP6_Solicit()
+        cid = DHCP6OptClientId()
+        iana = DHCP6OptIA_NA()
+        iapd = DHCP6OptIA_PD(iapdopt=[(DHCP6OptIAPrefix())])
+        package = ether / ip / udp / dhcpv6 / cid / iana / iapd
+        package.show()
+
+        ip_pck: IP = ether.getlayer(1)
+        tcp_pck: TCP = ip_pck.getlayer(1)
+        http_pck: HTTP = tcp_pck.getlayer(1)
+
+        # 发送报文
+        # send：发送3层报文（ 如TCP / UDP协议），不接收数据包
+        # sendp：发送2层报文(通过mac地址转发)，不接收
+
+        # 2. 发且收
+        # sr：发送，接收3层报文，返回有回应的数据包和没有回应的数据包。
+        # sr1：发送，只接收1个响应包
+        # srp：发送，接收2层报文
+        # srloop()：循环发送
+        # srp1：发送，只接收1个响应包
+        # srploop：循环发送
+
         IP(ttl=(1, 30))
-
         send(IP(dst="192.0.2.1") / UDP(dport=53))
         sendp(Ether() / IP(dst="192.0.2.1") / UDP(dport=53))
 
@@ -35,25 +66,28 @@ class TestPcap(TestCase):
 
         srloop(IP(dst="packetlife.net") / ICMP(), count=3)
 
-        eth_packet = Ether()
-        # 使用IP()方法生成一个网络层数据包
-        ip_packet = IP()
-        ipv6 = IPv6()
-        # 使用TCP()方法生成一个tcp数据包
-        tcp_packet = TCP()
-        # 使用UDP()方法生成一个udp数据包
-        udp_packet = UDP()
-        # 使用ICMP()方法生成一个udp数据包
-        icmp_packet = ICMP()
+    # 抓包
+    def test_to_file(self):
+        package = sniff(iface='WLAN', timeout=10)
+        wrpcap("test.pcap", package)  # 将抓取的包保存为test.pcap文件
 
-    def test_run(self):
-        with open('test.h264.export.fenxi.video.pcapng', 'rb') as fp:
-            pcap = pcapng.Reader(fp)
-            for block in pcap:
-                if isinstance(block, pcapng.blocks.EnhancedPacket):
-                    print(block.packet_payload)
+        # 过滤报文
+        # sniff(iface='WLAN', timeout=10, filter="tcp port 80", prn=lambda x: x.sprintf("{IP:%IP.src% -> %IP.dst%}"))
 
-    def test_run4(self):
+        # 除了使用scapy抓包外，也可以使用tcpdump（Linux）和tshark（Windows）进行抓包。
+
+    def test_read_file(self):
+        field = 'dst=00:0c:29:d9:98:c7'
+        pkts = rdpcap("test.pcap")
+        for packet in pkts:
+            if packet.haslayer('DHCP6_Solicit'):
+                packet_text = repr(packet)
+                if re.search(field, packet_text, re.IGNORECASE):
+                    print("666")
+        # 或者
+        pkts = sniff(offline='packet_solicit.pcap')
+
+    def test_read_file2(self):
         packets = rdpcap('test-ggok-http.pcap')  # 'example.pcap' 是 pcap 文件名
         pkt0: Ether = packets[0]
         print(isinstance(pkt0, Loopback))  # 可以产生 Loopback 对象, 捕捉WiFi数据??
@@ -70,15 +104,6 @@ class TestPcap(TestCase):
         b1 = pkt0['IP'].version
         b2 = pkt0['IP'].dst
         b3 = pkt0['IP'].src
-
-        # b1 = pkt0['IPv6'].version
-        # b2 = pkt0['IPv6'].tc
-        # b3 = pkt0['IPv6'].fl
-        # b4 = pkt0['IPv6'].plen
-        # b5 = pkt0['IPv6'].nh
-        # b6 = pkt0['IPv6'].hlim
-        # b7 = pkt0['IPv6'].src
-        # b8 = pkt0['IPv6'].dst
         c1 = pkt0['TCP'].sport
         c2 = pkt0['TCP'].dport
         c3 = pkt0['TCP'].seq
