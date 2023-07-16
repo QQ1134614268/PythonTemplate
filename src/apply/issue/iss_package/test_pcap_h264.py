@@ -114,8 +114,7 @@ class Package(Base):
     ps_sys_flag_video = Column(Text, comment="系统头 系统视频锁定标识, 1bit,")
     ps_sys_video_rate = Column(Text, comment="系统头 视频 界限, 5bit,")
     ps_sys_stream_flag = Column(Text, comment="系统头 流标识, 8bit,")
-    p
-    s_sys_std_flag = Column(Text, comment="std缓存器界限标识, 1bit,")
+    ps_sys_std_flag = Column(Text, comment="std缓存器界限标识, 1bit,")
     ps_sys_std_len = Column(Text, comment="std缓存器尺寸标识, 13bit,")
     ps_sys_stream = Column(Text, comment="流识别, 8bit,")
     # h264 层
@@ -126,6 +125,9 @@ class PS(Packet):
     # eg: HTTP:
     name = "PS"
     fields_desc = [
+        # 0~3字节: 为0x 00 00 01 ba，表示当前为PSH头部 #I帧附加信息:20~23: 为0x 00 00 01 bb,表示当前为I帧附件信息
+        # 当前为I帧或P帧的第一个NALU则需加PSH头部。若当前为I帧的第一个NALU还需要加PSM头部。
+        # 每个NALU分为若干段，每段前需加PES头部, 每段数据与PES头部组成PES包。
         BitField('ps_h_start_code', 32, 2),  # 起始码，占位4bit; 000001BA/000001BB/000001BC/000001E0 | 000001BA/000001E0
         BitField('ps_h_mark_1', 2, 1),  # PTS[32…30]：占位3bit；
         BitField('ps_h_scr', 3, 1),  # System clock
