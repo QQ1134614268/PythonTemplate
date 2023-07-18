@@ -29,13 +29,11 @@ class Package(Base):
     id = Column(INTEGER, primary_key=True, comment="id")
     raw = Column(BLOB, comment="原始数据")
 
-    # 其值为6，则为TCP，其值为17，则为UDP。
-
     # 数据链路层
-    time = Column(Text, comment="版本, 4bit")
-    # e_mac_src = Column(Text, comment="目标mac, 48bit")
-    # e_mac_dst = Column(Text, comment="源mac, 48bit")
-    # e_type = Column(Text, comment="协议类型, 16bit")
+    ether_time = Column(Text, comment="版本, 4bit")
+    # ether_mac_src = Column(Text, comment="目标mac, 48bit")
+    # ether_mac_dst = Column(Text, comment="源mac, 48bit")
+    # ether_type = Column(Text, comment="协议类型, 16bit")
     # 1500 1456 -12 = 1442
 
     # ip 层
@@ -47,7 +45,7 @@ class Package(Base):
     ip_flags = Column(Text, comment="标志, 3bit")
     ip_offset = Column(Text, comment="片偏移, 9bit")
     ip_live_time = Column(Text, comment="生存时间, 8bit")
-    ip_prop = Column(Text, comment="payload协议, 8bit")  # 17 UDP
+    ip_prop = Column(Text, comment="payload协议, 8bit")  # 其值为6，则为TCP，其值为17，则为UDP。
     ip_check = Column(Text, comment="首部校验和, 16bit")
     ip_src = Column(Text, comment="源地址, 32bit")
     ip_dst = Column(Text, comment="目标地址, 32bit")
