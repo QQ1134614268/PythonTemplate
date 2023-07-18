@@ -7,7 +7,7 @@ import json
 import time
 from unittest import TestCase
 
-from scapy.fields import BitField
+from scapy.fields import BitField, IntField
 from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
@@ -127,22 +127,22 @@ class PS(Packet):
         # 0~3字节: 为0x 00 00 01 ba，表示当前为PSH头部 #I帧附加信息:20~23: 为0x 00 00 01 bb,表示当前为I帧附件信息
         # 当前为I帧或P帧的第一个NALU则需加PSH头部。若当前为I帧的第一个NALU还需要加PSM头部。
         # 每个NALU分为若干段，每段前需加PES头部, 每段数据与PES头部组成PES包。
-        BitField('ps_start_code', 32, 2),  # 起始码，占位4bit; 000001BA/000001BB/000001BC/000001E0 | 000001BA/000001E0
-        BitField('ps_mark_1', 2, 1),  # PTS[32…30]：占位3bit；
-        BitField('ps_scr', 3, 1),  # System clock
-        BitField('ps_mark_2', 1, 1),
-        BitField('ps_scr2', 15, 1),  # System clock
-        BitField('ps_mark_3', 1, 1),
-        BitField('ps_scr22', 15, 1),  # System clock
-        BitField('ps_mark_33', 1, 1),
-        BitField('ps_scr_extend', 9, 1),
-        BitField('ps_mark_4', 1, 1),
-        BitField('ps_rate', 22, 1),
-        BitField('ps_mark_5', 1, 1),
-        BitField('ps_mark_6', 1, 1),
-        BitField('ps_reserved', 5, 1),
-        BitField('ps_stuffing_length', 3, 1),
-
+        IntField('ps_start_code', 0x000001BB),  # 起始码，占位4bit; 000001BA/000001BB/000001BC/000001E0 | 000001BA/000001E0
+        # BitField('ps_mark_1', 2, 1),
+        # BitField('ps_scr', 3, 1),
+        # BitField('ps_mark_2', 1, 1),
+        # BitField('ps_scr2', 15, 1),
+        # BitField('ps_mark_3', 1, 1),
+        # BitField('ps_scr22', 15, 1),
+        # BitField('ps_mark_33', 1, 1),
+        # BitField('ps_scr_extend', 9, 1),
+        # BitField('ps_mark_4', 1, 1),
+        # BitField('ps_rate', 22, 1),
+        # BitField('ps_mark_5', 1, 1),
+        # BitField('ps_mark_6', 1, 1),
+        # BitField('ps_reserved', 5, 1),
+        # BitField('ps_stuffing_length', 3, 1),
+        #
         # #
         # BitField('ps_sys_start_code', 32, 1),
         # BitField('ps_sys_header_len', 16, 1),
@@ -250,6 +250,7 @@ class TestPcap(TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test1(self):
+        self.test_pre()
         packets = rdpcap('rtp.pcapng')
         for pck in packets:
             package = Package()
@@ -293,11 +294,13 @@ class TestPcap(TestCase):
                     package.rtp_timestamp = rtp.timestamp
                     package.rtp_ssrc = rtp.sourcesync
                     package.rtp_sync = json.dumps(rtp.sync)
-
-                    rtp.add_payload(PS(rtp.payload.__bytes__()))
-                    if pck.haslayer(PS):
-                        ps: PS = pck[PS]
-                        package.ps_start_code = ps.ps_start_code
+                    if rtp.payload.__bytes__().startswith(b'\x00\x00\x01\xba'):
+                        rtp.add_payload(PS(rtp.payload.__bytes__()))
+                        if pck.haslayer(PS):
+                            ps: PS = pck[PS]
+                            package.ps_start_code = ps.ps_start_code
+                    else:
+                        package.raw = rtp.payload.__bytes__()
 
                 # if pck.haslayer("PES"):
                 #     pes: PES = pck["PES"]
