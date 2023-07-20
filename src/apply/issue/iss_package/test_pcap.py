@@ -92,38 +92,30 @@ class TestPcap(TestCase):
         pkt0: Ether = packets[0]
         print(isinstance(pkt0, Loopback))  # 可以产生 Loopback 对象, 捕捉WiFi数据??
         print(pkt0.time)
-        a1 = pkt0['Ethernet'].dst
-        a2 = pkt0['Ethernet'].src
-        a3 = pkt0['Ethernet'].type
+        a1 = pkt0[Ether].dst
+        a2 = pkt0[Ether].src
+        a3 = pkt0[Ether].type
 
         # 可以通过 pkt0.show() 打印每个数据包的详细信息
         # 这里演示如何获取数据包的源地址和目标地址
         # if "IP" in packet:
         # if isinstance(pkt0, pcapng.blocks.EnhancedPacket):
         # pkt0.packet_payload
-        b1 = pkt0['IP'].version
-        b2 = pkt0['IP'].dst
-        b3 = pkt0['IP'].src
-        c1 = pkt0['TCP'].sport
-        c2 = pkt0['TCP'].dport
-        c3 = pkt0['TCP'].seq
-        c4 = pkt0['TCP'].ack
-        c5 = pkt0['TCP'].dataofs
-        c6 = pkt0['TCP'].reserved
-        c7 = pkt0['TCP'].flags
-        c8 = pkt0['TCP'].window
-        c9 = pkt0['TCP'].chksum
-        c10 = pkt0['TCP'].urgptr
-        c11 = pkt0['TCP'].options[0][1]
-        c12 = pkt0['TCP'].options[1][1]
-        c13 = pkt0['TCP'].options[2][1]
-        c14 = pkt0['TCP'].options[3][1]
-        c15 = pkt0['TCP'].options[4][1]
-
-
-# https://www.cntofu.com/book/33/6.md 添加高级协议
-class Disney(Packet):
-    name = "DisneyPacket "
-    fields_desc = [ShortField("mickey", 5),
-                   XByteField("minnie", 3),
-                   IntEnumField("donald", 1, {1: "happy", 2: "cool", 3: "angry"})]
+        b1 = pkt0[IP].version
+        b2 = pkt0[IP].dst
+        b3 = pkt0[IP].src
+        c1 = pkt0[TCP].sport
+        c2 = pkt0[TCP].dport
+        c3 = pkt0[TCP].seq
+        c4 = pkt0[TCP].ack
+        c5 = pkt0[TCP].dataofs
+        c6 = pkt0[TCP].reserved
+        c7 = pkt0[TCP].flags
+        c8 = pkt0[TCP].window
+        c9 = pkt0[TCP].chksum
+        c10 = pkt0[TCP].urgptr
+        c11 = pkt0[TCP].options[0][1]
+        c12 = pkt0[TCP].options[1][1]
+        c13 = pkt0[TCP].options[2][1]
+        c14 = pkt0[TCP].options[3][1]
+        c15 = pkt0[TCP].options[4][1]

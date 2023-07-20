@@ -13,8 +13,7 @@ from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
 from scapy.packet import Packet, Raw
 from scapy.utils import PcapReader, rdpcap
-from sqlalchemy import BLOB
-from sqlalchemy import Column, Text
+from sqlalchemy import BLOB, Column, Text
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
@@ -28,7 +27,7 @@ class Package(Base):
     # 原始数据
     id = Column(INTEGER, primary_key=True, comment="id")
     raw = Column(BLOB, comment="原始数据")
-
+    debug_info = Column(Text, comment="debug info, json, 4bit")
     # 数据链路层
     ether_time = Column(Text, comment="版本, 4bit")
     # ether_mac_src = Column(Text, comment="目标mac, 48bit")
@@ -128,73 +127,72 @@ class PS(Packet):
         # 当前为I帧或P帧的第一个NALU则需加PSH头部。若当前为I帧的第一个NALU还需要加PSM头部。
         # 每个NALU分为若干段，每段前需加PES头部, 每段数据与PES头部组成PES包。
         IntField('ps_start_code', 0x000001BB),  # 起始码，占位4bit; 000001BA/000001BB/000001BC/000001E0 | 000001BA/000001E0
-        # BitField('ps_mark_1', 2, 1),
-        # BitField('ps_scr', 3, 1),
-        # BitField('ps_mark_2', 1, 1),
-        # BitField('ps_scr2', 15, 1),
-        # BitField('ps_mark_3', 1, 1),
-        # BitField('ps_scr22', 15, 1),
-        # BitField('ps_mark_33', 1, 1),
-        # BitField('ps_scr_extend', 9, 1),
-        # BitField('ps_mark_4', 1, 1),
-        # BitField('ps_rate', 22, 1),
-        # BitField('ps_mark_5', 1, 1),
-        # BitField('ps_mark_6', 1, 1),
-        # BitField('ps_reserved', 5, 1),
-        # BitField('ps_stuffing_length', 3, 1),
-        #
-        # #
-        # BitField('ps_sys_start_code', 32, 1),
-        # BitField('ps_sys_header_len', 16, 1),
-        # BitField('ps_sys_mark_1', 1, 1),
-        # BitField('ps_sys_rate_bound', 22, 50000),
-        # BitField('ps_sys_mark_2', 1, 1),
-        # BitField('ps_sys_audio_bound', 6, 1),
-        # BitField('ps_sys_fixed_flag', 1, 0),
-        # BitField('ps_sys_csps_flag', 1, 1),
-        # BitField('ps_sys_audio_lock_flag', 1, 1),
-        # BitField('ps_sys_video_lock_flag', 1, 1),
-        # BitField('ps_sys_mark_3', 1, 1),
-        # BitField('ps_sys_video_bound', 5, 1),
-        # BitField('ps_sys_restriction_flag', 1, 1),
-        # BitField('ps_sys_reserved', 7, 0x7F),
-        #
-        # BitField('ps_sys_audio_stream_id', 8, 0xC0),
-        # BitField('ps_sys_audio_mark', 2, 3),
-        # BitField('ps_sys_audio_pstd_buffer_bound_scale', 1, 0),
-        # BitField('ps_sys_audio_pstd_buffer_size_bound', 13, 512),
-        #
-        # BitField('ps_sys_video_stream_id', 8, 0xE0),
-        # BitField('ps_sys_video_mark', 2, 3),
-        # BitField('ps_sys_video_pstd_buffer_bound_scale', 1, 1),
-        # BitField('ps_sys_video_pstd_buffer_size_bound', 13, 2048),
-        #
-        # # psm 记录了媒体信息，比如音视频的编码格式
-        # BitField('ps_m_start_code', 24, 0x000001),
-        # BitField('ps_m_stream_id', 8, 0xBC),
-        # BitField('ps_m_len', 16, 16),
-        # BitField('ps_m_next_indicator', 1, 1),
-        # BitField('ps_m_reserved', 2, 3),
-        # BitField('ps_m_version', 5, 0),
-        # BitField('ps_m_reserved2', 7, 0x7F),
-        # BitField('ps_m_mark_1', 1, 1),
-        # BitField('ps_m_stream_info_len', 16, 0),
-        # BitField('ps_m_stream_map_len', 16, 8),
-        #
-        # #     /*video*/
-        # BitField('ps_m_video_stream_type', 8, 0x1B),  # 视频编码格式H264
-        # BitField('ps_m_video_elementary_stream_id', 8, 0xE0),
-        # BitField('ps_m_video_elementary_stream_info_length', 16, 0),
-        # #     /*audio*/
-        # BitField('ps_m_audio_stream_type', 8, 0x90),  # 音频编码格式G711
-        # BitField('ps_m_audio_elementary_stream_id', 8, 0xC0),
-        # BitField('ps_m_audio_elementary_stream_info_length', 16, 0),
-        #
-        # #     /*crc*/
-        # BitField('ps_m_crc_1', 8, 0x45),
-        # BitField('ps_m_crc_2', 8, 0xBD),
-        # BitField('ps_m_crc_3', 8, 0xDC),
-        # BitField('ps_m_crc_4', 8, 0xDC),
+        BitField('ps_mark_1', 1, 2),
+        BitField('ps_scr', 1, 3),
+        BitField('ps_mark_2', 1, 1),
+        BitField('ps_scr2', 1, 15),
+        BitField('ps_mark_3', 1, 1),
+        BitField('ps_scr22', 1, 15),
+        BitField('ps_mark_33', 1, 1),
+        BitField('ps_scr_extend', 1, 9),
+        BitField('ps_mark_4', 1, 1),
+        BitField('ps_rate', 1, 22),
+        BitField('ps_mark_5', 3, 2),
+        BitField('ps_reserved', 3, 5),
+        BitField('ps_stuffing_length', 0, 3),
+        # var('ps_var_data', 0, 3), 可变填充长度
+
+        BitField('ps_sys_start_code', 1, 32),
+        BitField('ps_sys_header_len', 1, 16),
+        BitField('ps_sys_mark_1', 1, 1),
+        BitField('ps_sys_rate_bound', 50000, 22),
+        BitField('ps_sys_mark_2', 1, 1),
+        BitField('ps_sys_audio_bound', 1, 6),
+        BitField('ps_sys_fixed_flag', 0, 1),
+        BitField('ps_sys_csps_flag', 1, 1),
+        BitField('ps_sys_audio_lock_flag', 1, 1),
+        BitField('ps_sys_video_lock_flag', 1, 1),
+        BitField('ps_sys_mark_3', 1, 1),
+        BitField('ps_sys_video_bound', 1, 5),
+        BitField('ps_sys_restriction_flag', 1, 1),
+        BitField('ps_sys_reserved', 0x7F, 7),
+
+        BitField('ps_sys_audio_stream_id', 0xC0, 8),
+        BitField('ps_sys_audio_mark', 3, 2),
+        BitField('ps_sys_audio_pstd_buffer_bound_scale', 0, 1),
+        BitField('ps_sys_audio_pstd_buffer_size_bound', 512, 13),
+
+        BitField('ps_sys_video_stream_id', 0xE0, 8),
+        BitField('ps_sys_video_mark', 3, 2),
+        BitField('ps_sys_video_pstd_buffer_bound_scale', 1, 1),
+        BitField('ps_sys_video_pstd_buffer_size_bound', 2048, 13),
+
+        # psm 记录了媒体信息，比如音视频的编码格式
+        BitField('ps_m_start_code', 0x000001, 24),
+        BitField('ps_m_stream_id', 0xBC, 8),
+        BitField('ps_m_len', 16, 16),
+        BitField('ps_m_next_indicator', 1, 1),
+        BitField('ps_m_reserved', 3, 2),
+        BitField('ps_m_version', 0, 5),
+        BitField('ps_m_reserved2', 0x7F, 7),
+        BitField('ps_m_mark_1', 1, 1),
+        BitField('ps_m_stream_info_len', 0, 16),
+        BitField('ps_m_stream_map_len', 8, 16),
+
+        #     /*video*/
+        BitField('ps_m_video_stream_type', 0x1B, 8),  # 视频编码格式H264
+        BitField('ps_m_video_elementary_stream_id', 0xE0, 8),
+        BitField('ps_m_video_elementary_stream_info_length', 0, 16),
+        #     /*audio*/
+        BitField('ps_m_audio_stream_type', 0x90, 8),  # 音频编码格式G711
+        BitField('ps_m_audio_elementary_stream_id', 0xC0, 8),
+        BitField('ps_m_audio_elementary_stream_info_length', 0, 16),
+
+        #     /*crc*/
+        BitField('ps_m_crc_1', 0x45, 8),
+        BitField('ps_m_crc_2', 0xBD, 8),
+        BitField('ps_m_crc_3', 0xDC, 8),
+        BitField('ps_m_crc_4', 0xDC, 8),
     ]
 
 
@@ -202,43 +200,43 @@ class PES(Packet):
     name = "PES"
     fields_desc = [
         # PES
-        BitField('pes_start_code', 24, 0x000001),
-        BitField('pes_stream_id', 8, 0x000001),
-        BitField('pes_payload_len', 16, 0),
-        BitField('pes_f1', 2, 10),
-        BitField('pes_scrambling_control', 2, 0),
+        BitField('pes_start_code', 0x000001, 24),
+        BitField('pes_stream_id', 0x000001, 8),
+        BitField('pes_payload_len', 0, 16),
+        BitField('pes_f1', 10, 2),
+        BitField('pes_scrambling_control', 0, 2),
         BitField('pes_priority', 1, 1),
         BitField('pes_data_alignment_indicator', 1, 1),
-        BitField('pes_copyright', 1, 0),
-        BitField('pes_original_or_copy', 1, 0),
+        BitField('pes_copyright', 0, 1),
+        BitField('pes_original_or_copy', 0, 1),
         BitField('pes_pts_flag', 1, 1),
         BitField('pes_dts_flag', 1, 1),
-        BitField('pes_escr_flag', 1, 0),
-        BitField('pes_es_rate_flag', 1, 0),
-        BitField('pes_dsm_trick_mode_flag', 1, 0),
-        BitField('pes_additional_copy_info_flag', 1, 0),
-        BitField('pes_PES_CRC_flag', 1, 0),
-        BitField('pes_PES_extension_flag', 1, 0),
-        BitField('pes_header_data_length', 8, 10),
+        BitField('pes_escr_flag', 0, 1),
+        BitField('pes_es_rate_flag', 0, 1),
+        BitField('pes_dsm_trick_mode_flag', 0, 1),
+        BitField('pes_additional_copy_info_flag', 0, 1),
+        BitField('pes_PES_CRC_flag', 0, 1),
+        BitField('pes_PES_extension_flag', 0, 1),
+        BitField('pes_header_data_length', 10, 8),
         #     /*PTS,DTS*/
-        BitField('pes_pts', 4, 3),
+        BitField('pes_pts', 3, 4),
         BitField('pes_PTS', 3, 3),
         BitField('pes_mark_1', 1, 1),
-        BitField('pes_pts_2', 15, 0),
+        BitField('pes_pts_2', 0, 15),
         BitField('pes_mark_2', 1, 1),
-        BitField('pes_pts_3', 15, 1),
+        BitField('pes_pts_3', 1, 15),
         BitField('pes_mark_3', 1, 1),
-        BitField('pes_pts_4', 4, 1),
-        BitField('pes_dts_1', 3, 1),
+        BitField('pes_pts_4', 1, 4),
+        BitField('pes_dts_1', 1, 3),
         BitField('pes_dts_mark_1', 1, 1),
-        BitField('pes_dts_2', 4, 1),
-        BitField('pes_dts_3', 3, 1),
+        BitField('pes_dts_2', 1, 4),
+        BitField('pes_dts_3', 1, 3),
         BitField('pes_dts_mark_2', 1, 1),
-        BitField('pes_dts_4', 15, 1),
+        BitField('pes_dts_4', 1, 15),
         BitField('pes_dts_mark_3', 1, 1),
-        BitField('pes_dts_5', 15, 1),
+        BitField('pes_dts_5', 1, 15),
         BitField('pes_dts_mark_5', 1, 1),
-        BitField('pes_dts_6', 15, 1),
+        BitField('pes_dts_6', 1, 15),
         BitField('pes_dts_mark_6', 1, 1),
     ]
 
@@ -250,7 +248,7 @@ class TestPcap(TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test1(self):
-        self.test_pre()
+        # self.test_pre()
         packets = rdpcap('rtp.pcapng')
         for pck in packets:
             package = Package()
@@ -294,13 +292,19 @@ class TestPcap(TestCase):
                     package.rtp_timestamp = rtp.timestamp
                     package.rtp_ssrc = rtp.sourcesync
                     package.rtp_sync = json.dumps(rtp.sync)
-                    if rtp.payload.__bytes__().startswith(b'\x00\x00\x01\xba'):
-                        rtp.add_payload(PS(rtp.payload.__bytes__()))
+
+                    b = b'\x00\x00\x01\xba'
+                    b2 = b'\x00\x00\x01\xbb'
+                    b3 = b'\x00\x00\x01\xbb'
+                    bytes__ = rtp.payload.__bytes__()
+                    package.debug_info = f"{bytes__.__contains__(b)}-{bytes__.__contains__(b2)}-{bytes__.__contains__(b3)}"
+                    if bytes__.startswith(b):
+                        rtp.add_payload(PS(bytes__))
                         if pck.haslayer(PS):
                             ps: PS = pck[PS]
                             package.ps_start_code = ps.ps_start_code
                     else:
-                        package.raw = rtp.payload.__bytes__()
+                        package.raw = bytes__
 
                 # if pck.haslayer("PES"):
                 #     pes: PES = pck["PES"]
@@ -329,6 +333,15 @@ class TestPcap(TestCase):
             localhost_test_session.commit()
 
     def test2(self):
+        class TestPacket(Packet):
+            fields_desc = [
+                BitField("a", 0, 8),
+                # BitField("b", 0, 16),
+                # BitField("c", 0, 2),
+            ]
+
+        TestPacket(b"a" * 32)
+        print()
         with PcapReader("test_out_export_h264.pcapng") as reader:
             for pck in reader:
                 print(pck, pck.time, isinstance(pck, Ether), isinstance(pck, IP), isinstance(pck, Raw))

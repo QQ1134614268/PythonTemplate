@@ -1,3 +1,5 @@
+from unittest import TestCase
+
 from scapy.compat import raw
 from scapy.error import warning
 from scapy.fields import Field, StrLenField
@@ -5,6 +7,7 @@ from scapy.packet import Packet
 
 
 def vlenq2str(l):
+    # ending byte ??
     s = []
     s.append(l & 0x7F)
     l = l >> 7
@@ -45,7 +48,7 @@ class VarLenQField(Field):
         return raw(x)
 
     def m2i(self, pkt, x):
-        if s is None:
+        if x is None:
             return None, 0
         return str2vlenq(x)[1]
 
@@ -68,8 +71,8 @@ def dissect(self, s):
     s = self.post_dissect(s)
     payl, pad = self.extract_padding(s)
     self.do_dissect_payload(payl)
-    if pad and conf.padding:
-        self.add_payload(Padding(pad))
+    # if pad and conf.padding:
+    #     self.add_payload(Padding(pad))
 
 
 def do_dissect_payload(self, s):
@@ -86,3 +89,16 @@ def do_dissect(self, s):
         s, fval = f.getfield(self, s)
         self.fields[f] = fval
     return s
+
+
+class TestPcap(TestCase):
+
+    def test1(self):
+        f = FOO(data="A" * 129)
+        f.show()
+        f.show2()
+        print(raw(FOO(data="A" * 129)))
+        print(raw(FOO(data="A" * 12900)))
+        FOO("\xff\xff" + "B" * 8)
+        vlenq2str(2097090)
+        FOO("\x05" + "B" * 8)
