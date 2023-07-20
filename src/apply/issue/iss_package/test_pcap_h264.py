@@ -7,13 +7,13 @@ import json
 import time
 from unittest import TestCase
 
-from scapy.fields import BitField, IntField
+from scapy.fields import BitField, IntField, StrLenField, ShortField, X3BytesField, ByteField, XIntField
 from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
 from scapy.packet import Packet, Raw
 from scapy.utils import PcapReader, rdpcap
-from sqlalchemy import BLOB, Column, Text
+from sqlalchemy import Column, Text
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
@@ -26,7 +26,7 @@ class Package(Base):
     __tablename__ = 'package'
     # 原始数据
     id = Column(INTEGER, primary_key=True, comment="id")
-    raw = Column(BLOB, comment="原始数据")
+    raw = Column(Text, comment="原始数据")
     debug_info = Column(Text, comment="debug info, json, 4bit")
     # 数据链路层
     ether_time = Column(Text, comment="版本, 4bit")
@@ -102,6 +102,8 @@ class Package(Base):
     ps_scr = Column(Text, comment="包头scr,33bit,")  # 系统时钟基准（SCR-System Clock Reference）的基本部分
     ps_scr_extend = Column(Text, comment="包头scr 扩展部分,9bit,")
     ps_rate = Column(Text, comment="节目复用速率, 22bit,")
+
+    # ps system header
     ps_sys_start_code = Column(Text, comment="系统头 起始码, 32bit,")
     ps_sys_len = Column(Text, comment="系统头 长度, 16bit,")
     ps_sys_rate = Column(Text, comment="系统头 速率界限, 22bit,")
@@ -115,6 +117,14 @@ class Package(Base):
     ps_sys_std_flag = Column(Text, comment="std缓存器界限标识, 1bit,")
     ps_sys_std_len = Column(Text, comment="std缓存器尺寸标识, 13bit,")
     ps_sys_stream = Column(Text, comment="流识别, 8bit,")
+
+    ps_sys_options = Column(Text, comment="附加, 8bit,")
+    # psm Header
+    psm_start_code = Column(Text, comment="开始码,32bit,")
+
+    # pes Header
+    pes_start_code = Column(Text, comment="开始码,32bit,")
+
     # h264 层
     # 帧 -- 合并
 
@@ -140,10 +150,15 @@ class PS(Packet):
         BitField('ps_mark_5', 3, 2),
         BitField('ps_reserved', 3, 5),
         BitField('ps_stuffing_length', 0, 3),
-        # var('ps_var_data', 0, 3), 可变填充长度
+        StrLenField("ps_options", b"", length_from=lambda pkt: pkt.ps_stuffing_length)
+    ]
 
-        BitField('ps_sys_start_code', 1, 32),
-        BitField('ps_sys_header_len', 1, 16),
+
+class PSSYS(Packet):
+    name = "PSSYS"
+    fields_desc = [
+        XIntField('ps_sys_start_code', 1),
+        ShortField('ps_sys_header_len', 1),
         BitField('ps_sys_mark_1', 1, 1),
         BitField('ps_sys_rate_bound', 50000, 22),
         BitField('ps_sys_mark_2', 1, 1),
@@ -157,42 +172,55 @@ class PS(Packet):
         BitField('ps_sys_restriction_flag', 1, 1),
         BitField('ps_sys_reserved', 0x7F, 7),
 
-        BitField('ps_sys_audio_stream_id', 0xC0, 8),
-        BitField('ps_sys_audio_mark', 3, 2),
-        BitField('ps_sys_audio_pstd_buffer_bound_scale', 0, 1),
-        BitField('ps_sys_audio_pstd_buffer_size_bound', 512, 13),
+        StrLenField("ps_sys_options", b"", length_from=lambda pkt: pkt.ps_sys_header_len - 6),
 
-        BitField('ps_sys_video_stream_id', 0xE0, 8),
-        BitField('ps_sys_video_mark', 3, 2),
-        BitField('ps_sys_video_pstd_buffer_bound_scale', 1, 1),
-        BitField('ps_sys_video_pstd_buffer_size_bound', 2048, 13),
+        # BitField('ps_sys_audio_stream_id', 0xC0, 8),
+        # BitField('ps_sys_audio_mark', 3, 2),
+        # BitField('ps_sys_audio_pstd_buffer_bound_scale', 0, 1),
+        # BitField('ps_sys_audio_pstd_buffer_size_bound', 512, 13),
+        #
+        # BitField('ps_sys_video_stream_id', 0xE0, 8),
+        # BitField('ps_sys_video_mark', 3, 2),
+        # BitField('ps_sys_video_pstd_buffer_bound_scale', 1, 1),
+        # BitField('ps_sys_video_pstd_buffer_size_bound', 2048, 13),
 
+    ]
+
+
+class PSM(Packet):
+    name = "PSM"
+    fields_desc = [
         # psm 记录了媒体信息，比如音视频的编码格式
-        BitField('ps_m_start_code', 0x000001, 24),
-        BitField('ps_m_stream_id', 0xBC, 8),
-        BitField('ps_m_len', 16, 16),
-        BitField('ps_m_next_indicator', 1, 1),
-        BitField('ps_m_reserved', 3, 2),
-        BitField('ps_m_version', 0, 5),
-        BitField('ps_m_reserved2', 0x7F, 7),
-        BitField('ps_m_mark_1', 1, 1),
-        BitField('ps_m_stream_info_len', 0, 16),
-        BitField('ps_m_stream_map_len', 8, 16),
+        X3BytesField('psm_start_code', 0x000001),
+        ByteField('psm_stream_id', 0xBC),
+        ShortField('psm_len', 16),
+        BitField('psm_next_indicator', 1, 1),
+        BitField('psm_reserved', 3, 2),
+        BitField('psm_version', 0, 5),
+        BitField('psm_reserved2', 0x7F, 7),
+        BitField('psm_mark_1', 1, 1),
+        BitField('psm_stream_info_len', 0, 16),
+        StrLenField("psm_stream_info", b"", length_from=lambda pkt: pkt.psm_stream_info_len),
+        BitField('psm_stream_map_len', 8, 16),
+        StrLenField("psm_stream_map", b"", length_from=lambda pkt: pkt.psm_stream_map_len),
+        # #     /*video*/
+        # BitField('psm_video_stream_type', 0x1B, 8),  # 视频编码格式H264
+        # BitField('psm_video_elementary_stream_id', 0xE0, 8),
+        # BitField('psm_video_elementary_stream_info_length', 0, 16),
+        # #     /*audio*/
+        # BitField('psm_audio_stream_type', 0x90, 8),  # 音频编码格式G711
+        # BitField('psm_audio_elementary_stream_id', 0xC0, 8),
+        # BitField('psm_audio_elementary_stream_info_length', 0, 16),
 
-        #     /*video*/
-        BitField('ps_m_video_stream_type', 0x1B, 8),  # 视频编码格式H264
-        BitField('ps_m_video_elementary_stream_id', 0xE0, 8),
-        BitField('ps_m_video_elementary_stream_info_length', 0, 16),
-        #     /*audio*/
-        BitField('ps_m_audio_stream_type', 0x90, 8),  # 音频编码格式G711
-        BitField('ps_m_audio_elementary_stream_id', 0xC0, 8),
-        BitField('ps_m_audio_elementary_stream_info_length', 0, 16),
-
+        #
         #     /*crc*/
-        BitField('ps_m_crc_1', 0x45, 8),
-        BitField('ps_m_crc_2', 0xBD, 8),
-        BitField('ps_m_crc_3', 0xDC, 8),
-        BitField('ps_m_crc_4', 0xDC, 8),
+        BitField('psm_crc_1', 0x45, 8),
+        BitField('psm_crc_2', 0xBD, 8),
+        BitField('psm_crc_3', 0xDC, 8),
+        BitField('psm_crc_4', 0xDC, 8),
+        StrLenField("psm_options", b"",
+                    length_from=lambda pkt: pkt.psm_len - 10 - pkt.psm_stream_info_len - pkt.psm_stream_map_len),
+
     ]
 
 
@@ -200,8 +228,8 @@ class PES(Packet):
     name = "PES"
     fields_desc = [
         # PES
-        BitField('pes_start_code', 0x000001, 24),
-        BitField('pes_stream_id', 0x000001, 8),
+        X3BytesField('pes_start_code', 0x000001),
+        ByteField('pes_stream_id', 0x000001),
         BitField('pes_payload_len', 0, 16),
         BitField('pes_f1', 10, 2),
         BitField('pes_scrambling_control', 0, 2),
@@ -241,6 +269,11 @@ class PES(Packet):
     ]
 
 
+class H264(Packet):
+    # 标准 H.264 流以 0x00 00 00 01 起始码为标志分割成若干单元，称之为 Network Abstraction Layer
+    ...
+
+
 class TestPcap(TestCase):
     def test_pre(self):
         ...
@@ -248,7 +281,7 @@ class TestPcap(TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test1(self):
-        # self.test_pre()
+        self.test_pre()
         packets = rdpcap('rtp.pcapng')
         for pck in packets:
             package = Package()
@@ -277,8 +310,7 @@ class TestPcap(TestCase):
                 package.udp_dst_port = udp.dport
                 package.udp_len = udp.len
                 package.udp_check = udp.chksum
-                print(udp.payload)
-                # print(udp.underlayer)
+                # udp.payload.decode_payload_as(RTP)
                 udp.add_payload(RTP(udp.payload.__bytes__()))
                 if pck.haslayer(RTP):
                     rtp: RTP = pck[RTP]
@@ -293,22 +325,48 @@ class TestPcap(TestCase):
                     package.rtp_ssrc = rtp.sourcesync
                     package.rtp_sync = json.dumps(rtp.sync)
 
-                    b = b'\x00\x00\x01\xba'
-                    b2 = b'\x00\x00\x01\xbb'
-                    b3 = b'\x00\x00\x01\xbb'
+                    ps_ba = b'\x00\x00\x01\xba'
+                    pss_bb = b'\x00\x00\x01\xbb'
+                    psm_bc = b'\x00\x00\x01\xbc'
+                    pes_e0 = b'\x00\x00\x01\xe0'
                     bytes__ = rtp.payload.__bytes__()
-                    package.debug_info = f"{bytes__.__contains__(b)}-{bytes__.__contains__(b2)}-{bytes__.__contains__(b3)}"
-                    if bytes__.startswith(b):
-                        rtp.add_payload(PS(bytes__))
+                    package.debug_info = f"{ps_ba in bytes__}-{pss_bb in bytes__}-{psm_bc in bytes__}-{pes_e0 in bytes__}"
+                    if bytes__.startswith(ps_ba):
+                        # rtp.payload.decode_payload_as(PS)
+                        rtp.add_payload(PS(rtp.payload.__bytes__()))
                         if pck.haslayer(PS):
                             ps: PS = pck[PS]
                             package.ps_start_code = ps.ps_start_code
-                    else:
-                        package.raw = bytes__
 
-                # if pck.haslayer("PES"):
-                #     pes: PES = pck["PES"]
-                #     package.ps_start_code = pes.chksum
+                            if ps.payload.__bytes__().startswith(pss_bb):
+                                # ps.payload.decode_payload_as(PSSYS)
+                                ps.add_payload(PSSYS(ps.payload.__bytes__()))
+                                pss: PSSYS = pck[PSSYS]
+                                package.ps_sys_start_code = pss.ps_sys_start_code
+                                package.ps_sys_options = pss.ps_sys_options
+
+                                if pss.payload.__bytes__().startswith(psm_bc):
+                                    # pss.payload.decode_payload_as(PSM)
+                                    pss.add_payload(PSM(pss.payload.__bytes__()))
+                                    psm: PSM = pss[PSM]
+                                    package.psm_start_code = psm.psm_start_code
+
+                                    if psm.payload.__bytes__().startswith(pes_e0):
+                                        # pss.payload.decode_payload_as(PES)
+                                        psm.add_payload(PES(psm.payload.__bytes__()))
+                                        pes: PES = psm[PES]
+                                        package.pes_start_code = pes.pes_start_code
+
+                                        package.raw = pes.payload.__bytes__().hex()
+                            if ps.payload.__bytes__().startswith(pes_e0):
+                                # ps.payload.decode_payload_as(PES)
+                                ps.add_payload(PES(ps.payload.__bytes__()))
+                                pes: PES = ps[PES]
+                                package.pes_start_code = pes.pes_start_code
+
+                                package.raw = pes.payload.__bytes__().hex()
+                    else:
+                        package.raw = bytes__.hex()
 
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]
@@ -328,20 +386,10 @@ class TestPcap(TestCase):
                 package.tcp_check = tcp.chksum
                 package.tcp_emergency = tcp.urgptr
                 package.tcp_other = str(tcp.options)
-            print(package)
             localhost_test_session.add(package)
             localhost_test_session.commit()
 
     def test2(self):
-        class TestPacket(Packet):
-            fields_desc = [
-                BitField("a", 0, 8),
-                # BitField("b", 0, 16),
-                # BitField("c", 0, 2),
-            ]
-
-        TestPacket(b"a" * 32)
-        print()
         with PcapReader("test_out_export_h264.pcapng") as reader:
             for pck in reader:
                 print(pck, pck.time, isinstance(pck, Ether), isinstance(pck, IP), isinstance(pck, Raw))

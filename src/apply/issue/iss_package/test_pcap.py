@@ -6,11 +6,9 @@
 from unittest import TestCase
 
 from scapy.all import *
-from scapy.layers.dhcp6 import DHCP6OptIA_PD, DHCP6OptIAPrefix, DHCP6OptIA_NA, DHCP6OptClientId, DHCP6_Solicit
 from scapy.layers.http import HTTP
 from scapy.layers.inet import IP, TCP, ICMP
 from scapy.layers.inet import UDP
-from scapy.layers.inet6 import IPv6
 from scapy.layers.l2 import Ether
 from scapy.layers.l2 import Loopback
 
@@ -19,31 +17,18 @@ class TestPcap(TestCase):
     def test0(self):
         # 构造报文
         ether = Ether(dst='00:0c:29:47:f3:2f', src='c8:3a:35:09:ef:a1', type=0x86dd)
-        ip = IP(src="10.0.0.1", dst="example.com")
+        ip = IP(src="10.0.0.1", dst="example.com", ttl=(1, 30))
         print(hexdump(ip))
         print(raw(ip))
         print(Ether(raw(ip)))
         # pkt.decode_payload_as（） 更改有效负载的解码方式
 
-        # p = IP()/TCP()/"AAAA"
-        # tcp=p[TCP]
-        # tcp.underlayer
-        # <IP  frag=0 proto=TCP |<TCP  |<Raw  load='AAAA' |>>>
-        # tcp.payload
-        # <Raw  load='AAAA' |>
-
-        udp = UDP(sport=546, dport=547)
-        # dhcpv6 = DHCP6(msgtype = 1)
-        dhcpv6 = DHCP6_Solicit()
-        cid = DHCP6OptClientId()
-        iana = DHCP6OptIA_NA()
-        iapd = DHCP6OptIA_PD(iapdopt=[(DHCP6OptIAPrefix())])
-        package = ether / ip / udp / dhcpv6 / cid / iana / iapd
-        package.show()
-
-        ip_pck: IP = ether.getlayer(1)
-        tcp_pck: TCP = ip_pck.getlayer(1)
-        http_pck: HTTP = tcp_pck.getlayer(1)
+        p = IP() / TCP() / HTTP()/"AAAA"
+        tcp = p[TCP]
+        print(tcp.payload)
+        print(tcp.underlayer)
+        p.show()
+        ls(UDP())
 
         # 发送报文
         # send：发送3层报文（ 如TCP / UDP协议），不接收数据包
@@ -53,16 +38,11 @@ class TestPcap(TestCase):
         # sr：发送，接收3层报文，返回有回应的数据包和没有回应的数据包。
         # sr1：发送，只接收1个响应包
         # srp：发送，接收2层报文
-        # srloop()：循环发送
         # srp1：发送，只接收1个响应包
         # srploop：循环发送
 
-        IP(ttl=(1, 30))
         send(IP(dst="192.0.2.1") / UDP(dport=53))
         sendp(Ether() / IP(dst="192.0.2.1") / UDP(dport=53))
-
-        ls(UDP())
-        (Ether() / IPv6()).show()
 
         srloop(IP(dst="packetlife.net") / ICMP(), count=3)
 
