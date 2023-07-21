@@ -29,3 +29,5 @@ class TestBase(TestCase):
         print(bytearray("a", "utf8"))
 
         print(num & 16)
+
+        print(b'01', b'\x01', '01', 0x01, 0o01, '\u0101', u'01')

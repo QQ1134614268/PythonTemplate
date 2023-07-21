@@ -214,10 +214,7 @@ class PSM(Packet):
 
         #
         #     /*crc*/
-        BitField('psm_crc_1', 0x45, 8),
-        BitField('psm_crc_2', 0xBD, 8),
-        BitField('psm_crc_3', 0xDC, 8),
-        BitField('psm_crc_4', 0xDC, 8),
+        BitField('psm_crc_32', 0x45, 32),
         StrLenField("psm_options", b"",
                     length_from=lambda pkt: pkt.psm_len - 10 - pkt.psm_stream_info_len - pkt.psm_stream_map_len),
 
@@ -231,41 +228,43 @@ class PES(Packet):
         X3BytesField('pes_start_code', 0x000001),
         ByteField('pes_stream_id', 0x000001),
         BitField('pes_payload_len', 0, 16),
-        BitField('pes_f1', 10, 2),
-        BitField('pes_scrambling_control', 0, 2),
-        BitField('pes_priority', 1, 1),
-        BitField('pes_data_alignment_indicator', 1, 1),
-        BitField('pes_copyright', 0, 1),
-        BitField('pes_original_or_copy', 0, 1),
-        BitField('pes_pts_flag', 1, 1),
-        BitField('pes_dts_flag', 1, 1),
-        BitField('pes_escr_flag', 0, 1),
-        BitField('pes_es_rate_flag', 0, 1),
-        BitField('pes_dsm_trick_mode_flag', 0, 1),
-        BitField('pes_additional_copy_info_flag', 0, 1),
-        BitField('pes_PES_CRC_flag', 0, 1),
-        BitField('pes_PES_extension_flag', 0, 1),
-        BitField('pes_header_data_length', 10, 8),
-        #     /*PTS,DTS*/
-        BitField('pes_pts', 3, 4),
-        BitField('pes_PTS', 3, 3),
-        BitField('pes_mark_1', 1, 1),
-        BitField('pes_pts_2', 0, 15),
-        BitField('pes_mark_2', 1, 1),
-        BitField('pes_pts_3', 1, 15),
-        BitField('pes_mark_3', 1, 1),
-        BitField('pes_pts_4', 1, 4),
-        BitField('pes_dts_1', 1, 3),
-        BitField('pes_dts_mark_1', 1, 1),
-        BitField('pes_dts_2', 1, 4),
-        BitField('pes_dts_3', 1, 3),
-        BitField('pes_dts_mark_2', 1, 1),
-        BitField('pes_dts_4', 1, 15),
-        BitField('pes_dts_mark_3', 1, 1),
-        BitField('pes_dts_5', 1, 15),
-        BitField('pes_dts_mark_5', 1, 1),
-        BitField('pes_dts_6', 1, 15),
-        BitField('pes_dts_mark_6', 1, 1),
+        StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_payload_len),
+
+        # BitField('pes_f1', 10, 2),
+        # BitField('pes_scrambling_control', 0, 2),
+        # BitField('pes_priority', 1, 1),
+        # BitField('pes_data_alignment_indicator', 1, 1),
+        # BitField('pes_copyright', 0, 1),
+        # BitField('pes_original_or_copy', 0, 1),
+        # BitField('pes_pts_flag', 1, 1),
+        # BitField('pes_dts_flag', 1, 1),
+        # BitField('pes_escr_flag', 0, 1),
+        # BitField('pes_es_rate_flag', 0, 1),
+        # BitField('pes_dsm_trick_mode_flag', 0, 1),
+        # BitField('pes_additional_copy_info_flag', 0, 1),
+        # BitField('pes_PES_CRC_flag', 0, 1),
+        # BitField('pes_PES_extension_flag', 0, 1),
+        # BitField('pes_header_data_length', 10, 8),
+        # #     /*PTS,DTS*/
+        # BitField('pes_pts', 3, 4),
+        # BitField('pes_PTS', 3, 3),
+        # BitField('pes_mark_1', 1, 1),
+        # BitField('pes_pts_2', 0, 15),
+        # BitField('pes_mark_2', 1, 1),
+        # BitField('pes_pts_3', 1, 15),
+        # BitField('pes_mark_3', 1, 1),
+        # BitField('pes_pts_4', 1, 4),
+        # BitField('pes_dts_1', 1, 3),
+        # BitField('pes_dts_mark_1', 1, 1),
+        # BitField('pes_dts_2', 1, 4),
+        # BitField('pes_dts_3', 1, 3),
+        # BitField('pes_dts_mark_2', 1, 1),
+        # BitField('pes_dts_4', 1, 15),
+        # BitField('pes_dts_mark_3', 1, 1),
+        # BitField('pes_dts_5', 1, 15),
+        # BitField('pes_dts_mark_5', 1, 1),
+        # BitField('pes_dts_6', 1, 15),
+        # BitField('pes_dts_mark_6', 1, 1),
     ]
 
 
@@ -310,63 +309,58 @@ class TestPcap(TestCase):
                 package.udp_dst_port = udp.dport
                 package.udp_len = udp.len
                 package.udp_check = udp.chksum
-                # udp.payload.decode_payload_as(RTP)
-                udp.add_payload(RTP(udp.payload.__bytes__()))
-                if pck.haslayer(RTP):
-                    rtp: RTP = pck[RTP]
-                    package.rtp_version = rtp.version
-                    package.rtp_padding = rtp.padding
-                    package.rtp_extension = rtp.extension
-                    package.rtp_numsync = rtp.numsync
-                    package.rtp_marker = rtp.marker
-                    package.rtp_payload_type = rtp.payload_type
-                    package.rtp_seq = rtp.sequence
-                    package.rtp_timestamp = rtp.timestamp
-                    package.rtp_ssrc = rtp.sourcesync
-                    package.rtp_sync = json.dumps(rtp.sync)
+                udp.decode_payload_as(RTP)
 
-                    ps_ba = b'\x00\x00\x01\xba'
-                    pss_bb = b'\x00\x00\x01\xbb'
-                    psm_bc = b'\x00\x00\x01\xbc'
-                    pes_e0 = b'\x00\x00\x01\xe0'
-                    bytes__ = rtp.payload.__bytes__()
-                    package.debug_info = f"{ps_ba in bytes__}-{pss_bb in bytes__}-{psm_bc in bytes__}-{pes_e0 in bytes__}"
-                    if bytes__.startswith(ps_ba):
-                        # rtp.payload.decode_payload_as(PS)
-                        rtp.add_payload(PS(rtp.payload.__bytes__()))
-                        if pck.haslayer(PS):
-                            ps: PS = pck[PS]
-                            package.ps_start_code = ps.ps_start_code
+            if pck.haslayer(RTP):
+                rtp: RTP = pck[RTP]
+                package.rtp_version = rtp.version
+                package.rtp_padding = rtp.padding
+                package.rtp_extension = rtp.extension
+                package.rtp_numsync = rtp.numsync
+                package.rtp_marker = rtp.marker
+                package.rtp_payload_type = rtp.payload_type
+                package.rtp_seq = rtp.sequence
+                package.rtp_timestamp = rtp.timestamp
+                package.rtp_ssrc = rtp.sourcesync
+                package.rtp_sync = json.dumps(rtp.sync)
 
-                            if ps.payload.__bytes__().startswith(pss_bb):
-                                # ps.payload.decode_payload_as(PSSYS)
-                                ps.add_payload(PSSYS(ps.payload.__bytes__()))
-                                pss: PSSYS = pck[PSSYS]
-                                package.ps_sys_start_code = pss.ps_sys_start_code
-                                package.ps_sys_options = pss.ps_sys_options
+                ps_ba = b'\x00\x00\x01\xba'
+                pss_bb = b'\x00\x00\x01\xbb'
+                psm_bc = b'\x00\x00\x01\xbc'
+                pes_e0 = b'\x00\x00\x01\xe0'
+                bytes__ = rtp.payload.__bytes__()
+                package.debug_info = f"{ps_ba in bytes__}-{pss_bb in bytes__}-{psm_bc in bytes__}-{pes_e0 in bytes__}"
+                if bytes__.startswith(ps_ba):
+                    rtp.decode_payload_as(PS)
+                    if pck.haslayer(PS):
+                        ps: PS = pck[PS]
+                        package.ps_start_code = ps.ps_start_code
 
-                                if pss.payload.__bytes__().startswith(psm_bc):
-                                    # pss.payload.decode_payload_as(PSM)
-                                    pss.add_payload(PSM(pss.payload.__bytes__()))
-                                    psm: PSM = pss[PSM]
-                                    package.psm_start_code = psm.psm_start_code
+                        if ps.payload.__bytes__().startswith(pss_bb):
+                            ps.decode_payload_as(PSSYS)
+                            pss: PSSYS = pck[PSSYS]
+                            package.ps_sys_start_code = pss.ps_sys_start_code
+                            package.ps_sys_options = pss.ps_sys_options
 
-                                    if psm.payload.__bytes__().startswith(pes_e0):
-                                        # pss.payload.decode_payload_as(PES)
-                                        psm.add_payload(PES(psm.payload.__bytes__()))
-                                        pes: PES = psm[PES]
-                                        package.pes_start_code = pes.pes_start_code
+                            if pss.payload.__bytes__().startswith(psm_bc):
+                                pss.decode_payload_as(PSM)
+                                psm: PSM = pss[PSM]
+                                package.psm_start_code = psm.psm_start_code
 
-                                        package.raw = pes.payload.__bytes__().hex()
-                            if ps.payload.__bytes__().startswith(pes_e0):
-                                # ps.payload.decode_payload_as(PES)
-                                ps.add_payload(PES(ps.payload.__bytes__()))
-                                pes: PES = ps[PES]
-                                package.pes_start_code = pes.pes_start_code
+                                if psm.payload.__bytes__().startswith(pes_e0):
+                                    psm.decode_payload_as(PES)
+                                    pes: PES = psm[PES]
+                                    package.pes_start_code = pes.pes_start_code
+                                    # pes.show()
+                                    package.raw = pes.payload.__bytes__().hex()
+                        if ps.payload.__bytes__().startswith(pes_e0):
+                            ps.decode_payload_as(PES)
+                            pes: PES = ps[PES]
+                            package.pes_start_code = pes.pes_start_code
 
-                                package.raw = pes.payload.__bytes__().hex()
-                    else:
-                        package.raw = bytes__.hex()
+                            package.raw = pes.payload.__bytes__().hex()
+                else:
+                    package.raw = bytes__.hex()
 
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]
