@@ -121,6 +121,8 @@ class Package(Base):
     ps_sys_options = Column(Text, comment="附加, 8bit,")
     # psm Header
     psm_start_code = Column(Text, comment="开始码,32bit,")
+    psm_stream_info = Column(Text, comment="info,32bit,")
+    psm_stream_map = Column(Text, comment="map,32bit,")
 
     # pes Header
     pes_start_code = Column(Text, comment="开始码,32bit,")
@@ -273,18 +275,47 @@ class H264(Packet):
     ...
 
 
+ps_ba = b'\x00\x00\x01\xba'
+pss_bb = b'\x00\x00\x01\xbb'
+psm_bc = b'\x00\x00\x01\xbc'
+pes_e0 = b'\x00\x00\x01\xe0'
+
+
 class TestPcap(TestCase):
     def test_pre(self):
         ...
         Base.metadata.drop_all(localhost_test_engine)
         Base.metadata.create_all(localhost_test_engine)
 
-    def test1(self):
+    def test_to_db(self):
+        # 合并psm pss, hex表示 str
         self.test_pre()
         packets = rdpcap('rtp.pcapng')
         for pck in packets:
             package = Package()
-            # print(pck, pck.time, isinstance(pck, Ether), isinstance(pck, IP), isinstance(pck, Raw))
+
+            if not pck.haslayer(RTP) and isinstance(pck.lastlayer(), Raw) and isinstance(pck.lastlayer().underlayer,
+                                                                                         (UDP, TCP)):
+                pck.lastlayer().underlayer.decode_payload_as(RTP)
+                rtp: RTP = pck[RTP]
+                if rtp.payload_type != 96:  # rtp.version ==
+                    pck.lastlayer().underlayer.decode_payload_as(Raw)
+
+            if pck.haslayer(RTP):
+                bytes__ = pck[RTP].payload.__bytes__()
+                package.debug_info = f"{ps_ba in bytes__}-{pss_bb in bytes__}-{psm_bc in bytes__}-{pes_e0 in bytes__}"
+
+            if pck.haslayer(RTP) and pck[RTP].payload.__bytes__().startswith(ps_ba):
+                pck[RTP].decode_payload_as(PS)
+            if pck.haslayer(RTP) and pck[RTP].payload.__bytes__().startswith(pes_e0):
+                pck[RTP].decode_payload_as(PES)
+            if pck.haslayer(PS) and pck[PS].payload.__bytes__().startswith(pss_bb):
+                pck[PS].decode_payload_as(PSSYS)
+            if pck.haslayer(PSSYS) and pck[PSSYS].payload.__bytes__().startswith(psm_bc):
+                pck[PSSYS].decode_payload_as(PSM)
+            if pck.haslayer(PSM) and pck[PSM].payload.__bytes__().startswith(pes_e0):
+                pck[PSM].decode_payload_as(PES)
+
             if pck.haslayer(Ether):
                 ether: Ether = pck[Ether]
                 package.time = time.localtime(ether.time.real.__int__())
@@ -309,8 +340,6 @@ class TestPcap(TestCase):
                 package.udp_dst_port = udp.dport
                 package.udp_len = udp.len
                 package.udp_check = udp.chksum
-                udp.decode_payload_as(RTP)
-
             if pck.haslayer(RTP):
                 rtp: RTP = pck[RTP]
                 package.rtp_version = rtp.version
@@ -324,43 +353,25 @@ class TestPcap(TestCase):
                 package.rtp_ssrc = rtp.sourcesync
                 package.rtp_sync = json.dumps(rtp.sync)
 
-                ps_ba = b'\x00\x00\x01\xba'
-                pss_bb = b'\x00\x00\x01\xbb'
-                psm_bc = b'\x00\x00\x01\xbc'
-                pes_e0 = b'\x00\x00\x01\xe0'
-                bytes__ = rtp.payload.__bytes__()
-                package.debug_info = f"{ps_ba in bytes__}-{pss_bb in bytes__}-{psm_bc in bytes__}-{pes_e0 in bytes__}"
-                if bytes__.startswith(ps_ba):
-                    rtp.decode_payload_as(PS)
-                    if pck.haslayer(PS):
-                        ps: PS = pck[PS]
-                        package.ps_start_code = ps.ps_start_code
+            if pck.haslayer(PS):
+                ps: PS = pck[PS]
+                package.ps_start_code = ps.ps_start_code
+            if pck.haslayer(PSSYS):
+                pss: PSSYS = pck[PSSYS]
+                package.ps_sys_start_code = pss.ps_sys_start_code
+                package.ps_sys_options = pss.ps_sys_options
+            if pck.haslayer(PSM):
+                psm: PSM = pck[PSM]
+                package.psm_start_code = psm.psm_start_code
+                package.psm_stream_info = psm.psm_stream_info.hex()
+                package.psm_stream_map = psm.psm_stream_map.hex()
 
-                        if ps.payload.__bytes__().startswith(pss_bb):
-                            ps.decode_payload_as(PSSYS)
-                            pss: PSSYS = pck[PSSYS]
-                            package.ps_sys_start_code = pss.ps_sys_start_code
-                            package.ps_sys_options = pss.ps_sys_options
+            if pck.haslayer(PES):
+                pes: PES = pck[PES]
+                package.pes_start_code = pes.pes_start_code
 
-                            if pss.payload.__bytes__().startswith(psm_bc):
-                                pss.decode_payload_as(PSM)
-                                psm: PSM = pss[PSM]
-                                package.psm_start_code = psm.psm_start_code
-
-                                if psm.payload.__bytes__().startswith(pes_e0):
-                                    psm.decode_payload_as(PES)
-                                    pes: PES = psm[PES]
-                                    package.pes_start_code = pes.pes_start_code
-                                    # pes.show()
-                                    package.raw = pes.payload.__bytes__().hex()
-                        if ps.payload.__bytes__().startswith(pes_e0):
-                            ps.decode_payload_as(PES)
-                            pes: PES = ps[PES]
-                            package.pes_start_code = pes.pes_start_code
-
-                            package.raw = pes.payload.__bytes__().hex()
-                else:
-                    package.raw = bytes__.hex()
+            last_layer = pck.lastlayer()
+            package.raw = last_layer.payload.__bytes__().hex()
 
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]

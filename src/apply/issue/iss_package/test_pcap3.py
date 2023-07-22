@@ -1,16 +1,18 @@
-from scapy.fields import StrFixedLenField, ByteField, FieldLenField
+from scapy.fields import ByteField, FieldLenField, StrFixedLenField
 from scapy.packet import Packet
 
 
 class XNumberField(FieldLenField):
+    __slots__ = ["sep"]  # 否则  self.sep 报错
 
-    def __init__(self, name, default, sep="\r\n"):
-        FieldLenField.__init__(self, name, default, fld)
+    def __init__(self, name, default, sep=b"\r\n", length_of=None):
+        FieldLenField.__init__(self, name, default, length_of=length_of)
         self.sep = sep
 
     def i2m(self, pkt, x):
         x = FieldLenField.i2m(self, pkt, x)
         return "%02x" % x
+        # return x.to_bytes()
 
     def m2i(self, pkt, x):
         return int(x, 16)
@@ -26,8 +28,8 @@ class XNumberField(FieldLenField):
 class Foo(Packet):
     fields_desc = [
         ByteField("type", 0),
-        XNumberField("len", None, "\r\n"),
-        StrFixedLenField("sep", "\r\n", 2)
+        XNumberField("len", None, b"\r\n", "sep"),
+        StrFixedLenField("sep", b"\r\n", 2)
     ]
 
     def post_build(self, p, pay):
@@ -37,5 +39,6 @@ class Foo(Packet):
         return p + pay
 
 
-p = Foo() / ("X" * 32)
-p.show2()
+if __name__ == '__main__':
+    p = Foo() / ("X" * 32)
+    p.show2()
