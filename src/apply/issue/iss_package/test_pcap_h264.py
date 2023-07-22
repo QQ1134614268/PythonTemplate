@@ -7,7 +7,8 @@ import json
 import time
 from unittest import TestCase
 
-from scapy.fields import BitField, IntField, StrLenField, ShortField, X3BytesField, ByteField, XIntField
+from scapy.fields import BitField, IntField, StrLenField, ShortField, X3BytesField, ByteField, XIntField, \
+    ConditionalField
 from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
@@ -153,6 +154,8 @@ class PS(Packet):
         BitField('ps_reserved', 3, 5),
         BitField('ps_stuffing_length', 0, 3),
         StrLenField("ps_options", b"", length_from=lambda pkt: pkt.ps_stuffing_length)
+
+        # ConditionalField()
     ]
 
 

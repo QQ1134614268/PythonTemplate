@@ -31,3 +31,5 @@ class TestBase(TestCase):
         print(num & 16)
 
         print(b'01', b'\x01', '01', 0x01, 0o01, '\u0101', u'01')
+# 十进制	八进制	十六进制	二进制	符号	HTML实体	说明
+# 0	000	00	00000000	NUL	&#000;	空字符
