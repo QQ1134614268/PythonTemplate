@@ -55,8 +55,8 @@ class Package(Base):
     udp_check = Column(Text, comment="udp 校验和, 16bit")
 
     # tcp层
-    tcp_src_port = Column(Text, comment="源端口号, 16bit")
-    tcp_dst_port = Column(Text, comment="目标端口号, 16bit")
+    tcp_sport = Column(Text, comment="源端口号, 16bit")
+    tcp_dport = Column(Text, comment="目标端口号, 16bit")
     tcp_seq = Column(Text, comment="序号, 32bit")
     tcp_ack = Column(Text, comment="确认号, 32bit")
     # Offset：报头长度，4位，给出报头中 32bit 字的数目。
@@ -119,7 +119,7 @@ class Package(Base):
     pes_flag = Column(Text, comment="开始码,32bit,")
     pes_pts_flag = Column(Text, comment="开始码,32bit,")
     pes_dts_flag = Column(Text, comment="开始码,32bit,")
-    pes_header_data_length = Column(Text, comment="开始码,32bit,")
+    pes_header_data = Column(Text, comment="开始码,32bit,")
     pes_payload = Column(Text, comment="开始码,32bit,")
 
     # h264 层
@@ -243,8 +243,8 @@ class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
         BitField('pes_CRC_flag', 0, 1),
         BitField('pes_extension_flag', 0, 1),
         BitField('pes_header_data_length', 10, 8),  # 8位字段。指出包含在PES分组标题中的可选字段和任何填充字节所占用的总字节数。该字段之前的字节指出了有无可选字段。
-
-        StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_pck_len - 3),
+        StrLenField("pes_header_data", b"", length_from=lambda pkt: pkt.pes_header_data_length),
+        StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_pck_len - 3 - pkt.pes_header_data_length),
 
         # #     /*PTS,DTS*/
         # BitField('pes_pts', 3, 4),
@@ -383,7 +383,7 @@ class TestPcap(TestCase):
                 package.pes_flag = pes.pes_flag
                 package.pes_pts_flag = pes.pes_pts_flag
                 package.pes_dts_flag = pes.pes_dts_flag
-                package.pes_header_data_length = pes.pes_header_data_length
+                package.pes_header_data = pes.pes_header_data.hex()
                 package.pes_payload = pes.pes_payload.hex()
 
             last_layer = pck.lastlayer()
@@ -391,8 +391,8 @@ class TestPcap(TestCase):
             # pck.lastlayer().original.hex()
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]
-                package.tcp_src_port = tcp.sport
-                package.tcp_dst_port = tcp.dport
+                package.tcp_sport = tcp.sport
+                package.tcp_dport = tcp.dport
                 package.tcp_seq = tcp.seq
                 package.tcp_ack = tcp.ack
                 package.tcp_offset = tcp.dataofs
