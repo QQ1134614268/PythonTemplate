@@ -13,7 +13,7 @@ from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
 from scapy.packet import Packet, Raw
 from scapy.utils import PcapReader, rdpcap
-from sqlalchemy import Column, Text
+from sqlalchemy import Column, Text, JSON
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
@@ -27,7 +27,7 @@ class Package(Base):
     # 原始数据
     id = Column(INTEGER, primary_key=True, comment="id")
     raw = Column(Text, comment="原始数据")
-    debug_info = Column(Text, comment="debug info, json, 4bit")
+    debug_info = Column(JSON, comment="debug info, json, 4bit")
     # 数据链路层
     ether_time = Column(Text, comment="版本, 4bit")
     # ether_type = Column(Text, comment="协议类型, 16bit")
@@ -63,17 +63,11 @@ class Package(Base):
     # 需要这个值是因为任选字段的长度是可变的。这个字段占 4bit,即TCP 最多有 60（15*4） 字节的首部
     tcp_offset = Column(Text, comment="数据偏移, 4bit")
     tcp_reserve = Column(Text, comment="保留, 6bit")
-    tcp_flag_urg = Column(Text, comment="urg 标识, 1bit")
-    tcp_flag_ack = Column(Text, comment="ack 标识, 1bit")
-    tcp_flag_psh = Column(Text, comment="psh 标识, 1bit")
-    tcp_flag_pst = Column(Text, comment="pst 标识, 1bit")
-    tcp_flag_syn = Column(Text, comment="syn 标识, 1bit")
-    tcp_flag_fin = Column(Text, comment="fin 标识, 1bit")  # 指示接收方的接收窗口大小，用于流量控制
+    tcp_flags = Column(Text, comment="tcp_flags, 6bit")
     tcp_window = Column(Text, comment="窗口, 16bit")
     tcp_check = Column(Text, comment="校验和, 16bit")
     tcp_emergency = Column(Text, comment="紧急指针, 16bit")
     tcp_other = Column(Text, comment="选项, 16bit")
-    tcp_padding = Column(Text, comment="选项, 16bit")
 
     # RTP 层
     rtp_version = Column(Text, comment="版本号，固定为2，2bit")
@@ -85,8 +79,7 @@ class Package(Base):
     rtp_seq = Column(Text, comment="序列号，16bit")  # 发送方在每发送完一个RTP包后就将该值增加1，接收方可以由该值检测包的丢失及恢复包序列。
     # 比如说一个音频的采样频率为8000Hz，那么我们可以把时间戳单位设为1 / 8000
     # timestamp表示每帧的时间，由于一个帧（如I帧）可能被分成多个RTP包，所以多个相同帧的RTP
-    # timestamp相等。（可以通过每帧最后一个RTP的marker标志区别帧，但最可靠的方法是查看相同RTP
-    # timestamp包为同一帧。）
+    # timestamp相等。（可以通过每帧最后一个RTP的marker标志区别帧，但最可靠的方法是查看相同RTP timestamp包为同一帧。）
     rtp_timestamp = Column(Text, comment="时间戳，32bit")
     rtp_ssrc = Column(Text, comment="同步源标示符，32bit")  # 表示RTP数据包的来源，在同一个RTP会话中不可能存在两个相同的SSRC，SSRC的值是随机选取的；
     rtp_sync = Column(Text, comment="sync，12bit")
@@ -99,10 +92,14 @@ class Package(Base):
     #   3、音频帧的封装: RTP + PES header + G711
 
     ps_start_code = Column(Text, comment="开始码,32bit,")
-    ps_mark_1 = Column(Text, comment="market bit, 2bit")
-    ps_scr = Column(Text, comment="包头scr,33bit,")  # 系统时钟基准（SCR-System Clock Reference）的基本部分
+    ps_clock1 = Column(Text, comment="包头scr,33bit,")  # 系统时钟基准（SCR-System Clock Reference）的基本部分
+    ps_clock2 = Column(Text, comment="包头scr,33bit,")  # 系统时钟基准（SCR-System Clock Reference）的基本部分
+    ps_clock3 = Column(Text, comment="包头scr,33bit,")  # 系统时钟基准（SCR-System Clock Reference）的基本部分
+    ps_clock_extend = Column(Text, comment="包头scr,33bit,")  # 系统时钟基准（SCR-System Clock Reference）的基本部分
     ps_scr_extend = Column(Text, comment="包头scr 扩展部分,9bit,")
     ps_rate = Column(Text, comment="节目复用速率, 22bit,")
+    ps_reserved = Column(Text, comment="节目复用速率, 22bit,")
+    ps_options = Column(Text, comment="节目复用速率, 22bit,")
 
     # ps system header
     pss_start_code = Column(Text, comment="系统头 起始码, 32bit,")
@@ -138,11 +135,11 @@ class PS(Packet):
         # 每个NALU分为若干段，每段前需加PES头部, 每段数据与PES头部组成PES包。
         IntField('ps_start_code', 0x000001BA),  # 起始码，标识PS包的开始，固定为 0x000001BA
         BitField('ps_mark_1', 1, 2),
-        BitField('ps_clock_1', 1, 3),
+        BitField('ps_clock1', 1, 3),
         BitField('ps_mark_2', 1, 1),
-        BitField('ps_clock_2', 1, 15),
+        BitField('ps_clock2', 1, 15),
         BitField('ps_mark_3', 1, 1),
-        BitField('ps_clock_3', 1, 15),
+        BitField('ps_clock3', 1, 15),
         BitField('ps_mark_4', 1, 1),
         BitField('ps_clock_extend', 1, 9),
         BitField('ps_mark_5', 1, 1),
@@ -358,6 +355,14 @@ class TestPcap(TestCase):
             if pck.haslayer(PS):
                 ps: PS = pck[PS]
                 package.ps_start_code = ps.ps_start_code
+                package.ps_clock1 = ps.ps_clock1
+                package.ps_clock2 = ps.ps_clock2
+                package.ps_clock3 = ps.ps_clock3
+                package.ps_clock_extend = ps.ps_clock_extend
+                package.ps_rate = ps.ps_rate
+                package.ps_reserved = ps.ps_reserved
+                package.ps_options = ps.ps_options
+
             if pck.haslayer(PSS):
                 pss: PSS = pck[PSS]
                 package.pss_start_code = pss.pss_start_code
@@ -383,7 +388,7 @@ class TestPcap(TestCase):
 
             last_layer = pck.lastlayer()
             package.raw = last_layer.__bytes__().hex()
-
+            # pck.lastlayer().original.hex()
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]
                 package.tcp_src_port = tcp.sport
@@ -392,12 +397,7 @@ class TestPcap(TestCase):
                 package.tcp_ack = tcp.ack
                 package.tcp_offset = tcp.dataofs
                 package.tcp_reserve = tcp.reserved
-                package.tcp_flag_urg = tcp.flags.value
-                package.tcp_flag_ack = tcp.flags.value
-                package.tcp_flag_psh = tcp.flags.value
-                package.tcp_flag_pst = tcp.flags.value
-                package.tcp_flag_syn = tcp.flags.value
-                package.tcp_flag_fin = tcp.flags.value
+                package.tcp_flags = str(bin(tcp.flags.value))
                 package.tcp_window = tcp.window
                 package.tcp_check = tcp.chksum
                 package.tcp_emergency = tcp.urgptr
