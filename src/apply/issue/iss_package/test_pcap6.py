@@ -32,11 +32,9 @@ class RecordField(Field):
                 break
             else:
                 index += 1
-        result = {}
-        result['name'] = s[:index]
-
-        result['height'] = struct.unpack("I", s[index + 1:index + 5])[0]
-        result['age'] = struct.unpack("H", s[index + 5:index + 7])[0]
+        result = {'name': s[:index],
+                  'height': struct.unpack("I", s[index + 1:index + 5])[0],
+                  'age': struct.unpack("H", s[index + 5:index + 7])[0]}
 
         return s[index + 7:], result
 

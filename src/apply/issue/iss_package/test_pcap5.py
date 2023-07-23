@@ -36,6 +36,9 @@ class MyTestPck(Packet):
         FieldLenField("field_len_2", None, length_of="field_list_2", fmt="B", count_of=None, adjust=lambda pkt, x: x),
         FieldListField("field_list_2", [], InnerField("InnerField", ""), length_from=lambda pck: pck.len_1),
 
+        # BitFieldLenField('numsync', None, 4, count_of='sync'),
+        # FieldListField('sync', [], IntField("id", 0), count_from=lambda pkt: pkt.numsync),
+
         PacketLenField("packet_len", InnerPkt(), InnerPkt, length_from=lambda pck: pck.len_1),
 
         PacketField("packet_field", None, InnerPkt),
