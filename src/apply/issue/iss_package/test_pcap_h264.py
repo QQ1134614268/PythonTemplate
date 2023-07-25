@@ -5,9 +5,11 @@
 """
 import json
 import time
+from typing import List
 from unittest import TestCase
 
-from scapy.fields import BitField, IntField, StrLenField, ShortField, X3BytesField, ByteField, XIntField
+from scapy.fields import BitField, IntField, StrLenField, ShortField, X3BytesField, ByteField, XIntField, \
+    ConditionalField, PacketListField, PacketField
 from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
@@ -112,44 +114,58 @@ class Package(Base):
     psm_stream_info = Column(Text, comment="info,32bit,")
     psm_stream_map = Column(Text, comment="map,32bit,")
 
-    # pes Header
-    pes_start_code = Column(Text, comment="开始码,32bit,")
-    pes_stream_id = Column(Text, comment="开始码,32bit,")
-    pes_pck_len = Column(Text, comment="开始码,32bit,")
-    pes_flag = Column(Text, comment="开始码,32bit,")
-    pes_pts_flag = Column(Text, comment="开始码,32bit,")
-    pes_dts_flag = Column(Text, comment="开始码,32bit,")
-    pes_header_data = Column(Text, comment="开始码,32bit,")
-    pes_payload = Column(Text, comment="开始码,32bit,")
+    # pes Data
+    pes_json_data = Column(JSON, comment="pes data")
 
     # h264 层
     # 帧 -- 合并
 
 
-class PS(Packet):
-    name = "PS"
-    # https://blog.csdn.net/ichenwin/article/details/100086930
+class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509/
+    name = "PES"
     fields_desc = [
-        # 0~3字节: 为0x 00 00 01 ba，表示当前为PSH头部 #I帧附加信息:20~23: 为0x 00 00 01 bb,表示当前为I帧附件信息
-        # 当前为I帧或P帧的第一个NALU则需加PSH头部。若当前为I帧的第一个NALU还需要加PSM头部。
-        # 每个NALU分为若干段，每段前需加PES头部, 每段数据与PES头部组成PES包。
-        IntField('ps_start_code', 0x000001BA),  # 起始码，标识PS包的开始，固定为 0x000001BA
-        BitField('ps_mark_1', 1, 2),
-        BitField('ps_clock1', 1, 3),
-        BitField('ps_mark_2', 1, 1),
-        BitField('ps_clock2', 1, 15),
-        BitField('ps_mark_3', 1, 1),
-        BitField('ps_clock3', 1, 15),
-        BitField('ps_mark_4', 1, 1),
-        BitField('ps_clock_extend', 1, 9),
-        BitField('ps_mark_5', 1, 1),
-        BitField('ps_rate', 1, 22),  # 按协议的说法是以50字节50字节/秒为单位节目流的速率，可以理解为是码流。比如我们用海康的摄像头来验证，因为海康的摄像头是节目流出流的
-        BitField('ps_mark_6', 0x11, 2),  # 固定 '11'
-        BitField('ps_reserved', 0x1f, 5),
-        BitField('ps_stuffing_length', 0, 3),
-        StrLenField("ps_options", b"", length_from=lambda pkt: pkt.ps_stuffing_length),
-
-        # ConditionalField(IPField("id", "127.0.0.1"), lambda pck: pck.stratum > 1),
+        X3BytesField('pes_start_code', 0x000001),  # 起始码是(0x000001)
+        ByteField('pes_stream_id', 0x000001),  # stream_id
+        BitField('pes_pck_len', 0, 16),
+        # PES包的长度, 指定在这个字段后的字节数，可以为零，如果这个字段为零的话，这个包可以是任意的长度，并且只有当这个 PES 包携带的是视频数据的时候，这个字段才可以为零
+        BitField('pes_flag', b'\x01\x00', 2),  # 固定 '10'
+        BitField('pes_scrambling_control', 0, 2),  # 加扰控制
+        BitField('pes_priority', 1, 1),  # 优先级
+        BitField('pes_data_alignment_indicator', 1, 1),  # 数据定位指示符
+        BitField('pes_copyright', 0, 1),  # 是否版权
+        BitField('pes_original_or_copy', 0, 1),  # 原始的或复制的
+        BitField('pes_pts_flag', 1, 1),
+        # 2位字段。当值为’10’时，PTS字段应出现在PES分组标题中；当值为’11’时，PTS字段和DTS字段都应出现在PES分组标题中；当值为’00’时，PTS字段和DTS字段都不出现在PES分组标题中。值’01’是不允许的。
+        BitField('pes_dts_flag', 1, 1),
+        BitField('pes_escr_flag', 0, 1),
+        BitField('pes_es_rate_flag', 0, 1),
+        BitField('pes_dsm_trick_mode_flag', 0, 1),
+        BitField('pes_additional_copy_info_flag', 0, 1),
+        BitField('pes_CRC_flag', 0, 1),
+        BitField('pes_extension_flag', 0, 1),
+        BitField('pes_header_data_length', 10, 8),  # 8位字段。指出包含在PES分组标题中的可选字段和任何填充字节所占用的总字节数。该字段之前的字节指出了有无可选字段。
+        StrLenField("pes_header_data", b"", length_from=lambda pkt: pkt.pes_header_data_length),
+        StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_pck_len - 3 - pkt.pes_header_data_length),
+        # #     /*PTS,DTS*/
+        # BitField('pes_pts', 3, 4),
+        # BitField('pes_PTS', 3, 3),
+        # BitField('pes_mark_1', 1, 1),
+        # BitField('pes_pts_2', 0, 15),
+        # BitField('pes_mark_2', 1, 1),
+        # BitField('pes_pts_3', 1, 15),
+        # BitField('pes_mark_3', 1, 1),
+        # BitField('pes_pts_4', 1, 4),
+        # BitField('pes_dts_1', 1, 3),
+        # BitField('pes_dts_mark_1', 1, 1),
+        # BitField('pes_dts_2', 1, 4),
+        # BitField('pes_dts_3', 1, 3),
+        # BitField('pes_dts_mark_2', 1, 1),
+        # BitField('pes_dts_4', 1, 15),
+        # BitField('pes_dts_mark_3', 1, 1),
+        # BitField('pes_dts_5', 1, 15),
+        # BitField('pes_dts_mark_5', 1, 1),
+        # BitField('pes_dts_6', 1, 15),
+        # BitField('pes_dts_mark_6', 1, 1),
     ]
 
 
@@ -183,6 +199,9 @@ class PSS(Packet):
 
     ]
 
+    def extract_padding(self, pkt):
+        return "", pkt
+
 
 class PSM(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509/
     name = "PSM"
@@ -197,9 +216,9 @@ class PSM(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
         # 表示PSM的版本号，取值范围1到32，随着PSM定义的改变循环累加；若current_next_indicator == 1，表示当前PSM的版本号，若current_next_indicator == 0，表示下一个PSM的版本号
         BitField('psm_reserved2', 0x7F, 7),
         BitField('psm_mark_1', 1, 1),
-        BitField('psm_stream_info_len', 0, 16), # todo
+        BitField('psm_stream_info_len', 0, 16),  # todo
         StrLenField("psm_stream_info", b"", length_from=lambda pkt: pkt.psm_stream_info_len),
-        BitField('psm_stream_map_len', 8, 16), # todo
+        BitField('psm_stream_map_len', 8, 16),  # todo
         # 表示在这个PSM中所有ES流信息的总长度；包括stream_type,elementary_stream_id, elementary_stream_info_length的长度，即N*32bit；是不包括具体ES流描述信息descriptor的长度的；
         StrLenField("psm_stream_map", b"", length_from=lambda pkt: pkt.psm_stream_map_len),
         # #     /*video*/
@@ -219,53 +238,41 @@ class PSM(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
 
     ]
 
+    def extract_padding(self, pkt):
+        return "", pkt
 
-class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509/
-    name = "PES"
+
+def tt(pck):
+    return pck.original[pck.ps_stuffing_length + 14:pck.ps_stuffing_length + 18] == pss_bb
+
+
+class PS(Packet):
+    name = "PS"
+    # https://blog.csdn.net/ichenwin/article/details/100086930
     fields_desc = [
-        X3BytesField('pes_start_code', 0x000001),  # 起始码是(0x000001)
-        ByteField('pes_stream_id', 0x000001),  # stream_id
-        BitField('pes_pck_len', 0, 16),
-        # PES包的长度, 指定在这个字段后的字节数，可以为零，如果这个字段为零的话，这个包可以是任意的长度，并且只有当这个 PES 包携带的是视频数据的时候，这个字段才可以为零
-        BitField('pes_flag', b'\x01\x00', 2),  # 固定 '10'
-        BitField('pes_scrambling_control', 0, 2),  # 加扰控制
-        BitField('pes_priority', 1, 1),  # 优先级
-        BitField('pes_data_alignment_indicator', 1, 1),  # 数据定位指示符
-        BitField('pes_copyright', 0, 1),  # 是否版权
-        BitField('pes_original_or_copy', 0, 1),  # 原始的或复制的
-        BitField('pes_pts_flag', 1, 1),
-        # 2位字段。当值为’10’时，PTS字段应出现在PES分组标题中；当值为’11’时，PTS字段和DTS字段都应出现在PES分组标题中；当值为’00’时，PTS字段和DTS字段都不出现在PES分组标题中。值’01’是不允许的。
-        BitField('pes_dts_flag', 1, 1),
-        BitField('pes_escr_flag', 0, 1),
-        BitField('pes_es_rate_flag', 0, 1),
-        BitField('pes_dsm_trick_mode_flag', 0, 1),
-        BitField('pes_additional_copy_info_flag', 0, 1),
-        BitField('pes_CRC_flag', 0, 1),
-        BitField('pes_extension_flag', 0, 1),
-        BitField('pes_header_data_length', 10, 8),  # 8位字段。指出包含在PES分组标题中的可选字段和任何填充字节所占用的总字节数。该字段之前的字节指出了有无可选字段。
-        StrLenField("pes_header_data", b"", length_from=lambda pkt: pkt.pes_header_data_length),
-        StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_pck_len - 3 - pkt.pes_header_data_length),
-
-        # #     /*PTS,DTS*/
-        # BitField('pes_pts', 3, 4),
-        # BitField('pes_PTS', 3, 3),
-        # BitField('pes_mark_1', 1, 1),
-        # BitField('pes_pts_2', 0, 15),
-        # BitField('pes_mark_2', 1, 1),
-        # BitField('pes_pts_3', 1, 15),
-        # BitField('pes_mark_3', 1, 1),
-        # BitField('pes_pts_4', 1, 4),
-        # BitField('pes_dts_1', 1, 3),
-        # BitField('pes_dts_mark_1', 1, 1),
-        # BitField('pes_dts_2', 1, 4),
-        # BitField('pes_dts_3', 1, 3),
-        # BitField('pes_dts_mark_2', 1, 1),
-        # BitField('pes_dts_4', 1, 15),
-        # BitField('pes_dts_mark_3', 1, 1),
-        # BitField('pes_dts_5', 1, 15),
-        # BitField('pes_dts_mark_5', 1, 1),
-        # BitField('pes_dts_6', 1, 15),
-        # BitField('pes_dts_mark_6', 1, 1),
+        # 0~3字节: 为0x 00 00 01 ba，表示当前为PSH头部 #I帧附加信息:20~23: 为0x 00 00 01 bb,表示当前为I帧附件信息
+        # 当前为I帧或P帧的第一个NALU则需加PSH头部。若当前为I帧的第一个NALU还需要加PSM头部。
+        # 每个NALU分为若干段，每段前需加PES头部, 每段数据与PES头部组成PES包。
+        IntField('ps_start_code', 0x000001BA),  # 起始码，标识PS包的开始，固定为 0x000001BA
+        BitField('ps_mark_1', 1, 2),
+        BitField('ps_clock1', 1, 3),
+        BitField('ps_mark_2', 1, 1),
+        BitField('ps_clock2', 1, 15),
+        BitField('ps_mark_3', 1, 1),
+        BitField('ps_clock3', 1, 15),
+        BitField('ps_mark_4', 1, 1),
+        BitField('ps_clock_extend', 1, 9),
+        BitField('ps_mark_5', 1, 1),
+        BitField('ps_rate', 1, 22),  # 按协议的说法是以50字节50字节/秒为单位节目流的速率，可以理解为是码流。比如我们用海康的摄像头来验证，因为海康的摄像头是节目流出流的
+        BitField('ps_mark_6', 0x11, 2),  # 固定 '11'
+        BitField('ps_reserved', 0x1f, 5),
+        BitField('ps_stuffing_length', 0, 3),
+        StrLenField("ps_options", b"", length_from=lambda pkt: pkt.ps_stuffing_length),
+        # PacketListField("ppp", None, ConditionalField),
+        ConditionalField(PacketField("pss", None, PSS),
+                         lambda pkt: pkt.original[pkt.ps_stuffing_length + 14:pkt.ps_stuffing_length + 18] == pss_bb),
+        ConditionalField(PacketField("psm", None, PSM), lambda pkt: pkt.pss),
+        PacketListField("pes", [], PES),
     ]
 
 
@@ -293,28 +300,22 @@ class TestPcap(TestCase):
         for pck in packets:
             package = Package()
 
-            if not pck.haslayer(RTP) and isinstance(pck.lastlayer(), Raw) and isinstance(pck.lastlayer().underlayer,
-                                                                                         (UDP, TCP)):
+            package.debug_info = {
+                "ps_ba": pck.original.count(ps_ba),
+                "pss_bb": pck.original.count(pss_bb),
+                "psm_bc": pck.original.count(psm_bc),
+                "pes_e0": pck.original.count(pes_e0),
+            }
+
+            if not pck.haslayer(RTP) \
+                    and isinstance(pck.lastlayer(), Raw) \
+                    and isinstance(pck.lastlayer().underlayer, (UDP, TCP)):
                 pck.lastlayer().underlayer.decode_payload_as(RTP)
                 rtp: RTP = pck[RTP]
                 if rtp.payload_type != 96:  # rtp.version ==
                     pck.lastlayer().underlayer.decode_payload_as(Raw)
-
-            if pck.haslayer(RTP):
-                bytes__ = pck[RTP].payload.__bytes__()
-                package.debug_info = f"{ps_ba in bytes__}-{pss_bb in bytes__}-{psm_bc in bytes__}-{pes_e0 in bytes__}"
-
             if pck.haslayer(RTP) and pck[RTP].payload.__bytes__().startswith(ps_ba):
                 pck[RTP].decode_payload_as(PS)
-            if pck.haslayer(RTP) and pck[RTP].payload.__bytes__().startswith(pes_e0):
-                pck[RTP].decode_payload_as(PES)
-            if pck.haslayer(PS) and pck[PS].payload.__bytes__().startswith(pss_bb):
-                pck[PS].decode_payload_as(PSS)
-            if pck.haslayer(PSS) and pck[PSS].payload.__bytes__().startswith(psm_bc):
-                pck[PSS].decode_payload_as(PSM)
-            if pck.haslayer(PSM) and pck[PSM].payload.__bytes__().startswith(pes_e0):
-                pck[PSM].decode_payload_as(PES)
-
             if pck.haslayer(Ether):
                 ether: Ether = pck[Ether]
                 package.ether_time = time.localtime(ether.time.real.__int__())
@@ -339,56 +340,6 @@ class TestPcap(TestCase):
                 package.udp_dst_port = udp.dport
                 package.udp_len = udp.len
                 package.udp_check = udp.chksum
-            if pck.haslayer(RTP):
-                rtp: RTP = pck[RTP]
-                package.rtp_version = rtp.version
-                package.rtp_padding = rtp.padding
-                package.rtp_extension = rtp.extension
-                package.rtp_numsync = rtp.numsync
-                package.rtp_marker = rtp.marker
-                package.rtp_payload_type = rtp.payload_type
-                package.rtp_seq = rtp.sequence
-                package.rtp_timestamp = rtp.timestamp
-                package.rtp_ssrc = hex(rtp.sourcesync).upper()
-                package.rtp_sync = json.dumps(list(map(lambda x: hex(x), rtp.sync)))
-
-            if pck.haslayer(PS):
-                ps: PS = pck[PS]
-                package.ps_start_code = ps.ps_start_code
-                package.ps_clock1 = ps.ps_clock1
-                package.ps_clock2 = ps.ps_clock2
-                package.ps_clock3 = ps.ps_clock3
-                package.ps_clock_extend = ps.ps_clock_extend
-                package.ps_rate = ps.ps_rate
-                package.ps_reserved = ps.ps_reserved
-                package.ps_options = ps.ps_options
-
-            if pck.haslayer(PSS):
-                pss: PSS = pck[PSS]
-                package.pss_start_code = pss.pss_start_code
-                package.pss_header_len = pss.pss_header_len
-                package.pss_reserved = pss.pss_reserved
-                package.pss_options = pss.pss_options
-            if pck.haslayer(PSM):
-                psm: PSM = pck[PSM]
-                package.psm_start_code = psm.psm_start_code
-                package.psm_stream_info = psm.psm_stream_info.hex()
-                package.psm_stream_map = psm.psm_stream_map.hex()
-
-            if pck.haslayer(PES):
-                pes: PES = pck[PES]
-                package.pes_start_code = pes.pes_start_code
-                package.pes_stream_id = pes.pes_stream_id
-                package.pes_pck_len = pes.pes_pck_len
-                package.pes_flag = pes.pes_flag
-                package.pes_pts_flag = pes.pes_pts_flag
-                package.pes_dts_flag = pes.pes_dts_flag
-                package.pes_header_data = pes.pes_header_data.hex()
-                package.pes_payload = pes.pes_payload.hex()
-
-            last_layer = pck.lastlayer()
-            package.raw = last_layer.__bytes__().hex()
-            # pck.lastlayer().original.hex()
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]
                 package.tcp_sport = tcp.sport
@@ -402,6 +353,58 @@ class TestPcap(TestCase):
                 package.tcp_check = tcp.chksum
                 package.tcp_emergency = tcp.urgptr
                 package.tcp_other = json.dumps(list(map(lambda x: hex(x), tcp.options)))
+            if pck.haslayer(RTP):
+                rtp: RTP = pck[RTP]
+                package.rtp_version = rtp.version
+                package.rtp_padding = rtp.padding
+                package.rtp_extension = rtp.extension
+                package.rtp_numsync = rtp.numsync
+                package.rtp_marker = rtp.marker
+                package.rtp_payload_type = rtp.payload_type
+                package.rtp_seq = rtp.sequence
+                package.rtp_timestamp = rtp.timestamp
+                package.rtp_ssrc = hex(rtp.sourcesync).upper()
+                package.rtp_sync = json.dumps(list(map(lambda x: hex(x), rtp.sync)))
+            if pck.haslayer(PS):
+                ps: PS = pck[PS]
+                package.ps_start_code = ps.ps_start_code
+                package.ps_clock1 = ps.ps_clock1
+                package.ps_clock2 = ps.ps_clock2
+                package.ps_clock3 = ps.ps_clock3
+                package.ps_clock_extend = ps.ps_clock_extend
+                package.ps_rate = ps.ps_rate
+                package.ps_reserved = ps.ps_reserved
+                package.ps_options = ps.ps_options
+
+                if ps.pss:
+                    pss: PSS = ps.pss
+                    package.pss_start_code = pss.pss_start_code
+                    package.pss_header_len = pss.pss_header_len
+                    package.pss_reserved = pss.pss_reserved
+                    package.pss_options = pss.pss_options
+                if ps.psm:
+                    psm: PSM = ps.psm
+                    package.psm_start_code = psm.psm_start_code
+                    package.psm_stream_info = psm.psm_stream_info.hex()
+                    package.psm_stream_map = psm.psm_stream_map.hex()
+
+                if ps.pes:
+                    pes_list: List[PES] = ps.pes
+                    data = []
+                    for pes in pes_list:
+                        data.append({
+                            "pes_start_code": pes.pes_start_code,
+                            "pes_stream_id": pes.pes_stream_id,
+                            "pes_pck_len": pes.pes_pck_len,
+                            "pes_flag": pes.pes_flag,
+                            "pes_pts_flag": pes.pes_pts_flag,
+                            "pes_dts_flag": pes.pes_dts_flag,
+                            "pes_header_data": pes.pes_header_data.hex(),
+                            "pes_payload": pes.pes_payload.hex()
+                        })
+                    package.pes_json_data = data
+            if isinstance(pck.lastlayer(), Raw):
+                package.raw = pck.lastlayer().original.hex()  # pck.lastlayer().__bytes__().hex()
             localhost_test_session.add(package)
             localhost_test_session.commit()
 
