@@ -144,28 +144,28 @@ class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
         BitField('pes_CRC_flag', 0, 1),
         BitField('pes_extension_flag', 0, 1),
         BitField('pes_header_data_length', 10, 8),  # 8位字段。指出包含在PES分组标题中的可选字段和任何填充字节所占用的总字节数。该字段之前的字节指出了有无可选字段。
-        StrLenField("pes_header_data", b"", length_from=lambda pkt: pkt.pes_header_data_length),
+
+        ConditionalField(BitField('pes_pts_start', 3, 4), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_pts1', None, 3), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_mark1', None, 1), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_pts2', None, 15), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_mark2', None, 1), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_pts3', None, 15), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_mark3', None, 1), lambda pkt: pkt.pes_pts_flag),
+
+        ConditionalField(BitField('pes_dts_start', 3, 4), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_pts1', None, 3), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_mark1', None, 1), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_pts2', None, 15), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_mark2', None, 1), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_pts3', None, 15), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_mark3', None, 1), lambda pkt: pkt.pes_dts_flag),
+
+        StrLenField("pes_header_data", b"",
+                    length_from=lambda pkt: pkt.pes_header_data_length - (pkt.pes_pts_flag and 5) - (
+                            pkt.pes_dts_flag and 5)),
+
         StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_pck_len - 3 - pkt.pes_header_data_length),
-        # #     /*PTS,DTS*/
-        # BitField('pes_pts', 3, 4),
-        # BitField('pes_PTS', 3, 3),
-        # BitField('pes_mark_1', 1, 1),
-        # BitField('pes_pts_2', 0, 15),
-        # BitField('pes_mark_2', 1, 1),
-        # BitField('pes_pts_3', 1, 15),
-        # BitField('pes_mark_3', 1, 1),
-        # BitField('pes_pts_4', 1, 4),
-        # BitField('pes_dts_1', 1, 3),
-        # BitField('pes_dts_mark_1', 1, 1),
-        # BitField('pes_dts_2', 1, 4),
-        # BitField('pes_dts_3', 1, 3),
-        # BitField('pes_dts_mark_2', 1, 1),
-        # BitField('pes_dts_4', 1, 15),
-        # BitField('pes_dts_mark_3', 1, 1),
-        # BitField('pes_dts_5', 1, 15),
-        # BitField('pes_dts_mark_5', 1, 1),
-        # BitField('pes_dts_6', 1, 15),
-        # BitField('pes_dts_mark_6', 1, 1),
     ]
 
 
@@ -240,10 +240,6 @@ class PSM(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
 
     def extract_padding(self, pkt):
         return "", pkt
-
-
-def tt(pck):
-    return pck.original[pck.ps_stuffing_length + 14:pck.ps_stuffing_length + 18] == pss_bb
 
 
 class PS(Packet):
@@ -380,18 +376,21 @@ class TestPcap(TestCase):
                     pss: PSS = ps.pss
                     package.pss_start_code = pss.pss_start_code
                     package.pss_header_len = pss.pss_header_len
+                    assert bin(pss.pss_reserved) == b'\x01' * 7, "校验 固定值"
                     package.pss_reserved = pss.pss_reserved
                     package.pss_options = pss.pss_options
                 if ps.psm:
                     psm: PSM = ps.psm
+                    assert bin(psm.psm_start_code) == b'\x00\x00\x01', "校验 固定值"
                     package.psm_start_code = psm.psm_start_code
                     package.psm_stream_info = psm.psm_stream_info.hex()
                     package.psm_stream_map = psm.psm_stream_map.hex()
-
                 if ps.pes:
                     pes_list: List[PES] = ps.pes
                     data = []
                     for pes in pes_list:
+                        assert pes.pes_flag == 2, "校验"
+                        assert pes.pes_start_code == 1, "校验"
                         data.append({
                             "pes_start_code": pes.pes_start_code,
                             "pes_stream_id": pes.pes_stream_id,
@@ -399,12 +398,24 @@ class TestPcap(TestCase):
                             "pes_flag": pes.pes_flag,
                             "pes_pts_flag": pes.pes_pts_flag,
                             "pes_dts_flag": pes.pes_dts_flag,
+
+                            "pes_pts_start": pes.pes_pts_start,
+                            "pes_pts_pts1": pes.pes_pts_pts1,
+                            "pes_pts_pts2": pes.pes_pts_pts2,
+                            "pes_pts_pts3": pes.pes_pts_pts3,
+
+                            "pes_pds_start": pes.pes_dts_start,
+                            "pes_dts_pts1": pes.pes_dts_pts1,
+                            "pes_dts_pts2": pes.pes_dts_pts2,
+                            "pes_dts_pts3": pes.pes_dts_pts3,
+
                             "pes_header_data": pes.pes_header_data.hex(),
-                            "pes_payload": pes.pes_payload.hex()
+                            "pes_payload": pes.pes_payload.hex(),
                         })
                     package.pes_json_data = data
             if isinstance(pck.lastlayer(), Raw):
                 package.raw = pck.lastlayer().original.hex()  # pck.lastlayer().__bytes__().hex()
+
             localhost_test_session.add(package)
             localhost_test_session.commit()
 
