@@ -5,6 +5,7 @@
 """
 import json
 import time
+from datetime import datetime
 from typing import List
 from unittest import TestCase
 
@@ -15,7 +16,7 @@ from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
 from scapy.packet import Packet, Raw
 from scapy.utils import PcapReader, rdpcap
-from sqlalchemy import Column, Text, JSON
+from sqlalchemy import Column, Text, JSON, DATETIME, DateTime
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
@@ -31,7 +32,7 @@ class Package(Base):
     raw = Column(Text, comment="原始数据")
     debug_info = Column(JSON, comment="debug info, json, 4bit")
     # 数据链路层
-    ether_time = Column(Text, comment="版本, 4bit")
+    ether_time = Column(DateTime, comment="版本, 4bit")
     # ether_type = Column(Text, comment="协议类型, 16bit")
     # 1500 1456 -12 = 1442
 
@@ -125,7 +126,7 @@ class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
     name = "PES"
     fields_desc = [
         X3BytesField('pes_start_code', 0x000001),  # 起始码是(0x000001)
-        ByteField('pes_stream_id', 0x000001),  # stream_id
+        ByteField('pes_stream_id', 0xe0),  # stream_id
         BitField('pes_pck_len', 0, 16),
         # PES包的长度, 指定在这个字段后的字节数，可以为零，如果这个字段为零的话，这个包可以是任意的长度，并且只有当这个 PES 包携带的是视频数据的时候，这个字段才可以为零
         BitField('pes_flag', b'\x01\x00', 2),  # 固定 '10'
@@ -146,20 +147,20 @@ class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
         BitField('pes_header_data_length', 10, 8),  # 8位字段。指出包含在PES分组标题中的可选字段和任何填充字节所占用的总字节数。该字段之前的字节指出了有无可选字段。
 
         ConditionalField(BitField('pes_pts_start', 3, 4), lambda pkt: pkt.pes_pts_flag),
-        ConditionalField(BitField('pes_pts_pts1', None, 3), lambda pkt: pkt.pes_pts_flag),
-        ConditionalField(BitField('pes_pts_mark1', None, 1), lambda pkt: pkt.pes_pts_flag),
-        ConditionalField(BitField('pes_pts_pts2', None, 15), lambda pkt: pkt.pes_pts_flag),
-        ConditionalField(BitField('pes_pts_mark2', None, 1), lambda pkt: pkt.pes_pts_flag),
-        ConditionalField(BitField('pes_pts_pts3', None, 15), lambda pkt: pkt.pes_pts_flag),
-        ConditionalField(BitField('pes_pts_mark3', None, 1), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_pts1', 0, 3), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_mark1', 0, 1), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_pts2', 0, 15), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_mark2', 0, 1), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_pts3', 0, 15), lambda pkt: pkt.pes_pts_flag),
+        ConditionalField(BitField('pes_pts_mark3', 0, 1), lambda pkt: pkt.pes_pts_flag),
 
         ConditionalField(BitField('pes_dts_start', 3, 4), lambda pkt: pkt.pes_dts_flag),
-        ConditionalField(BitField('pes_dts_pts1', None, 3), lambda pkt: pkt.pes_dts_flag),
-        ConditionalField(BitField('pes_dts_mark1', None, 1), lambda pkt: pkt.pes_dts_flag),
-        ConditionalField(BitField('pes_dts_pts2', None, 15), lambda pkt: pkt.pes_dts_flag),
-        ConditionalField(BitField('pes_dts_mark2', None, 1), lambda pkt: pkt.pes_dts_flag),
-        ConditionalField(BitField('pes_dts_pts3', None, 15), lambda pkt: pkt.pes_dts_flag),
-        ConditionalField(BitField('pes_dts_mark3', None, 1), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_dts1', 0, 3), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_mark1', 0, 1), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_dts2', 0, 15), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_mark2', 0, 1), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_dts3', 0, 15), lambda pkt: pkt.pes_dts_flag),
+        ConditionalField(BitField('pes_dts_mark3', 0, 1), lambda pkt: pkt.pes_dts_flag),
 
         StrLenField("pes_header_data", b"",
                     length_from=lambda pkt: pkt.pes_header_data_length - (pkt.pes_pts_flag and 5) - (
@@ -167,6 +168,9 @@ class PES(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
 
         StrLenField("pes_payload", b"", length_from=lambda pkt: pkt.pes_pck_len - 3 - pkt.pes_header_data_length),
     ]
+
+    def extract_padding(self, pkt):
+        return "", pkt
 
 
 class PSS(Packet):
@@ -314,7 +318,7 @@ class TestPcap(TestCase):
                 pck[RTP].decode_payload_as(PS)
             if pck.haslayer(Ether):
                 ether: Ether = pck[Ether]
-                package.ether_time = time.localtime(ether.time.real.__int__())
+                package.ether_time = datetime.fromtimestamp(ether.time.real.__int__())
             if pck.haslayer(IP):
                 ip: IP = pck[IP]
                 package.ip_version = ip.version
@@ -370,23 +374,27 @@ class TestPcap(TestCase):
                 package.ps_clock_extend = ps.ps_clock_extend
                 package.ps_rate = ps.ps_rate
                 package.ps_reserved = ps.ps_reserved
+                assert ps.ps_mark_6 == 3, "校验"
                 package.ps_options = ps.ps_options
 
                 if ps.pss:
                     pss: PSS = ps.pss
                     package.pss_start_code = pss.pss_start_code
                     package.pss_header_len = pss.pss_header_len
-                    assert bin(pss.pss_reserved) == b'\x01' * 7, "校验 固定值"
+                    assert pss.pss_reserved == 127, "校验 固定值"
                     package.pss_reserved = pss.pss_reserved
                     package.pss_options = pss.pss_options
                 if ps.psm:
                     psm: PSM = ps.psm
-                    assert bin(psm.psm_start_code) == b'\x00\x00\x01', "校验 固定值"
                     package.psm_start_code = psm.psm_start_code
+                    assert psm.psm_start_code == 1, "校验 固定值"
+                    package.psm_stream_id = psm.psm_stream_id
+                    assert psm.psm_stream_id == 0xbc, "校验"
                     package.psm_stream_info = psm.psm_stream_info.hex()
                     package.psm_stream_map = psm.psm_stream_map.hex()
                 if ps.pes:
                     pes_list: List[PES] = ps.pes
+
                     data = []
                     for pes in pes_list:
                         assert pes.pes_flag == 2, "校验"
@@ -404,10 +412,10 @@ class TestPcap(TestCase):
                             "pes_pts_pts2": pes.pes_pts_pts2,
                             "pes_pts_pts3": pes.pes_pts_pts3,
 
-                            "pes_pds_start": pes.pes_dts_start,
-                            "pes_dts_pts1": pes.pes_dts_pts1,
-                            "pes_dts_pts2": pes.pes_dts_pts2,
-                            "pes_dts_pts3": pes.pes_dts_pts3,
+                            "pes_dts_start": pes.pes_dts_start,
+                            "pes_dts_dts1": pes.pes_dts_dts1,
+                            "pes_dts_dts2": pes.pes_dts_dts2,
+                            "pes_dts_dts3": pes.pes_dts_dts3,
 
                             "pes_header_data": pes.pes_header_data.hex(),
                             "pes_payload": pes.pes_payload.hex(),
@@ -432,3 +440,29 @@ class TestPcap(TestCase):
                 # pck.payload_guess
                 # pck.layers()
                 # print(pck)
+
+    def test_mp4(self):
+        # 转MP4
+        vos = localhost_test_session.query(Package).filter(
+            Package.psm_start_code.isnot(None)
+        ).all()
+        vos2 = localhost_test_session.query(Package).filter(
+            Package.id < vos[1].id
+        ).all()
+        # vos2 = localhost_test_session.query(Package).all()
+        with open('2.raw', mode='wb') as f:
+            for vo2 in vos2:
+                if vo2.pes_json_data:
+                    for pes in vo2.pes_json_data:
+                        f.write(bytearray.fromhex(pes["pes_payload"]))
+                if vo2.raw:
+                    f.write(bytearray.fromhex(vo2.raw))
+                # if vo2.rtp_marker == 1:
+                #     break
+
+    def test_assert(self):
+        # assert "", 关键帧， # ps_bb bc ==1, e0==4,pes_json_data, 两个关键帧之间 25帧
+        # 关键帧 转 rpg
+        # 关键帧 真实时间
+        # 关键帧 时间戳
+        ...
