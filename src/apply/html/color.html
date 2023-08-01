@@ -61,7 +61,7 @@
                     let fields = this.fields
                     this.tableData = this.tableData.sort(function (objA, objB) {
                         for (name of fields) {
-                            if (objA[name] != objB[name]) {
+                            if (objA[name] !== objB[name]) {
                                 return objA[name] - objB[name]
                             }
                         }

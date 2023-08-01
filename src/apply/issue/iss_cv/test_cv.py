@@ -1,9 +1,23 @@
 import unittest
+from datetime import datetime, timedelta
 
 import cv2
 
 
 class Test(unittest.TestCase):
+    def test0(self):
+        onvif = "rtsp://admin:xxx@123@127.39.107.85:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
+        cap = cv2.VideoCapture(onvif)
+        end = datetime.now() + timedelta(seconds=30)
+        with open(f"opencv_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.mp4", mode='ab') as f:
+            while end > datetime.now():
+                ret, frame = cap.read()
+                f.write(frame)
+                # cv2.imwrite(f"opencv_{datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.jpg", frame)
+                f.flush()
+
+        cap.release()
+
     def test1(self):
         # cap = cv2.VideoCapture(0) 打开本机摄像头
         cap = cv2.VideoCapture("test.mp4")

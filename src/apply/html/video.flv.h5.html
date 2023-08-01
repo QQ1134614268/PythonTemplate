@@ -23,21 +23,15 @@
 </head>
 <body>
 <div class="v-container">
-    <input id="v" value="123">
-    <button onclick="submit()">确认</button>
-    <video id="player1" muted autoplay="autoplay" preload="auto" controls="controls"
-           src="http://44.39.19.14:13080/rtp/4DC8C15B.live.mp4">
+    <video id="player1" muted autoplay="autoplay" preload="auto" controls="controls" src="out.mp4">
     </video>
+    <input id="idInput1" value="out.mp4">
+    <button onclick="submit()">确认</button>
 </div>
 </body>
 </html>
 <script>
     function submit() {
-        let src = document.getElementById("v").value
-        console.log(src)
-        let newUrl = "http://44.39.19.14:13080/rtp/" + src + ".live.mp4"
-        console.log(newUrl)
-        document.getElementById("player1").src = newUrl
-        console.log(document.getElementById("player1").src)
+        document.getElementById("player1").src = document.getElementById("idInput1").value
     }
 </script>

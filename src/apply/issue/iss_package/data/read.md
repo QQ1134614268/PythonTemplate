@@ -4,3 +4,5 @@
 使用Chrome请求 一次挥手握手
 
 建立连接后,才开始传输http请求
+
+# todo 清数据 *.pcapng pcap 19.14 44.39
