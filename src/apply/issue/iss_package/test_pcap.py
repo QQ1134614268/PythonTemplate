@@ -11,6 +11,7 @@ from scapy.layers.inet import IP, TCP, ICMP
 from scapy.layers.inet import UDP
 from scapy.layers.l2 import Ether
 from scapy.layers.l2 import Loopback
+from scapy.layers.tls.session import TLSSession
 
 
 class TestPcap(TestCase):
@@ -23,7 +24,7 @@ class TestPcap(TestCase):
         print(Ether(raw(ip)))
         # pkt.decode_payload_as（） 更改有效负载的解码方式
 
-        p = IP() / TCP() / HTTP()/"AAAA"
+        p = IP() / TCP() / HTTP() / "AAAA"
         tcp = p[TCP]
         print(tcp.payload)
         print(tcp.underlayer)
@@ -55,6 +56,20 @@ class TestPcap(TestCase):
         # sniff(iface='WLAN', timeout=10, filter="tcp port 80", prn=lambda x: x.sprintf("{IP:%IP.src% -> %IP.dst%}"))
 
         # 除了使用scapy抓包外，也可以使用tcpdump（Linux）和tshark（Windows）进行抓包。
+    def test_tls_https_to_file(self):
+        load_layer("tls")
+        package = sniff(iface='WLAN', timeout=10, filter="dst host www.shipxy.com", session=TLSSession)
+        wrpcap("ship.pcap", package)  # 将抓取的包保存为test.pcap文件
+        # https://www.cnpython.com/pypi/scapy-ssl_tls
+
+    def test_tls_https(self):
+        # scapy-ssl_tls
+        # todo
+        load_layer('tls')
+        pkts = rdpcap('ship.pcap')
+        for pkt in pkts:
+            pkt.lastlayer()
+            print(pkt)
 
     def test_read_file(self):
         field = 'dst=00:0c:29:d9:98:c7'
