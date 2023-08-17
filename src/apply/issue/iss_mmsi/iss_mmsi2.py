@@ -1,8 +1,8 @@
 import time
 from unittest import TestCase
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from sqlalchemy import Column, String, Text
 from sqlalchemy.dialects.mysql import INTEGER
@@ -36,8 +36,7 @@ class TestMmsi(TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test_main(self):
-        option = Options()
-        browser = webdriver.Chrome(chrome_options=option, executable_path='chromedriver.exe')
+        browser = WebDriver(service=Service(executable_path='chromedriver.exe'))
         browser.maximize_window()  # 窗口最大化
         browser.get('https://www.shipxy.com/')
 
