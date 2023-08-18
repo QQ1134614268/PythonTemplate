@@ -26,9 +26,8 @@ BEGIN
             SET update_time = create_time;
             SET create_by = id;
             SET update_by = id;
-            -- SET rand_id = SUBSTRING(MD5(RAND()), 1, 28);
             INSERT INTO `performance_user_t`(id, name, sex, create_time, update_time, create_by, update_by)
-            VALUES (id, name, sex, create_time, update_time, create_by, update_by);
+            VALUE (id, name, sex, create_time, update_time, create_by, update_by);
             SET i = i + 1;
         END WHILE;
 END$$
