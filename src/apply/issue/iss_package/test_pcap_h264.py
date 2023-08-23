@@ -4,7 +4,6 @@
 @Description:
 """
 import json
-import time
 from datetime import datetime
 from typing import List
 from unittest import TestCase
@@ -16,7 +15,7 @@ from scapy.layers.l2 import Ether
 from scapy.layers.rtp import RTP
 from scapy.packet import Packet, Raw
 from scapy.utils import PcapReader, rdpcap
-from sqlalchemy import Column, Text, JSON, DATETIME, DateTime
+from sqlalchemy import Column, Text, JSON, DATETIME
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import declarative_base
 
@@ -32,45 +31,13 @@ class Package(Base):
     raw = Column(Text, comment="原始数据")
     debug_info = Column(JSON, comment="debug info, json, 4bit")
     # 数据链路层
-    ether_time = Column(DateTime, comment="版本, 4bit")
+    ether_time = Column(DATETIME, comment="版本, 4bit")
     # ether_type = Column(Text, comment="协议类型, 16bit")
     # 1500 1456 -12 = 1442
 
-    # ip 层
-    ip_version = Column(Text, comment="版本, 4bit")
-    ip_header_len = Column(Text, comment="首部长度, 4bit")
-    ip_ser = Column(Text, comment="区分服务, 4bit")
-    ip_total_len = Column(Text, comment="总长度, 4bit")
-    ip_id = Column(Text, comment="标识, 16bit")
-    ip_flags = Column(Text, comment="标志, 3bit")
-    ip_offset = Column(Text, comment="片偏移, 9bit")
-    ip_live_time = Column(Text, comment="生存时间, 8bit")
-    ip_prop = Column(Text, comment="payload协议, 8bit")  # 其值为6，则为TCP，其值为17，则为UDP。
-    ip_check = Column(Text, comment="首部校验和, 16bit")
-    ip_src = Column(Text, comment="源地址, 32bit")
-    ip_dst = Column(Text, comment="目标地址, 32bit")
-    ip_other = Column(Text, comment="可选字段")
-
-    # udp 层
-    udp_src_port = Column(Text, comment="源端口号, 16bit")
-    udp_dst_port = Column(Text, comment="目标端口号, 16bit")
-    udp_len = Column(Text, comment="udp 长度, 16bit")
-    udp_check = Column(Text, comment="udp 校验和, 16bit")
-
-    # tcp层
-    tcp_sport = Column(Text, comment="源端口号, 16bit")
-    tcp_dport = Column(Text, comment="目标端口号, 16bit")
-    tcp_seq = Column(Text, comment="序号, 32bit")
-    tcp_ack = Column(Text, comment="确认号, 32bit")
-    # Offset：报头长度，4位，给出报头中 32bit 字的数目。
-    # 需要这个值是因为任选字段的长度是可变的。这个字段占 4bit,即TCP 最多有 60（15*4） 字节的首部
-    tcp_offset = Column(Text, comment="数据偏移, 4bit")
-    tcp_reserve = Column(Text, comment="保留, 6bit")
-    tcp_flags = Column(Text, comment="tcp_flags, 6bit")
-    tcp_window = Column(Text, comment="窗口, 16bit")
-    tcp_check = Column(Text, comment="校验和, 16bit")
-    tcp_emergency = Column(Text, comment="紧急指针, 16bit")
-    tcp_other = Column(Text, comment="选项, 16bit")
+    ip_json_data = Column(JSON, comment="ip data")
+    udp_json_data = Column(JSON, comment="udp data")
+    tcp_json_data = Column(JSON, comment="tcp data")
 
     # RTP 层
     rtp_version = Column(Text, comment="版本号，固定为2，2bit")
@@ -220,9 +187,9 @@ class PSM(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
         # 表示PSM的版本号，取值范围1到32，随着PSM定义的改变循环累加；若current_next_indicator == 1，表示当前PSM的版本号，若current_next_indicator == 0，表示下一个PSM的版本号
         BitField('psm_reserved2', 0x7F, 7),
         BitField('psm_mark_1', 1, 1),
-        BitField('psm_stream_info_len', 0, 16),  # todo
+        BitField('psm_stream_info_len', 0, 16),
         StrLenField("psm_stream_info", b"", length_from=lambda pkt: pkt.psm_stream_info_len),
-        BitField('psm_stream_map_len', 8, 16),  # todo
+        BitField('psm_stream_map_len', 8, 16),
         # 表示在这个PSM中所有ES流信息的总长度；包括stream_type,elementary_stream_id, elementary_stream_info_length的长度，即N*32bit；是不包括具体ES流描述信息descriptor的长度的；
         StrLenField("psm_stream_map", b"", length_from=lambda pkt: pkt.psm_stream_map_len),
         # #     /*video*/
@@ -234,7 +201,6 @@ class PSM(Packet):  # https://blog.csdn.net/marcosun_sw/article/details/86495509
         # BitField('psm_audio_elementary_stream_id', 0xC0, 8),
         # BitField('psm_audio_elementary_stream_info_length', 0, 16),
 
-        #
         #     /*crc*/
         BitField('psm_crc_32', 0x45, 32),
         StrLenField("psm_options", b"",
@@ -321,38 +287,23 @@ class TestPcap(TestCase):
                 package.ether_time = datetime.fromtimestamp(ether.time.real.__int__())
             if pck.haslayer(IP):
                 ip: IP = pck[IP]
-                package.ip_version = ip.version
-                package.ip_header_len = ip.ihl
-                package.ip_ser = ip.tos
-                package.ip_total_len = ip.len
-                package.ip_id = ip.id
-                package.ip_flags = ip.flags.value  # ["MF", "DF", "evil"]
-                package.ip_offset = ip.frag
-                package.ip_live_time = ip.ttl
-                package.ip_prop = ip.proto
-                package.ip_check = ip.chksum
-                package.ip_src = ip.src
-                package.ip_dst = ip.dst
-                package.ip_other = str(ip.options)
+                package.ip_json_data = {"ip_version": ip.version, "ip_header_len": ip.ihl, "ip_ser": ip.tos,
+                                        "ip_total_len": ip.len, "ip_id": ip.id, "ip_flags": ip.flags.value,
+                                        "ip_offset": ip.frag, "ip_live_time": ip.ttl, "ip_prop": ip.proto,
+                                        "ip_check": ip.chksum, "ip_src": ip.src, "ip_dst": ip.dst,
+                                        "ip_other": str(ip.options)}
             if pck.haslayer(UDP):
                 udp: UDP = pck[UDP]
-                package.udp_src_port = udp.sport
-                package.udp_dst_port = udp.dport
-                package.udp_len = udp.len
-                package.udp_check = udp.chksum
+                package.udp_json_data = {"udp_src_port": udp.sport, "udp_dst_port": udp.dport, "udp_len": udp.len,
+                                         "udp_check": udp.chksum}
             if pck.haslayer(TCP):
                 tcp: TCP = pck[TCP]
-                package.tcp_sport = tcp.sport
-                package.tcp_dport = tcp.dport
-                package.tcp_seq = tcp.seq
-                package.tcp_ack = tcp.ack
-                package.tcp_offset = tcp.dataofs
-                package.tcp_reserve = tcp.reserved
-                package.tcp_flags = str(bin(tcp.flags.value))
-                package.tcp_window = tcp.window
-                package.tcp_check = tcp.chksum
-                package.tcp_emergency = tcp.urgptr
-                package.tcp_other = json.dumps(list(map(lambda x: hex(x), tcp.options)))
+                package.tcp_json_data = {"tcp_sport": tcp.sport, "tcp_dport": tcp.dport, "tcp_seq": tcp.seq,
+                                         "tcp_ack": tcp.ack,
+                                         "tcp_offset": tcp.dataofs, "tcp_reserve": tcp.reserved,
+                                         "tcp_flags": str(bin(tcp.flags.value)), "tcp_window": tcp.window,
+                                         "tcp_check": tcp.chksum, "tcp_emergency": tcp.urgptr,
+                                         "tcp_other": json.dumps(list(map(lambda x: hex(x), tcp.options)))}
             if pck.haslayer(RTP):
                 rtp: RTP = pck[RTP]
                 package.rtp_version = rtp.version
