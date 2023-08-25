@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>录像</title>
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./util.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+</head>
+<body>
+<div id="app" style="height: 100vh; display: flex">
+    <el-button>254</el-button>
+    <div id="container" style="width: 50%"></div>
+    <el-form ref="form" :model="form" style="width: 50%; border:  solid 1px aliceblue">
+        <el-form-item label="FPS设置:" style="width: 30rem;user-select: text">
+            <el-select v-model="isUseFpsRender" style="width: 140px;">
+                <el-option label="动态(根据流)" :value="false" selected label=""></el-option>
+                <el-option label="定频（本地设置）" :value="true" label=""></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="是否解码前缓冲数据(定频生效):" style="width: 30rem">
+            <el-select v-model="isCacheBeforeDecodeForFpsRender">
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false" selected></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item label="只解码I帧(点击重播按钮生效):" style="width: 30rem">
+            <el-select v-model="onlyDecoderIFrame" id="onlyDecoderIFrame">
+                <el-option label="1倍" :value="1"></el-option>
+                <el-option label="2倍" :value="2"></el-option>
+                <el-option label="4倍" :value="4" selected></el-option>
+                <el-option label="8倍" :value="8"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="FPS（定频(本地设置)生效）：" style="width: 30rem">
+            <el-input v-model="playbackFps"></el-input>
+        </el-form-item>
+        <el-form-item label="不断流暂停是否清除缓存数据：" style="width: 30rem">
+            <el-select v-model="isPlaybackPauseClearCache" id="isPlaybackPauseClearCache">
+                <el-option label="是" :value="true" selected></el-option>
+                <el-option label="否" :value="false"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="ui是否使用playbackPause：" style="width: 30rem">
+            <el-select v-model="uiUsePlaybackPause">
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false" selected></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="canvas渲染技术：" style="width: 30rem">
+            <el-select v-model="isUseWebGPU" onchange="replay()">
+                <el-option label="webgl" :value="'webgl'"></el-option>
+                <el-option label="webgpu" :value="'webgpu'" selected></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="是否使用硬解码(https支持)：" style="width: 30rem">
+            <el-select v-model="playbackUseWCS">
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false" selected></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item label="播放地址:" style="width: 30rem">
+            <el-input v-model="playUrl" style="width: 5rem"></el-input>
+        </el-form-item>
+        <el-button @click="replay()">重播</el-button>
+        <el-button @click="play()">播放</el-button>
+        <el-button @click="pause()">停止(流会断开)</el-button>
+        <el-button @click="playbackPause()">停止(流不断开)</el-button>
+        <el-button @click="currentTimeScroll()">滚动到当前时间</el-button>
+
+        <el-form-item label="时间:" style="width: 30rem">
+            <div>{{ playTimesArray }}</div>
+        </el-form-item>
+
+        <el-form-item label="浏览器配置：" style="width: 30rem">
+            <div>
+                <el-checkbox v-model="checked2" disabled>支持MSE H264解码；</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持Webcodecs H264解码；</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持WASM解码</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
+            </div>
+        </el-form-item>
+    </el-form>
+</div>
+<script>
+    let t = new Vue(
+        {
+            el: '#app',
+            data() {
+                return {
+                    form: {},
+                    isUseFpsRender: false,
+                    isCacheBeforeDecodeForFpsRender: true,
+                    onlyDecoderIFrame: 4,
+                    playbackFps: 25,
+                    isPlaybackPauseClearCache: true,
+                    uiUsePlaybackPause: '',
+                    isUseWebGPU: '',
+                    playbackUseWCS: false,
+                    playUrl: '',
+                    playTimesArray: [],
+
+                    checked2: checkSupportWCS(),
+
+                    videoBuffer: 0.2,
+                    decodeType: '',
+                    jessibuca: null,
+                    version: '',
+                    wasm: false,
+                    vc: "ff",
+                    playing: false,
+                    quieting: true,
+                    loaded: false, // mute
+                    showOperateBtns: false,
+                    showBandwidth: false,
+                    err: "",
+                    speed: 0,
+                    performance: "",
+                    volume: 1,
+                    rotate: 0,
+                    useWCS: false,
+                    useMSE: true,
+                    useOffscreen: false,
+                    recording: false,
+                    recordType: 'webm',
+                    scale: '0',
+                };
+            },
+            mounted() {
+                // this.create();
+                // window.onerror = (msg) => (this.err = msg);
+            },
+            unmounted() {
+                this.jessibuca.destroy();
+            },
+            methods: {
+                create() {
+                    this.jessibuca = new JessibucaPro({
+                        container: document.getElementById('container'),
+                        videoBuffer: 0.2, // 缓存时长
+                        isResize: false,
+                        text: "",
+                        loadingText: "加载中",
+                        debug: true,
+                        debugLevel: 'debug',
+                        showPerformance: true,
+                        showBandwidth: true, // 显示网速
+                        showPlaybackOperate: this.onlyDecoderIFrame,
+                        operateBtns: {
+                            fullscreen: this.showOperateBtns,
+                            screenshot: this.showOperateBtns,
+                            play: this.showOperateBtns,
+                            audio: this.showOperateBtns,
+                            zoom: this.showOperateBtns,
+                            performance: this.showOperateBtns,
+                        },
+                        forceNoOffscreen: forceNoOffscreen,
+                        isNotMute: false,
+                        playbackForwardMaxRateDecodeIFrame: this.onlyDecoderIFrame,
+                        useWebGPU: this.useWebGPU === 'webgpu' // 使用WebGPU
+                    },);
+
+                    this.jessibuca.onLog = msg => console.error(msg);
+                    this.jessibuca.onRecord = (status) => console.log('onRecord', status);
+                    this.jessibuca.onPause = () => console.log('onPause');
+                    this.jessibuca.onPlay = () => console.log('onPlay');
+                    this.jessibuca.onFullscreen = msg => console.log('onFullscreen', msg);
+                    this.jessibuca.onMute = msg => console.log('onMute', msg);
+
+                    this.jessibuca.on('playbackPreRateChange', (rate) => {
+                        this.jessibuca.forward(rate);
+                    })
+
+                    this.jessibuca.on('playbackSeek', (data) => {
+                        const currentTime = new Date(1653840000000).setHours(data.hour, data.min, data.second, 0);
+                        this.jessibuca.setPlaybackStartTime(currentTime);
+                    })
+                },
+                play() {
+                    if (!this.playUrl) {
+                        return
+                    }
+
+                    if (this.isPlaybackPause) {
+                        this.jessibuca.playbackResume()
+                    } else {
+                        this.jessibuca.playback(this.playUrl, {
+                            playList: this.playTimesArray,
+                            fps: this.playbackFps,
+                            showControl: true,
+                            isUseFpsRender: this.isUseFpsRender,
+                            isCacheBeforeDecodeForFpsRender: this.isCacheBeforeDecodeForFpsRender,
+                            showRateBtn: true,
+                            supportWheel: true,
+                            uiUsePlaybackPause: this.uiUsePlaybackPause,
+                            isPlaybackPauseClearCache: this.isPlaybackPauseClearCache,
+                            rateConfig: [
+                                {label: '正常', value: 1},
+                                {label: '2倍', value: 2},
+                                {label: '4倍', value: 4},
+                                {label: '8倍', value: 8},
+                                {label: '16倍', value: 16},
+                            ],
+                            useWCS: this.playbackUseWCS,
+                        });
+                    }
+                    this.isPlaybackPause = false;
+                    //     $player.style.display = 'none';
+                    //    $pause.style.display = 'inline-block';
+                    //   $playbackPause.style.display = 'inline-block';
+                    //   $playScroll.style.display = 'inline-block';
+                    //  $destroy.style.display = 'inline-block';
+                },
+                replay() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy();
+                    }
+                    this.create();
+                    this.play();
+                },
+                mute() {
+                    this.jessibuca.mute();
+                },
+                cancelMute() {
+                    this.jessibuca.cancelMute();
+                },
+                pause() {
+                    // $playbackPause.style.display = 'none';
+                    // $pause.style.display = 'none';
+                    // $playScroll.style.display = 'none';
+                    // $player.style.display = 'inline-block';
+                    this.jessibuca.jessibuca.pause();
+                },
+                playbackPause() {
+                    this.jessibuca.playbackPause();
+                    this.isPlaybackPause = true;
+                },
+                destroy() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy();
+                    }
+                    this.create();
+                },
+                currentTimeScroll() {
+                    if (this.jessibuca) {
+                        this.jessibuca.playbackCurrentTimeScroll();
+                    }
+                },
+
+            },
+        }
+    );
+</script>
+</body>
+<style>
+    html {
+        -ms-user-select: text;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        user-select: text;
+    }
+
+    #container {
+        background: rgba(13, 14, 27, 0.7);
+        width: 640px;
+        height: 398px;
+    }
+
+    .option span {
+        color: white;
+    }
+
+    @media (max-width: 720px) {
+        #container {
+            width: 90vw;
+            height: 52.7vw;
+        }
+    }
+</style>
+</html>

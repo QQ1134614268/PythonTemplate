@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>录像</title>
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./util.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+</head>
+<body>
+<div id="app" style="height: 100vh; display: flex">
+    <div id="container" style="width: 50%"></div>
+    <el-form ref="form" :model="form" style="width: 50%; border:  solid 1px aliceblue">
+        <span style="color:red;">注意：将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了</span>即：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play
+
+        <div class="input">
+            <div>输入URL：</div>
+            <input
+                    autocomplete="on"
+                    id="playUrl"
+                    placeholder="webrtc://"
+                    value=""
+            />
+            <button id="play">播放</button>
+            <button id="pause" style="display: none">停止</button>
+        </div>
+        <div class="input" style="line-height: 30px">
+            <button id="destroy">销毁</button>
+            <span class="fps-inner"></span>
+        </div>
+
+    </el-form>
+</div>
+<script>
+    let t = new Vue(
+        {
+            el: '#app',
+            data() {
+                return {
+                    form: {},
+                    isUseFpsRender: 'false',
+                    isCacheBeforeDecodeForFpsRender: 'true',
+                    onlyDecoderIFrame: 4,
+                    playbackFps: 25,
+                    isPlaybackPauseClearCache: 'true',
+                    uiUsePlaybackPause: '',
+                    isUseWebGPU: '',
+                    playbackUseWCS: false,
+                    playUrl: '',
+                    playTimesArray: [],
+
+                    checked2: checkSupportWCS(),
+
+                    videoBuffer: 0.2,
+                    decodeType: '',
+                    jessibuca: null,
+                    version: '',
+                    wasm: false,
+                    vc: "ff",
+                    playing: false,
+                    quieting: true,
+                    loaded: false, // mute
+                    showOperateBtns: false,
+                    showBandwidth: false,
+                    err: "",
+                    speed: 0,
+                    performance: "",
+                    volume: 1,
+                    rotate: 0,
+                    useWCS: false,
+                    useMSE: true,
+                    useOffscreen: false,
+                    recording: false,
+                    recordType: 'webm',
+                    scale: '0',
+                };
+            },
+            mounted() {
+                // this.create();
+                // window.onerror = (msg) => (this.err = msg);
+            },
+            unmounted() {
+                this.jessibuca.destroy();
+            },
+            methods: {
+                create() {
+                    jessibuca = new JessibucaPro({
+                        container: $container,
+                        isResize: false,
+                        text: "",
+                        loadingText: "加载中",
+                        debug: true,
+                        debugLevel: "debug",
+                        showBandwidth: showOperateBtns, // 显示网速
+                        showPerformance: showOperateBtns, // 显示性能
+                        operateBtns: {
+                            fullscreen: showOperateBtns,
+                            screenshot: showOperateBtns,
+                            play: showOperateBtns,
+                            audio: showOperateBtns,
+                            ptz: showOperateBtns,
+                            quality: showOperateBtns,
+                            performance: showOperateBtns,
+                        },
+                        heartTimeoutReplayUseLastFrameShow: true,
+                        audioEngine: "worklet",
+                        isNotMute: false,
+                        heartTimeout: 10,
+                        isWebrtcForOthers: $isForOthers.checked === true,
+                    },);
+
+
+                    jessibuca.on('streamQualityChange', (value) => {
+                        console.log('streamQualityChange', value);
+                    })
+
+                    jessibuca.on('timeUpdate', (value) => {
+                        // console.log('timeUpdate', value);
+                    })
+
+                    jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+                        console.log('crashLog', log)
+                    })
+
+                    //  $player.style.display = 'inline-block';
+                    // $pause.style.display = 'none';
+                    //  $destroy.style.display = 'none';
+                },
+
+                play() {
+                    if (!this.playUrl) {
+                        return
+                    }
+
+                    if (this.isPlaybackPause) {
+                        jessibuca.playbackResume()
+                    } else {
+                        jessibuca.playback(this.playUrl, {
+                            playList: this.playTimesArray,
+                            fps: this.playbackFps,
+                            showControl: true,
+                            isUseFpsRender: this.isUseFpsRender,
+                            isCacheBeforeDecodeForFpsRender: this.isCacheBeforeDecodeForFpsRender,
+                            showRateBtn: true,
+                            supportWheel: true,
+                            uiUsePlaybackPause: this.uiUsePlaybackPause,
+                            isPlaybackPauseClearCache: this.isPlaybackPauseClearCache,
+                            rateConfig: [
+                                {label: '正常', value: 1},
+                                {label: '2倍', value: 2},
+                                {label: '4倍', value: 4},
+                                {label: '8倍', value: 8},
+                                {label: '16倍', value: 16},
+                            ],
+                            useWCS: this.playbackUseWCS,
+                        });
+                    }
+                    this.isPlaybackPause = false;
+                    //     $player.style.display = 'none';
+                    //    $pause.style.display = 'inline-block';
+                    //   $playbackPause.style.display = 'inline-block';
+                    //   $playScroll.style.display = 'inline-block';
+                    //  $destroy.style.display = 'inline-block';
+                },
+                replay() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy();
+                    }
+                    this.create();
+                    this.play();
+                },
+
+                pause() {
+                    // $playbackPause.style.display = 'none';
+                    // $pause.style.display = 'none';
+                    // $playScroll.style.display = 'none';
+                    // $player.style.display = 'inline-block';
+                    this.jessibuca.jessibuca.pause();
+                },
+                destroy() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy();
+                    }
+                    this.create();
+                },
+            },
+        }
+    );
+</script>
+
+</body>
+<style>
+    * {
+        -webkit-user-select: text;
+    }
+</style>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>低延迟</title>
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./util.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+</head>
+<body>
+<div id="app" style="height: 100vh; display: flex">
+    <div id="container" style="width: 50%"></div>
+    <el-form ref="form" :model="form" style="width: 50%; border:  solid 1px aliceblue">
+
+        <el-form-item label="MediaSource:" style="width: 30rem">
+            <input
+                    type="checkbox"
+                    checked
+                    id="useMSE"
+            />
+        </el-form-item>
+        <el-form-item label="Webcodec：" style="width: 30rem">
+            <input
+                    type="checkbox"
+                    id="useWCS"
+            />
+        </el-form-item>
+        <el-form-item label="WASM：" style="width: 30rem">
+            <input
+                    type="checkbox"
+                    id="useWASM"
+            />
+        </el-form-item>
+        <el-form-item label="WASM(SIMD)：" style="width: 30rem">
+            <input
+                    type="checkbox"
+                    id="useSIMD"
+            />
+        </el-form-item>
+        <el-form-item label="渲染标签：" style="width: 30rem">
+            <select id="renderDom" onchange="replay()">
+                <option value="video" selected>video</option>
+                <option value="canvas">canvas</option>
+            </select>
+        </el-form-item>
+        <el-form-item label="canvas渲染技术：" style="width: 30rem">
+            <select id="isUseWebGPU" onchange="replay()">
+                <option value="webgl">webgl</option>
+                <option value="webgpu" selected>webgpu</option>
+            </select>
+        </el-form-item>
+        <el-form-item label="缓存时长：" style="width: 30rem">
+            <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+        </el-form-item>
+        <el-form-item label="缓存延迟(延迟超过会触发丢帧)：" style="width: 30rem">
+            <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+        </el-form-item>
+        <el-form-item label="输入URL：" style="width: 30rem">
+            <input
+                    autocomplete="on"
+                    id="playUrl"
+                    value=""
+            />
+        </el-form-item>
+        <button id="replay">重播</button>
+        <button id="play">播放</button>
+        <button id="pause" style="display: none">停止</button>
+        <button id="destroy">销毁</button>
+
+        <el-form-item label="浏览器配置：" style="width: 30rem">
+            <div>
+                <el-checkbox v-model="checked2" disabled>支持MSE H264解码；</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持Webcodecs H264解码；</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持WASM解码</el-checkbox>
+                <el-checkbox v-model="checked2" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
+            </div>
+        </el-form-item>
+    </el-form>
+</div>
+<script>
+    let t = new Vue(
+        {
+            el: '#app',
+            data() {
+                return {
+                    form: {},
+                    isUseFpsRender: 'false',
+                    isCacheBeforeDecodeForFpsRender: 'true',
+                    onlyDecoderIFrame: 4,
+                    playbackFps: 25,
+                    isPlaybackPauseClearCache: 'true',
+                    uiUsePlaybackPause: '',
+                    isUseWebGPU: '',
+                    playbackUseWCS: false,
+                    playUrl: '',
+                    playTimesArray: [],
+
+                    checked2: checkSupportWCS(),
+
+                    videoBuffer: 0.2,
+                    decodeType: '',
+                    jessibuca: null,
+                    version: '',
+                    wasm: false,
+                    vc: "ff",
+                    playing: false,
+                    quieting: true,
+                    loaded: false, // mute
+                    showOperateBtns: false,
+                    showBandwidth: false,
+                    err: "",
+                    speed: 0,
+                    performance: "",
+                    volume: 1,
+                    rotate: 0,
+                    useWCS: false,
+                    useMSE: true,
+                    useOffscreen: false,
+                    recording: false,
+                    recordType: 'webm',
+                    scale: '0',
+                };
+            },
+            mounted() {
+                // this.create();
+                // window.onerror = (msg) => (this.err = msg);
+            },
+            unmounted() {
+                this.jessibuca.destroy();
+            },
+            methods: {
+                create() {
+                    this.jessibuca = new JessibucaPro({
+                        container: document.getElementById('container'),
+                        videoBuffer: 0.1, // 缓存时长
+                        videoBufferDelay: 0.2, //
+                        isResize: false,
+                        text: "",
+                        loadingText: "加载中",
+                        debug: true,
+                        debugLevel: "debug",
+                        useMSE: this.useMSE,
+                        useSIMD: this.useSIMD,
+                        useWCS: this.useWCS,
+                        showBandwidth: this.showOperateBtns, // 显示网速
+                        showPerformance: this.showOperateBtns, // 显示性能
+                        operateBtns: {
+                            fullscreen: this.showOperateBtns,
+                            screenshot: this.showOperateBtns,
+                            play: this.showOperateBtns,
+                            audio: this.showOperateBtns,
+                            ptz: this.showOperateBtns,
+                            quality: this.showOperateBtns,
+                            performance: this.showOperateBtns,
+                        },
+                        timeout: 10000,
+                        heartTimeoutReplayUseLastFrameShow: true,
+                        audioEngine: "worklet",
+                        qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
+                        forceNoOffscreen: forceNoOffscreen,
+                        isNotMute: false,
+                        heartTimeout: 10,
+                        ptzClickType: 'mouseDownAndUp',
+                        ptzZoomShow: true,
+                        ptzMoreArrowShow: true,
+                        ptzApertureShow: true,
+                        ptzFocusShow: true,
+                        useCanvasRender: this.renderDom,
+                        useWebGPU: this.isUseWebGPU,
+                        controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>'
+                        // audioEngine:"worklet",
+                        // isFlv: true
+                    },);
+
+
+                    this.jessibuca.on('ptz', (arrow) => {
+                        // console.log('ptz', arrow);
+                    })
+
+                    this.jessibuca.on('streamQualityChange', (value) => {
+                        console.log('streamQualityChange', value);
+                    })
+
+                    this.jessibuca.on('timeUpdate', (value) => {
+                        // console.log('timeUpdate', value);
+                    })
+
+                    this.jessibuca.on('stats', (stats) => {
+                        // console.log('stats', stats);
+                        $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+                    })
+
+
+                    //   $player.style.display = 'inline-block';
+                    //   $pause.style.display = 'none';
+                    //   $destroy.style.display = 'none';
+                    //   $fps.textContent = '';
+                },
+                play() {
+                    if (this.playUrl) {
+                        this.jessibuca.play(this.playUrl);
+                        //  $player.style.display = 'none';
+                        //   $pause.style.display = 'inline-block';
+                        //  $destroy.style.display = 'inline-block';
+                    }
+                },
+                replay() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy()
+
+                    }
+                    this.create();
+                    this.play();
+                },
+                mute() {
+                    this.jessibuca.mute();
+                },
+                cancelMute() {
+                    this.jessibuca.cancelMute();
+                },
+
+                pause() {
+                    //  $player.style.display = 'inline-block';
+                    //   //  $pause.style.display = 'none';
+                    //    $fps.textContent = '';
+                    this.jessibuca.pause();
+                },
+                destroy() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy();
+                    }
+                    this.create();
+                },
+                useMSE() {
+                    const checked = this.useMSE;
+                    if (checked) {
+                        this.useSIMD = false
+                        this.useWCS = false
+                    }
+                    this.replay();
+                },
+                useSIMD() {
+                    const checked = this.useSIMD;
+                    if (checked) {
+                        this.useMSE = false
+                        this.useWCS = false
+                    }
+                    this.replay();
+                },
+                useWCS() {
+                    const checked = this.useWCS;
+                    if (checked) {
+                        this.useMSE = false
+                        this.useSIMD = false
+                    }
+                    this.replay();
+                },
+
+            },
+        }
+    );
+</script>
+</body>
+<style>
+    * {
+        -webkit-user-select: text;
+    }
+
+    #container {
+        background: rgba(13, 14, 27, 0.7);
+        width: 640px;
+        height: 398px;
+    }
+
+    .option span {
+        color: white;
+    }
+
+    @media (max-width: 720px) {
+        #container {
+            width: 90vw;
+            height: 52.7vw;
+        }
+    }
+</style>
+</html>

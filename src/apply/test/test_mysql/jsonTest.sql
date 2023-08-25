@@ -73,3 +73,39 @@ SELECT JSON_EXTRACT('{"auth":[{"book":{"size":[1,2,3]}}]}', '$.auth[*].book.size
 -- ‘$.name’	返回key=”name”的数据
 -- ‘$**.name’	返回所有最底层key=”name”的数据
 -- ‘$.auth[*].book[*]’	返回key=auth的list的key=book的list的所有内容
+
+-- 二、创建JSON文本的函数
+-- 2.1.JSON_ARRAY（转换json数组）
+-- 2.2.JSON_OBJECT（转换json对象）
+-- 2.3.JSON_QUOTE（转义字符串）
+-- 三、搜索JSON文本的函数
+-- 3.1.JSON_CONTAINS（json当中是否包含指定value）
+-- 3.2.JSON_CONTAINS_PATH（是否包含某个PATH）
+-- 3.3.JSON_EXTRACT 和 -> （根据key取值）
+-- 3.4.JSON_UNQUOTE(JSON_EXTRACT()) 和 ->> （无引号提取）
+-- 3.5.JSON_KEYS（获取json当中key数组）
+-- 3.6.JSON_OVERLAPS（判断两个json是否存在同样的的key value）
+-- 3.7.JSON_SEARCH（通过内容找path，支持模糊查）
+-- 3.8.JSON_VALUE（根据key取值，如果没找到可以给默认值，如果找到了可以转换想要的数据类型）
+-- 3.9.MEMBER OF（查看数组是否有某个元素）
+-- 四、修改JSON文本的函数
+-- 4.1.JSON_ARRAY_APPEND（在指定的数组位置末尾追加元素，假如指定的位置不是数组追加完过后就变成了数组）
+-- 4.2.JSON_ARRAY_INSERT（在指定的数组位置后追加元素）
+-- 4.3.JSON_INSERT（向指定path添加元素，path有值不覆盖，没值就添加）
+-- 4.5.JSON_MERGE（多个json合并）
+-- 4.6.JSON_MERGE_PATCH
+-- 4.7.JSON_MERGE_PRESERVE
+-- 4.8.JSON_REMOVE（根据path移除）
+-- 4.9.JSON_REPLACE（替换指定path的值）
+-- 5.0.JSON_SET（有则覆盖，没有则新增）
+-- 五、返回JSON文本属性的函数
+-- 5.1.JSON_DEPTH（返回 JSON 文档的最大深度）
+-- 5.2.JSON_LENGTH（返回长度）
+-- 5.3.JSON_TYPE（获取json的类型）
+-- 5.4.JSON_VALID（判断是否是有效json）
+-- 六、JSON工具函数
+-- 6.1.JSON_PRETTY（json格式化输出）
+-- 6.2.JSON_STORAGE_SIZE（计算占用的存储空间，单位字节）
+-- 七、JSON聚合函数
+-- 7.1.JSON_ARRAYAGG（配合GROUP BY进行分组，得到的是数组）
+-- 7.2.JSON_OBJECTAGG（配合GROUP BY进行分组，得到的是对象）

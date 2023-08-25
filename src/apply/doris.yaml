@@ -1,0 +1,36 @@
+# Doris
+引擎: OLAP, mysql es ...
+
+Doris 的数据模型主要分为3类:
+    Aggregate:
+        新旧记录进行聚合
+        聚合类型:
+            SUM：求和，多行的 Value 进行累加。
+            REPLACE：替代，下一批数据中的 Value 会替换之前导入过的行中的 Value。
+            MAX：保留最大值。
+            MIN：保留最小值。
+    Unique:
+        保证 Key 的唯一性; 相同时，新记录覆盖旧记录
+    Duplicate:
+        在某些多维分析场景下，数据既没有主键，也没有聚合需求
+
+    排序存储
+    Rollup
+    Schema Change
+
+索引:
+    前缀索引和 ZoneMap 索引;
+    倒排索引、 bloomfilter索引、 ngram bloomfilter索引 和bitmap索引。
+
+    HELP CREATE INDEX / HELP SHOW INDEX / HELP DROP INDEX
+
+    inverted:
+        参考: https://doris.apache.org/zh-CN/docs/dev/data-table/index/inverted-index
+
+    Bitmap:
+        CREATE INDEX [IF NOT EXISTS] index_name ON table1 (siteid) USING BITMAP COMMENT 'balabala';
+        SHOW INDEX FROM example_db.table_name;
+        DROP INDEX [IF EXISTS] index_name ON [db_name.]table_name;
+导入
+导出
+数据更新,删除
