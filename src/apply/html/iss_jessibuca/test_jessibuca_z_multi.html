@@ -29,22 +29,22 @@
             <el-checkbox v-model="useSIMD" @change="replay('simd')">wasm(simd)</el-checkbox>
         </el-form-item>
         <el-form-item label="硬解码(MediaSource，Webcodec)worker解封装:" style="width: 100rem">
-            <el-checkbox @click="replay()" v-model="demuxUseWorker">备选项</el-checkbox>
+            <el-checkbox @click="replay" v-model="demuxUseWorker">备选项</el-checkbox>
         </el-form-item>
         <el-form-item label="渲染标签:" style="width: 100rem">
-            <el-select v-model="renderDom" onchange="replay()">
+            <el-select v-model="renderDom" onchange="replay">
                 <el-option value="video" selected>video</el-option>
                 <el-option value="canvas">canvas</el-option>
             </el-select>
         </el-form-item>
         <el-form-item label="canvas渲染技术:" style="width: 100rem">
-            <el-select v-model="renderCanvas" onchange="replay()">
+            <el-select v-model="renderCanvas" onchange="replay">
                 <el-option value="webgl">webgl</el-option>
                 <el-option value="webgpu" selected>webgpu</el-option>
             </el-select>
         </el-form-item>
         <el-form-item label="切换视频的时候，是否显示上一个流的最后一帧画面:" style="width: 100rem">
-            <el-checkbox @click="replay()" v-model="showLastIframe"></el-checkbox>
+            <el-checkbox @click="replay" v-model="showLastIframe"></el-checkbox>
         </el-form-item>
         <el-form-item  label="输入URL:" style="width: 100rem">
             <el-input autocomplete="on" :value="playUrl1"></el-input>

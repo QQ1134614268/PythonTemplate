@@ -19,7 +19,7 @@
             <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="changeBuffer"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 100rem">
-            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px" value="1"/>
+            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
         </el-form-item>
         <el-form-item label="解码:" style="width: 100rem">
             <el-checkbox v-model="useMSE" @change="replay('mse')">MediaSource</el-checkbox>
@@ -28,16 +28,16 @@
             <el-checkbox v-model="useSIMD" @change="replay('simd')">wasm(simd)</el-checkbox>
         </el-form-item>
         <el-form-item label="硬解码(MediaSource，Webcodec)worker解封装:" style="width: 100rem">
-            <el-checkbox @click="replay()" v-model="demuxUseWorker">备选项</el-checkbox>
+            <el-checkbox @click="replay" v-model="demuxUseWorker">备选项</el-checkbox>
         </el-form-item>
         <el-form-item label="渲染标签:" style="width: 100rem">
-            <el-select v-model="renderDom" onchange="replay()">
+            <el-select v-model="renderDom" onchange="replay">
                 <el-option value="video" selected>video</el-option>
                 <el-option value="canvas">canvas</el-option>
             </el-select>
         </el-form-item>
         <el-form-item label="canvas渲染技术:" style="width: 100rem">
-            <el-select v-model="renderCanvas" onchange="replay()">
+            <el-select v-model="renderCanvas" onchange="replay">
                 <el-option value="webgl">webgl</el-option>
                 <el-option value="webgpu" selected>webgpu</el-option>
             </el-select>

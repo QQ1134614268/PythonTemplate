@@ -6,7 +6,7 @@
     <title>录像</title>
     <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
     <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
-    <link href="https://cdn.bootcss.com/element-ui/2.4.5/theme-chalk/index.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
@@ -34,16 +34,16 @@
             </el-select>
         </el-form-item>
         <el-form-item label="硬解码(MediaSource，Webcodec)worker解封装:" style="width: 100rem">
-            <el-checkbox @click="replay()" v-model="demuxUseWorker">备选项</el-checkbox>
+            <el-checkbox @click="replay" v-model="demuxUseWorker">备选项</el-checkbox>
         </el-form-item>
         <el-form-item label="渲染标签:" style="width: 100rem">
-            <el-select v-model="renderDom" onchange="replay()">
+            <el-select v-model="renderDom" onchange="replay">
                 <el-option value="video" selected>video</el-option>
                 <el-option value="canvas">canvas</el-option>
             </el-select>
         </el-form-item>
         <el-form-item label="canvas渲染技术:" style="width: 100rem">
-            <el-select v-model="renderCanvas" onchange="replay()">
+            <el-select v-model="renderCanvas" onchange="replay">
                 <el-option value="webgl">webgl</el-option>
                 <el-option value="webgpu" selected>webgpu</el-option>
             </el-select>
