@@ -5,17 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>test</title>
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.4.5/theme-chalk/index.css" rel="stylesheet">
 
     <!--    <link rel="stylesheet" href="vue-virtual-scroller/dist/vue-virtual-scroller.css"/>-->
     <!--    <script src="vue-virtual-scroller/dist/vue-virtual-scroller.min.js"></script>-->
 
 </head>
 <body>
-<div id="app2" style="height: 100vh">
+<div id="app">
     <div>
         <el-form :model="history">
             <el-form-item label="token">
@@ -101,7 +100,7 @@
 
     let t = new Vue(
         {
-            el: '#app2',
+            el: '#app',
             data: {
                 tableData: [],
                 header: [],
@@ -191,6 +190,16 @@
 </script>
 </body>
 <style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    #app {
+        height: 100vh;
+    }
+
     .span_key {
         display: inline-block;
         width: 6rem;

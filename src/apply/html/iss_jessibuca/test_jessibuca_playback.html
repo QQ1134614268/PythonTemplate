@@ -2,25 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>录像</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.4.5/theme-chalk/index.css" rel="stylesheet">
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
-    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
-    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
 </head>
 <body>
 <div id="app" style="height: 100vh; display: flex">
-    <el-button>254</el-button>
     <div id="container" style="width: 50%"></div>
-    <el-form ref="form" :model="form" style="width: 50%; border:  solid 1px aliceblue">
-        <el-form-item label="FPS设置:" style="width: 30rem;user-select: text">
+    <el-form ref="form" :model="form" style="width: 50%">
+        <el-form-item label="缓冲(秒):" style="width: 30rem">
+            <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="changeBuffer"></el-input>
+        </el-form-item>
+        <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 100rem">
+            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
+        </el-form-item>
+        <el-form-item label="解码:" style="width: 100rem">
+            <el-checkbox v-model="useMSE" @change="replay('mse')" disable>MediaSource</el-checkbox>
+            <el-checkbox v-model="useWCS" @change="replay('wcs')" disable>webcodecs</el-checkbox>
+            <el-checkbox v-model="useWASM" @change="replay('wasm')" disable>wasm</el-checkbox>
+            <el-checkbox v-model="useSIMD" @change="replay('simd')" disable>wasm(simd)</el-checkbox>
+        </el-form-item>
+        <el-form-item label="是否使用硬解码(https支持)：" style="width: 30rem">
+            <el-select v-model="playbackUseWCS">
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false" selected></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="硬解码(MediaSource，Webcodec)worker解封装:" style="width: 100rem">
+            <el-checkbox @click="replay()" v-model="demuxUseWorker">备选项</el-checkbox>
+        </el-form-item>
+        <el-form-item label="渲染标签:" style="width: 100rem">
+            <el-select v-model="renderDom" onchange="replay()">
+                <el-option value="video" selected>video</el-option>
+                <el-option value="canvas">canvas</el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="canvas渲染技术:" style="width: 100rem">
+            <el-select v-model="renderCanvas" onchange="replay()">
+                <el-option value="webgl">webgl</el-option>
+                <el-option value="webgpu" selected>webgpu</el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="FPS设置:" style="width: 30rem">
             <el-select v-model="isUseFpsRender" style="width: 140px;">
                 <el-option label="动态(根据流)" :value="false" selected label=""></el-option>
                 <el-option label="定频（本地设置）" :value="true" label=""></el-option>
             </el-select>
+        </el-form-item>
+        <el-form-item label="FPS（定频(本地设置)生效）：" style="width: 30rem">
+            <el-input v-model="playbackFps"></el-input>
         </el-form-item>
         <el-form-item label="是否解码前缓冲数据(定频生效):" style="width: 30rem">
             <el-select v-model="isCacheBeforeDecodeForFpsRender">
@@ -28,7 +63,6 @@
                 <el-option label="否" :value="false" selected></el-option>
             </el-select>
         </el-form-item>
-
         <el-form-item label="只解码I帧(点击重播按钮生效):" style="width: 30rem">
             <el-select v-model="onlyDecoderIFrame" id="onlyDecoderIFrame">
                 <el-option label="1倍" :value="1"></el-option>
@@ -36,9 +70,6 @@
                 <el-option label="4倍" :value="4" selected></el-option>
                 <el-option label="8倍" :value="8"></el-option>
             </el-select>
-        </el-form-item>
-        <el-form-item label="FPS（定频(本地设置)生效）：" style="width: 30rem">
-            <el-input v-model="playbackFps"></el-input>
         </el-form-item>
         <el-form-item label="不断流暂停是否清除缓存数据：" style="width: 30rem">
             <el-select v-model="isPlaybackPauseClearCache" id="isPlaybackPauseClearCache">
@@ -52,40 +83,28 @@
                 <el-option label="否" :value="false" selected></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="canvas渲染技术：" style="width: 30rem">
-            <el-select v-model="isUseWebGPU" onchange="replay()">
-                <el-option label="webgl" :value="'webgl'"></el-option>
-                <el-option label="webgpu" :value="'webgpu'" selected></el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item label="是否使用硬解码(https支持)：" style="width: 30rem">
-            <el-select v-model="playbackUseWCS">
-                <el-option label="是" :value="true"></el-option>
-                <el-option label="否" :value="false" selected></el-option>
-            </el-select>
-        </el-form-item>
-
         <el-form-item label="播放地址:" style="width: 30rem">
-            <el-input v-model="playUrl" style="width: 5rem"></el-input>
+            <el-input v-model="playUrl"></el-input>
         </el-form-item>
-        <el-button @click="replay()">重播</el-button>
-        <el-button @click="play()">播放</el-button>
-        <el-button @click="pause()">停止(流会断开)</el-button>
-        <el-button @click="playbackPause()">停止(流不断开)</el-button>
-        <el-button @click="currentTimeScroll()">滚动到当前时间</el-button>
+        <el-button @click="play">播放</el-button>
+        <el-button @click="replay">重播</el-button>
+        <el-button @click="pause">停止(流会断开)</el-button>
+        <el-button @click="playbackPause">停止(流不断开)</el-button>
+        <el-button @click="destroy">销毁</el-button>
+        <el-button @click="currentTimeScroll">滚动到当前时间</el-button>
 
         <el-form-item label="时间:" style="width: 30rem">
             <div>{{ playTimesArray }}</div>
         </el-form-item>
-
+        <span>性能：{{ performance }}</span>
         <el-form-item label="浏览器配置：" style="width: 30rem">
             <div>
-                <el-checkbox v-model="checked2" disabled>支持MSE H264解码；</el-checkbox>
-                <el-checkbox v-model="checked2" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
-                <el-checkbox v-model="checked2" disabled> 支持Webcodecs H264解码；</el-checkbox>
-                <el-checkbox v-model="checked2" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
-                <el-checkbox v-model="checked2" disabled> 支持WASM解码</el-checkbox>
-                <el-checkbox v-model="checked2" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
             </div>
         </el-form-item>
     </el-form>
@@ -97,20 +116,24 @@
             data() {
                 return {
                     form: {},
+                    playUrl: '',
+                    demuxUseWorker: '',
+                    showLastIframe: '',
+                    renderDom: '',
+                    renderCanvas: '',
+
                     isUseFpsRender: false,
                     isCacheBeforeDecodeForFpsRender: true,
                     onlyDecoderIFrame: 4,
                     playbackFps: 25,
                     isPlaybackPauseClearCache: true,
                     uiUsePlaybackPause: '',
-                    isUseWebGPU: '',
+                    useWebGPU: '',
                     playbackUseWCS: false,
-                    playUrl: '',
                     playTimesArray: [],
 
-                    checked2: checkSupportWCS(),
-
                     videoBuffer: 0.2,
+                    videoBufferDelay: 1,
                     decodeType: '',
                     jessibuca: null,
                     version: '',
@@ -126,12 +149,21 @@
                     performance: "",
                     volume: 1,
                     rotate: 0,
+
                     useWCS: false,
-                    useMSE: true,
+                    useMSE: false,
+                    useWASM: false,
+                    useSIMD: true,
+
                     useOffscreen: false,
                     recording: false,
                     recordType: 'webm',
                     scale: '0',
+
+                    isSupportMSEH264: checkSupportMSEH264(),
+                    isSupportWCS: checkSupportWCS(),
+                    isSupportWasm: checkSupportWasm(),
+                    isSupportSIMD: checkSupportSIMD(),
                 };
             },
             mounted() {
@@ -144,16 +176,42 @@
             methods: {
                 create() {
                     this.jessibuca = new JessibucaPro({
-                        container: document.getElementById('container'),
-                        videoBuffer: 0.2, // 缓存时长
-                        isResize: false,
-                        text: "",
-                        loadingText: "加载中",
+                        // 基础, 调试
                         debug: true,
                         debugLevel: 'debug',
-                        showPerformance: true,
-                        showBandwidth: true, // 显示网速
-                        showPlaybackOperate: this.onlyDecoderIFrame,
+                        container: document.getElementById('container'),
+                        videoBuffer: this.videoBuffer, // 缓存时长
+                        videoBufferDelay: this.videoBufferDelay, // 1000s
+                        decoder: 'decoder.js', // 1 默认引用的是根目录下面的decoder.js文件 ，decoder.js 与 decoder.wasm文件必须是放在同一个目录下面
+
+                        timeout: 10, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
+                        loadingTimeout: 10,//设置超时时长, 单位秒,在连接成功之前,如果超过设定时长无数据返回,则回调timeout事件
+                        loadingTimeoutReplay: true,//loadingTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
+                        loadingTimeoutReplayTimes: -1,// loadingTimeoutReplay 重试失败之后，不再重新播放视频地址。如果想无限次重试，可以设置为-1
+                        heartTimeout: 5, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
+                        heartTimeoutReplay: true,//heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
+                        heartTimeoutReplayTimes: -1,//heartTimeoutReplay 重试失败之后，不再重新播放视频地址。是整个生命周期中重试的次数。如果想无限次重试，可以设置为-1
+                        heartTimeoutReplayUseLastFrameShow: true,
+                        // 性能, 解码,
+                        // videoBuffer
+                        // decoder
+                        useMSE: this.useMSE, //是否开启MediaSource硬解码;视频编码只支持H.264视频（Safari on iOS不支持）,不支持 forceNoOffscreen 为 false (开启离屏渲染),优先级高于useWCS:true
+                        useWCS: this.useWCS, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false （开启离屏渲染）
+                        useWASM: this.useWASM,
+                        useSIMD: this.useSIMD,
+                        forceNoOffscreen: !this.useOffscreen,//是否不使用离屏模式（提升渲染能力）
+                        wcsUseVideoRender: true, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
+                        // useCanvasRender: this.renderDom,
+                        isNotMute: true,//是否开启声音，默认是关闭声音播放的。
+                        hasAudio: false, // 是否有音频，如果设置false，则不对音频数据解码，提升性能。
+                        autoWasm: true, //在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
+                        wasmDecodeErrorReplay: true,//是否开启解码失败重新播放;wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
+                        playbackForwardMaxRateDecodeIFrame: this.onlyDecoderIFrame,
+                        useWebGPU: this.useWebGPU === 'webgpu', // 使用WebGPU
+
+                        // useCanvasRender: this.renderDom,
+                        // UI 配置
+                        isResize: false,//当为true的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 setScaleMode(1) 当为false的时候：视频画面完全填充canvas区域,画面会被拉伸。等同于 setScaleMode(0)
                         operateBtns: {
                             fullscreen: this.showOperateBtns,
                             screenshot: this.showOperateBtns,
@@ -162,12 +220,14 @@
                             zoom: this.showOperateBtns,
                             performance: this.showOperateBtns,
                         },
-                        forceNoOffscreen: forceNoOffscreen,
-                        isNotMute: false,
-                        playbackForwardMaxRateDecodeIFrame: this.onlyDecoderIFrame,
-                        useWebGPU: this.useWebGPU === 'webgpu' // 使用WebGPU
-                    },);
+                        showPerformance: true,
+                        showPlaybackOperate: this.onlyDecoderIFrame,
+                        showBandwidth: this.showBandwidth, // 显示网速
+                        loadingText: "疯狂加载中...",//加载过程中文案。
+                        text: "",
+                    });
 
+                    // -----------事件-----------------------
                     this.jessibuca.onLog = msg => console.error(msg);
                     this.jessibuca.onRecord = (status) => console.log('onRecord', status);
                     this.jessibuca.onPause = () => console.log('onPause');
@@ -188,30 +248,30 @@
                     if (!this.playUrl) {
                         return
                     }
-
                     if (this.isPlaybackPause) {
                         this.jessibuca.playbackResume()
-                    } else {
-                        this.jessibuca.playback(this.playUrl, {
-                            playList: this.playTimesArray,
-                            fps: this.playbackFps,
-                            showControl: true,
-                            isUseFpsRender: this.isUseFpsRender,
-                            isCacheBeforeDecodeForFpsRender: this.isCacheBeforeDecodeForFpsRender,
-                            showRateBtn: true,
-                            supportWheel: true,
-                            uiUsePlaybackPause: this.uiUsePlaybackPause,
-                            isPlaybackPauseClearCache: this.isPlaybackPauseClearCache,
-                            rateConfig: [
-                                {label: '正常', value: 1},
-                                {label: '2倍', value: 2},
-                                {label: '4倍', value: 4},
-                                {label: '8倍', value: 8},
-                                {label: '16倍', value: 16},
-                            ],
-                            useWCS: this.playbackUseWCS,
-                        });
+                        return
                     }
+                    this.jessibuca.playback(this.playUrl, {
+                        playList: this.playTimesArray,
+                        fps: this.playbackFps,
+                        showControl: true,
+                        isUseFpsRender: this.isUseFpsRender,
+                        isCacheBeforeDecodeForFpsRender: this.isCacheBeforeDecodeForFpsRender,
+                        showRateBtn: true,
+                        supportWheel: true,
+                        uiUsePlaybackPause: this.uiUsePlaybackPause,
+                        isPlaybackPauseClearCache: this.isPlaybackPauseClearCache,
+                        rateConfig: [
+                            {label: '正常', value: 1},
+                            {label: '2倍', value: 2},
+                            {label: '4倍', value: 4},
+                            {label: '8倍', value: 8},
+                            {label: '16倍', value: 16},
+                        ],
+                        useWCS: this.playbackUseWCS,
+                    });
+
                     this.isPlaybackPause = false;
                     //     $player.style.display = 'none';
                     //    $pause.style.display = 'inline-block';
@@ -221,23 +281,27 @@
                 },
                 replay() {
                     if (this.jessibuca) {
-                        this.jessibuca.destroy();
+                        this.jessibuca.destroy()
+                    }
+                    if (type === 'mse') {
+                        this.useWCS = false;
+                        this.useOffscreen = false;
+                    } else if (type === 'wcs') {
+                        this.useMSE = false
+                    } else if (type === 'offscreen') {
+                        this.useMSE = false
                     }
                     this.create();
-                    this.play();
-                },
-                mute() {
-                    this.jessibuca.mute();
-                },
-                cancelMute() {
-                    this.jessibuca.cancelMute();
+                    setTimeout(() => {
+                        this.play();
+                    }, 100)
                 },
                 pause() {
                     // $playbackPause.style.display = 'none';
                     // $pause.style.display = 'none';
                     // $playScroll.style.display = 'none';
                     // $player.style.display = 'inline-block';
-                    this.jessibuca.jessibuca.pause();
+                    this.jessibuca.pause();
                 },
                 playbackPause() {
                     this.jessibuca.playbackPause();
@@ -248,41 +312,29 @@
                         this.jessibuca.destroy();
                     }
                     this.create();
+                    this.playing = false;
+                    this.loaded = false;
+                    this.performance = "";
                 },
                 currentTimeScroll() {
                     if (this.jessibuca) {
                         this.jessibuca.playbackCurrentTimeScroll();
                     }
                 },
-
             },
         }
     );
 </script>
 </body>
 <style>
-    html {
-        -ms-user-select: text;
+    * {
         -webkit-user-select: text;
-        -moz-user-select: text;
-        user-select: text;
     }
 
     #container {
         background: rgba(13, 14, 27, 0.7);
         width: 640px;
         height: 398px;
-    }
-
-    .option span {
-        color: white;
-    }
-
-    @media (max-width: 720px) {
-        #container {
-            width: 90vw;
-            height: 52.7vw;
-        }
     }
 </style>
 </html>

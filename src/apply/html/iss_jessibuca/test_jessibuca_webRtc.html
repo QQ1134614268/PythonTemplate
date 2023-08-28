@@ -14,25 +14,24 @@
 <body>
 <div id="app" style="height: 100vh; display: flex">
     <div id="container" style="width: 50%"></div>
-    <el-form ref="form" :model="form" style="width: 50%; border:  solid 1px aliceblue">
+    <el-form ref="form" :model="form" style="width: 50%">
         <span style="color:red;">注意：将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了</span>即：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play
-
-        <div class="input">
-            <div>输入URL：</div>
-            <input
-                    autocomplete="on"
-                    id="playUrl"
-                    placeholder="webrtc://"
-                    value=""
-            />
-            <button id="play">播放</button>
-            <button id="pause" style="display: none">停止</button>
-        </div>
-        <div class="input" style="line-height: 30px">
-            <button id="destroy">销毁</button>
-            <span class="fps-inner"></span>
-        </div>
-
+        <el-form-item label="播放地址:" style="width: 30rem">
+            <el-input v-model="playUrl"></el-input>
+        </el-form-item>
+        <el-button @click="play">播放</el-button>
+        <el-button @click="pause">停止</el-button>
+        <el-button @click="destroy">销毁</el-button>
+        <el-form-item label="浏览器配置：" style="width: 30rem">
+            <div>
+                <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
+            </div>
+        </el-form-item>
     </el-form>
 </div>
 <script>
@@ -42,20 +41,24 @@
             data() {
                 return {
                     form: {},
-                    isUseFpsRender: 'false',
-                    isCacheBeforeDecodeForFpsRender: 'true',
+                    playUrl: '',
+                    demuxUseWorker: '',
+                    showLastIframe: '',
+                    renderDom: '',
+                    renderCanvas: '',
+
+                    isUseFpsRender: false,
+                    isCacheBeforeDecodeForFpsRender: true,
                     onlyDecoderIFrame: 4,
                     playbackFps: 25,
-                    isPlaybackPauseClearCache: 'true',
+                    isPlaybackPauseClearCache: true,
                     uiUsePlaybackPause: '',
-                    isUseWebGPU: '',
+                    useWebGPU: '',
                     playbackUseWCS: false,
-                    playUrl: '',
                     playTimesArray: [],
 
-                    checked2: checkSupportWCS(),
-
                     videoBuffer: 0.2,
+                    videoBufferDelay: 1,
                     decodeType: '',
                     jessibuca: null,
                     version: '',
@@ -71,12 +74,21 @@
                     performance: "",
                     volume: 1,
                     rotate: 0,
+
                     useWCS: false,
                     useMSE: true,
+                    useWASM: false,
+                    useSIMD: false,
+
                     useOffscreen: false,
                     recording: false,
                     recordType: 'webm',
                     scale: '0',
+
+                    isSupportMSEH264: checkSupportMSEH264(),
+                    isSupportWCS: checkSupportWCS(),
+                    isSupportWasm: checkSupportWasm(),
+                    isSupportSIMD: checkSupportSIMD(),
                 };
             },
             mounted() {
@@ -88,83 +100,52 @@
             },
             methods: {
                 create() {
-                    jessibuca = new JessibucaPro({
-                        container: $container,
+                    this.jessibuca = new JessibucaPro({
+                        // 基础, 调试
+                        debug: true,
+                        debugLevel: 'debug',
+                        container: document.getElementById('container'),
                         isResize: false,
                         text: "",
                         loadingText: "加载中",
-                        debug: true,
-                        debugLevel: "debug",
-                        showBandwidth: showOperateBtns, // 显示网速
-                        showPerformance: showOperateBtns, // 显示性能
+                        showBandwidth: true, // 显示网速
+                        showPerformance: this.showOperateBtns, // 显示性能
                         operateBtns: {
-                            fullscreen: showOperateBtns,
-                            screenshot: showOperateBtns,
-                            play: showOperateBtns,
-                            audio: showOperateBtns,
-                            ptz: showOperateBtns,
-                            quality: showOperateBtns,
-                            performance: showOperateBtns,
+                            fullscreen: this.showOperateBtns,
+                            screenshot: this.showOperateBtns,
+                            play: this.showOperateBtns,
+                            audio: this.showOperateBtns,
+                            ptz: this.showOperateBtns,
+                            quality: this.showOperateBtns,
+                            performance: this.showOperateBtns,
                         },
                         heartTimeoutReplayUseLastFrameShow: true,
                         audioEngine: "worklet",
                         isNotMute: false,
                         heartTimeout: 10,
-                        isWebrtcForOthers: $isForOthers.checked === true,
+                        isWebrtcForOthers: this.isForOthers,
                     },);
 
 
-                    jessibuca.on('streamQualityChange', (value) => {
+                    this.jessibuca.on('streamQualityChange', (value) => {
                         console.log('streamQualityChange', value);
                     })
 
-                    jessibuca.on('timeUpdate', (value) => {
-                        // console.log('timeUpdate', value);
+                    this.jessibuca.on('timeUpdate', (value) => {
+                        console.log('timeUpdate', value);
                     })
 
-                    jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
+                    this.jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
                         console.log('crashLog', log)
                     })
-
                     //  $player.style.display = 'inline-block';
                     // $pause.style.display = 'none';
                     //  $destroy.style.display = 'none';
                 },
-
                 play() {
-                    if (!this.playUrl) {
-                        return
+                    if (this.playUrl) {
+                        this.jessibuca.play(this.playUrl);
                     }
-
-                    if (this.isPlaybackPause) {
-                        jessibuca.playbackResume()
-                    } else {
-                        jessibuca.playback(this.playUrl, {
-                            playList: this.playTimesArray,
-                            fps: this.playbackFps,
-                            showControl: true,
-                            isUseFpsRender: this.isUseFpsRender,
-                            isCacheBeforeDecodeForFpsRender: this.isCacheBeforeDecodeForFpsRender,
-                            showRateBtn: true,
-                            supportWheel: true,
-                            uiUsePlaybackPause: this.uiUsePlaybackPause,
-                            isPlaybackPauseClearCache: this.isPlaybackPauseClearCache,
-                            rateConfig: [
-                                {label: '正常', value: 1},
-                                {label: '2倍', value: 2},
-                                {label: '4倍', value: 4},
-                                {label: '8倍', value: 8},
-                                {label: '16倍', value: 16},
-                            ],
-                            useWCS: this.playbackUseWCS,
-                        });
-                    }
-                    this.isPlaybackPause = false;
-                    //     $player.style.display = 'none';
-                    //    $pause.style.display = 'inline-block';
-                    //   $playbackPause.style.display = 'inline-block';
-                    //   $playScroll.style.display = 'inline-block';
-                    //  $destroy.style.display = 'inline-block';
                 },
                 replay() {
                     if (this.jessibuca) {
@@ -173,13 +154,12 @@
                     this.create();
                     this.play();
                 },
-
                 pause() {
                     // $playbackPause.style.display = 'none';
                     // $pause.style.display = 'none';
                     // $playScroll.style.display = 'none';
                     // $player.style.display = 'inline-block';
-                    this.jessibuca.jessibuca.pause();
+                    this.jessibuca.pause();
                 },
                 destroy() {
                     if (this.jessibuca) {
@@ -191,11 +171,16 @@
         }
     );
 </script>
-
 </body>
 <style>
     * {
         -webkit-user-select: text;
+    }
+
+    #container {
+        background: rgba(13, 14, 27, 0.7);
+        width: 640px;
+        height: 398px;
     }
 </style>
 </html>
