@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, DateTime, Integer, Float
+from sqlalchemy import Column, DateTime, Integer, DECIMAL
 from sqlalchemy.dialects.mysql import VARCHAR
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -43,7 +43,7 @@ class OrderInfo(BaseTable):
     )
     order_id = Column(Integer, comment='订单id')
 
-    price = Column(Float(10, 4), comment='价格')
+    price = Column(DECIMAL(precision=16, scale=4), comment='价格')
     num = Column(Integer, comment='数量')
     goods_id = Column(Integer, comment='商品id')
     goods_name = Column(VARCHAR(20), comment='商品名')

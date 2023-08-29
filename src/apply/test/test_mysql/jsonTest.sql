@@ -40,6 +40,8 @@ SELECT * from json_test WHERE obj ->> '$.name' = 'china';
 SELECT * from json_test WHERE JSON_CONTAINS(obj -> '$.name', '"china"');
 SELECT * from json_test WHERE JSON_CONTAINS(obj, '"china"','$.name');
 SELECT * from json_test WHERE JSON_CONTAINS(obj, '{"name":"china"}');
+SELECT JSON_CONTAINS('[1,2,3]', '1');
+SELECT JSON_CONTAINS('["张三","张三2"]', '"张三"');
 
 
 SELECT * from json_test WHERE JSON_CONTAINS(arr ,'{"city": [{"name": "深圳市"}, {"name": "珠海市"}]}');
@@ -69,10 +71,10 @@ SELECT JSON_EXTRACT('{"name": "book1", "auth": [{"name":"张三","book": ["book1
 
 # book 是对象; '$.auth[*].book[*].size' # 异常
 SELECT JSON_EXTRACT('{"auth":[{"book":{"size":[1,2,3]}}]}', '$.auth[*].book.size'), JSON_EXTRACT('{"auth":[{"book":{"size":[1,2,3]}}]}', '$.auth[*].book.size[*]') ;
--- ‘$.*’	返回全部key的value
--- ‘$.name’	返回key=”name”的数据
--- ‘$**.name’	返回所有最底层key=”name”的数据
--- ‘$.auth[*].book[*]’	返回key=auth的list的key=book的list的所有内容
+-- '$.*'	返回全部key的value
+-- '$.name'	返回key="name"的数据
+-- '$**.name'	返回所有最底层key="name"的数据
+-- '$.auth[*].book[*]'	返回key=auth的list的key=book的list的所有内容
 
 -- 二、创建JSON文本的函数
 -- 2.1.JSON_ARRAY（转换json数组）

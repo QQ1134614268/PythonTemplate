@@ -24,7 +24,7 @@ class TestMysql(TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test_drop_table(self):
-        # Base.metadata.drop_all(engine)
+        Base.metadata.drop_all(localhost_test_engine)
         ...
 
     def test_insert_user(self):
