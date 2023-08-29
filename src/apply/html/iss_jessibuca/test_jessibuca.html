@@ -16,7 +16,7 @@
     <div id="container" style="width: 50%"></div>
     <el-form ref="form" :model="form" style="width: 50%">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
-            <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="changeBuffer"></el-input>
+            <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 100rem">
             <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
@@ -139,8 +139,8 @@
                 };
             },
             mounted() {
-                // this.create();
-                // window.onerror = (msg) => (this.err = msg);
+                this.create();
+                window.onerror = (msg) => (this.err = msg);
             },
             unmounted() {
                 this.jessibuca.destroy();
@@ -173,7 +173,7 @@
                         useSIMD: this.useSIMD,
                         forceNoOffscreen: !this.useOffscreen,//是否不使用离屏模式（提升渲染能力）
                         wcsUseVideoRender: true, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
-                        // useCanvasRender: this.renderDom,
+                        useCanvasRender: this.renderDom,
                         isNotMute: true,//是否开启声音，默认是关闭声音播放的。
                         hasAudio: false, // 是否有音频，如果设置false，则不对音频数据解码，提升性能。
                         autoWasm: true, //在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。

@@ -17,7 +17,7 @@
     <el-form ref="form" :model="form" style="width: 50%">
         <span style="color:red;">注意：将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了;即：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play</span>
         <el-form-item label="缓冲(秒):" style="width: 30rem">
-            <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="changeBuffer"></el-input>
+            <el-input type="number" v-model="videoBuffer" style="width: 6rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 100rem">
             <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
@@ -130,8 +130,8 @@
                 };
             },
             mounted() {
-                // this.create();
-                // window.onerror = (msg) => (this.err = msg);
+                this.create();
+                window.onerror = (msg) => (this.err = msg);
             },
             unmounted() {
                 this.jessibuca.destroy();
