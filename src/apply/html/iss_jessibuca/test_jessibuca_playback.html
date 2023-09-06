@@ -10,11 +10,59 @@
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
+    <script src="../js/axios.js"></script>
+    <script src="gb28181.js"></script>
 </head>
 <body>
-<div id="app" style="height: 100vh; display: flex">
-    <div id="container" style="width: 70%"></div>
-    <el-form ref="form" :model="form" style="width: 30%">
+<div id="app">
+    <div style="width: 70%">
+        <div id="container"></div>
+        <div id="id1" @mouseup="log('mouseup')" @mousemove="mousemove" @mouseover="log"
+             @mouseenter="log('mouseenter')"
+             @click="seek">
+            <el-progress :percentage="percentage"></el-progress>
+        </div>
+        <el-date-picker v-model="seekTime" format="yyyy-MM-dd HH:mm:ss"
+                        value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+        <el-form>
+            <el-form-item label="播放地址:" style="width: 30rem">
+                <el-input v-model="playUrl"></el-input>
+            </el-form-item>
+            <el-button @click="play">播放</el-button>
+            <el-button @click="replay">重播</el-button>
+            <el-button @click="pause">停止(流会断开)</el-button>
+            <el-button @click="playbackPause">停止(流不断开)</el-button>
+            <el-button @click="destroy">销毁</el-button>
+            <el-button @click="currentTimeScroll">滚动到当前时间</el-button>
+            <el-form-item label="倍速:" style="width: 30rem">
+                <el-select v-model="rate" @change="ratePlay">
+                    <el-option v-for="item in rateConfig" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="时间戳:" style="width: 30rem">
+                <el-button @click="startTimeRecord">录制时间戳数据</el-button>
+                <el-table :data="statsArr">
+                    <el-table-column prop="ts" label="ts">
+                        <template slot-scope="scope">
+                            {{Math.floor(scope.row.ts/1000)}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="dts" label="dts"></el-table-column>
+                    <el-table-column prop="pTs" label="pTs"></el-table-column>
+                    <el-table-column prop="delayTs" label="delayTs"></el-table-column>
+                    <el-table-column prop="totalDelayTs" label="totalDelayTs"></el-table-column>
+                    <el-table-column prop="buf" label="buf"></el-table-column>
+                    <el-table-column prop="videoCurrentTime" label="videoCurrentTime"></el-table-column>
+                    <el-table-column prop="videoCurrentTimeDiff" label="videoCurrentTimeDiff"></el-table-column>
+                    <!--                    -->
+                </el-table>
+                <!--                <el-pagination @current-change="page" :current-page="page" :total="total"></el-pagination>-->
+            </el-form-item>
+        </el-form>
+        <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
+    </div>
+    <el-form ref="form" :model="form" style="width: 30%; display: flex; flex-wrap: wrap">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
@@ -35,7 +83,7 @@
         </el-form-item>
         <el-form-item label="canvas渲染技术(自动降级webgl):" style="width: 30rem">
             <el-select v-model="renderCanvas" onchange="replay">
-                <el-option value="webgl">webgl</el-option>
+                <el-option value="webgl">webgl(pro 支持 webgl2)</el-option>
                 <el-option value="webgpu" :disabled="!isSupportGpu">webgpu</el-option>
             </el-select>
         </el-form-item>
@@ -89,19 +137,6 @@
                 <el-option label="否" :value="false"></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="倍速:" style="width: 30rem">
-            <el-select v-model="rate">
-                <el-option v-for="item in rateConfig" :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item label="todo:" style="width: 30rem">
-            性能参数
-            时间戳, 跳转
-            倍速播放
-
-            参数--正一
-        </el-form-item>
         <el-form-item label="日志:" style="width: 30rem">
             <el-select v-model="debug">
                 <el-option label="是" :value="true"></el-option>
@@ -115,23 +150,22 @@
             <el-checkbox v-model="isSupportMSEH264" disabled>网速</el-checkbox>
             <el-checkbox v-model="isSupportMSEH264" disabled>键盘快捷键</el-checkbox>
             <el-checkbox v-model="isSupportMSEH264" disabled>性能面板</el-checkbox>
-            timeout:
-            <el-input v-model="timeout" style="width: 6rem"></el-input>
-            loadingTimeout:
-            <el-input v-model="loadingTimeout" style="width: 6rem"></el-input>
-            heartTimeout:
-            <el-input v-model="heartTimeout" style="width: 6rem"></el-input>
+            <el-input v-model="timeout" style="width: 10rem">
+                <template slot="prepend">
+                    timeout:
+                </template>
+            </el-input>
+            <el-input v-model="loadingTimeout" style="width: 15rem">
+                <template slot="prepend">
+                    loadingTimeout:
+                </template>
+            </el-input>
+            <el-input v-model="heartTimeout" style="width: 15rem">
+                <template slot="prepend">
+                    heartTimeout:
+                </template>
+            </el-input>
         </el-form-item>
-        <el-form-item label="播放地址:" style="width: 30rem">
-            <el-input v-model="playUrl"></el-input>
-        </el-form-item>
-        <el-button @click="play">播放</el-button>
-        <el-button @click="replay">重播</el-button>
-        <el-button @click="pause">停止(流会断开)</el-button>
-        <el-button @click="playbackPause">停止(流不断开)</el-button>
-        <el-button @click="destroy">销毁</el-button>
-        <el-button @click="currentTimeScroll">滚动到当前时间</el-button>
-
         <el-form-item label="时间:" style="width: 30rem">
             <div>{{ playTimesArray }}</div>
         </el-form-item>
@@ -154,6 +188,13 @@
             el: '#app',
             data() {
                 return {
+                    percentage: 0,
+                    startTime: new Date(),
+                    endTime: new Date(new Date().getTime() + 3600000),
+                    seekTime: new Date(),
+                    videoInfo: {},
+                    statsArr: [],
+
                     form: {},
                     debug: false,
                     debugLevel: 'debug',
@@ -205,11 +246,13 @@
 
                     rate: 1,
                     rateConfig: [
-                        {label: '正常', value: 1},
-                        {label: '2倍', value: 2},
-                        {label: '4倍', value: 4},
-                        {label: '8倍', value: 8},
-                        {label: '16倍', value: 16},
+                        {label: '0.25X', value: 0.25},
+                        {label: '0.5X', value: 0.5},
+                        {label: '1X', value: 1},
+                        {label: '2X', value: 2},
+                        {label: '4X', value: 4},
+                        {label: '8X', value: 8},
+                        {label: '16X', value: 16},
                     ],
 
                     isSupportMSEH264: checkSupportMSEH264(),
@@ -237,11 +280,11 @@
                         videoBufferDelay: this.videoBufferDelay, // 1000s
                         // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
-                        timeout: 10, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
-                        loadingTimeout: 10,//设置超时时长, 单位秒,在连接成功之前,如果超过设定时长无数据返回,则回调timeout事件
+                        timeout: this.timeout, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
+                        loadingTimeout: this.loadingTimeout,//设置超时时长, 单位秒,在连接成功之前,如果超过设定时长无数据返回,则回调timeout事件
                         loadingTimeoutReplay: true,//loadingTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         loadingTimeoutReplayTimes: -1,// loadingTimeoutReplay 重试失败之后，不再重新播放视频地址。如果想无限次重试，可以设置为-1
-                        heartTimeout: 5, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
+                        heartTimeout: this.heartTimeout, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
                         heartTimeoutReplay: true,//heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         heartTimeoutReplayTimes: -1,//heartTimeoutReplay 重试失败之后，不再重新播放视频地址。是整个生命周期中重试的次数。如果想无限次重试，可以设置为-1
                         heartTimeoutReplayUseLastFrameShow: true,
@@ -282,13 +325,13 @@
                             screenshot: this.showOperateBtns, //是否显示截图按钮
                             play: this.showOperateBtns,//是否显示播放暂停按钮
                             audio: this.showOperateBtns,//是否显示声音按钮
-                            record: !1,//record 是否显示录制按钮
+                            record: this.showOperateBtns,//record 是否显示录制按钮
                             ptz: !1,
                             quality: !0,
                             zoom: !1,
                             close: !0,
                             scale: !0,
-                            performance: !0,
+                            performance: this.showOperateBtns,
                             logSave: !0,
                             aiFace: !1,
                             aiObject: !1,
@@ -300,6 +343,14 @@
                             recordFn: null,
                             recordStopFn: null
                         },
+                        keepScreenOn: true,// 开启屏幕常亮
+                        background: "", //背景图片。
+
+                        // 其他
+                        isFlv: false, //当为true的时候：ws协议不检验是否以.flv为依据，进行协议解析。
+                        hotKey: false,//是否开启键盘快捷键; esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
+                        recordType: 'mp4',//默认录制的视频格式;支持 webm,mp4 参数
+                        useWebFullScreen: false,// 是否使用web全屏(旋转90度)（只会在移动端生效）。
                     });
 
                     // -----------事件-----------------------
@@ -374,6 +425,12 @@
                         // abps: 当前音频码率，单位byte,
                         // vbps: 当前视频码率，单位byte，
                         // ts:当前视频帧pts，单位毫秒
+                        if (_this.statsArr.length !== 0) {
+                            _this.statsArr.push(Object.assign({}, stats))
+                            if (_this.statsArr.length > 500) {
+                                _this.statsArr.slice(400, _this.statsArr.length)
+                            }
+                        }
                         console.log("listenerEvent", "stats", stats);
                     })
                     // this.jessibuca.on("kBps", function (kBps) {
@@ -404,7 +461,10 @@
                         return
                     }
                     if (this.isPlaybackPause) {
+                        console.log(await gbExist(this.videoInfo.stream))
+                        await gbResume(this.videoInfo.stream)
                         this.jessibuca.playbackResume()
+                        this.isPlaybackPause = false;
                         return
                     }
                     this.jessibuca.playback(this.playUrl, {
@@ -429,6 +489,7 @@
                     //  $destroy.style.display = 'inline-block';
                 },
                 async replay() {
+                    await this.getUrl();
                     if (this.jessibuca) {
                         await this.jessibuca.destroy()
                     }
@@ -437,14 +498,15 @@
                         this.play();
                     }, 100)
                 },
-                pause() {
+                async pause() {
                     // $playbackPause.style.display = 'none';
                     // $pause.style.display = 'none';
                     // $playScroll.style.display = 'none';
                     // $player.style.display = 'inline-block';
                     this.jessibuca.pause();
                 },
-                playbackPause() {
+                async playbackPause() {
+                    await gbPause(this.videoInfo.stream)
                     this.jessibuca.playbackPause();
                     this.isPlaybackPause = true;
                 },
@@ -462,6 +524,53 @@
                         this.jessibuca.playbackCurrentTimeScroll();
                     }
                 },
+                async ratePlay() {
+                    await gbSpeed(this.videoInfo.stream, this.rate)
+                    this.jessibuca.forward(this.rate);
+                },
+
+                startTimeRecord() {
+                    this.statsArr = [{}]
+                    let _this = this;
+
+                    function record(x, total) {
+                        console.log(new Date(), x)
+                        if (x < total) {
+                            setTimeout(record, 5000, x + 1, total)
+                            let res = gbSeek(_this.videoInfo.stream, 3600)
+                            console.log(res)
+                        }
+                    }
+
+                    record(1, 20);
+                },
+                log(event) {
+                    console.log(event)
+                },
+                mousemove(event) {
+                    console.log('mousemove')
+                    let ele = document.getElementById("id1")
+                    console.log(event.offsetX, ele.offsetWidth, event.offsetX / ele.offsetWidth, this.endTime.getTime(), this.startTime.getTime())
+                    let diff = this.startTime.getTime() + (this.endTime.getTime() - this.startTime.getTime()) * ((event.offsetX + 50) / ele.offsetWidth)
+                    this.seekTime = new Date(diff)
+                    // console.log(event, event.offsetX, event.offsetY)
+                },
+                async seek() {
+                    if (!this.playUrl) {
+                        return
+                    }
+                    let offset = parseInt((this.seekTime.getTime() - this.startTime.getTime()) / 1000)
+                    await gbSeek(this.videoInfo.stream, offset)
+                    this.percentage = (this.seekTime.getTime() - this.startTime.getTime()) / (this.endTime.getTime() - this.startTime.getTime()) * 100
+                },
+                async getUrl() {
+                    let res = await get452BanDao()
+                    this.videoInfo = res.data.data
+                    this.playUrl = this.videoInfo.wss_flv // wss_flv
+                    this.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
+                    this.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    console.log(this.videoInfo, this.startTime)
+                },
             },
         }
     );
@@ -470,6 +579,11 @@
 <style>
     * {
         -webkit-user-select: text;
+    }
+
+    #app {
+        height: 100vh;
+        display: flex;
     }
 
     #container {

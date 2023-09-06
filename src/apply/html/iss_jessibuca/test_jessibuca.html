@@ -13,8 +13,42 @@
 </head>
 <body>
 <div id="app" style="height: 100vh; display: flex">
-    <div id="container" style="width: 70%"></div>
-    <el-form ref="form" :model="form" style="width: 30%">
+    <div style="width: 70%">
+        <div id="container"></div>
+        <el-form>
+            <el-form-item label="播放地址:" style="width: 30rem">
+                <el-input v-model="playUrl"></el-input>
+            </el-form-item>
+            <el-button @click="play">播放</el-button>
+            <el-button @click="replay">重播</el-button>
+            <el-button @click="pause">停止</el-button>
+            <el-button @click="fullscreen">全屏</el-button>
+            <el-button @click="screenShot">截图</el-button>
+            <el-button @click="clearView">清屏</el-button>
+            <el-button @click="destroy">销毁</el-button>
+            <el-form-item label="时间戳:" style="width: 30rem">
+                <el-button @click="startTimeRecord">录制时间戳数据</el-button>
+                <el-table :data="statsArr">
+                    <el-table-column prop="ts" label="ts">
+                        <template slot-scope="scope">
+                            {{Math.floor(scope.row.ts/1000)}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="dts" label="dts"></el-table-column>
+                    <el-table-column prop="pTs" label="pTs"></el-table-column>
+                    <el-table-column prop="delayTs" label="delayTs"></el-table-column>
+                    <el-table-column prop="totalDelayTs" label="totalDelayTs"></el-table-column>
+                    <el-table-column prop="buf" label="buf"></el-table-column>
+                    <el-table-column prop="videoCurrentTime" label="videoCurrentTime"></el-table-column>
+                    <el-table-column prop="videoCurrentTimeDiff" label="videoCurrentTimeDiff"></el-table-column>
+                    <!--                    -->
+                </el-table>
+                <!--                <el-pagination @current-change="page" :current-page="page" :total="total"></el-pagination>-->
+            </el-form-item>
+        </el-form>
+        <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
+    </div>
+    <el-form ref="form" :model="form" style="width: 30%; display: flex; flex-wrap: wrap">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
@@ -61,10 +95,10 @@
                 <el-option value="2">完全填充(未拉伸)</el-option>
             </el-select>
         </el-form-item>
-             <el-form-item label="日志:" style="width: 30rem">
+        <el-form-item label="日志:" style="width: 30rem">
             <el-select v-model="debug">
-                <el-option :value="true"></el-option>
-                <el-option :value="false"></el-option>
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false"></el-option>
             </el-select>
             <el-select v-model="debugLevel">
                 <el-option value="debug"></el-option>
@@ -74,17 +108,25 @@
             <el-checkbox v-model="isSupportMSEH264" disabled>网速</el-checkbox>
             <el-checkbox v-model="isSupportMSEH264" disabled>键盘快捷键</el-checkbox>
             <el-checkbox v-model="isSupportMSEH264" disabled>性能面板</el-checkbox>
+            <el-input v-model="timeout" style="width: 10rem">
+                <template slot="prepend">
+                    timeout:
+                </template>
+            </el-input>
+            <el-input v-model="loadingTimeout" style="width: 15rem">
+                <template slot="prepend">
+                    loadingTimeout:
+                </template>
+            </el-input>
+            <el-input v-model="heartTimeout" style="width: 15rem">
+                <template slot="prepend">
+                    heartTimeout:
+                </template>
+            </el-input>
         </el-form-item>
-        <el-form-item label="播放地址:" style="width: 30rem">
-            <el-input v-model="playUrl"></el-input>
+        <el-form-item label="时间:" style="width: 30rem">
+            <div>{{ playTimesArray }}</div>
         </el-form-item>
-        <el-button @click="play">播放</el-button>
-        <el-button @click="replay">重播</el-button>
-        <el-button @click="pause">停止</el-button>
-        <el-button @click="destroy">销毁</el-button>
-        <el-button @click="fullscreen">全屏</el-button>
-        <el-button @click="screenShot">截图</el-button>
-        <el-button @click="clearView">清屏</el-button>
         <span>性能：{{ performance }}</span>
         <el-form-item label="浏览器配置：" style="width: 30rem">
             <div>
@@ -104,9 +146,20 @@
             el: '#app',
             data() {
                 return {
+                    percentage: 0,
+                    startTime: new Date(),
+                    endTime: new Date(new Date().getTime() + 3600000),
+                    seekTime: new Date(),
+                    videoInfo: {},
+                    statsArr: [],
+
                     form: {},
                     debug: false,
                     debugLevel: 'debug',
+                    timeout: 10,
+                    loadingTimeout: 10,
+                    heartTimeout: 5,
+
                     playUrl: '',
                     demuxUseWorker: '',
                     showLastIframe: '',
@@ -118,7 +171,7 @@
                     onlyDecoderIFrame: 4,
                     playbackFps: 25,
                     isPlaybackPauseClearCache: false, // 不断流暂停是否清除缓存数据
-                    uiUsePlaybackPause: '',
+                    uiUsePlaybackPause: false,
                     playbackUseWCS: false,
                     playTimesArray: [],
 
@@ -174,11 +227,11 @@
                         videoBufferDelay: this.videoBufferDelay, // 1000s
                         // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
-                        timeout: 10, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
-                        loadingTimeout: 10,//设置超时时长, 单位秒,在连接成功之前,如果超过设定时长无数据返回,则回调timeout事件
+                        timeout: this.timeout, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
+                        loadingTimeout: this.loadingTimeout,//设置超时时长, 单位秒,在连接成功之前,如果超过设定时长无数据返回,则回调timeout事件
                         loadingTimeoutReplay: true,//loadingTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         loadingTimeoutReplayTimes: -1,// loadingTimeoutReplay 重试失败之后，不再重新播放视频地址。如果想无限次重试，可以设置为-1
-                        heartTimeout: 5, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
+                        heartTimeout: this.heartTimeout, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
                         heartTimeoutReplay: true,//heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         heartTimeoutReplayTimes: -1,//heartTimeoutReplay 重试失败之后，不再重新播放视频地址。是整个生命周期中重试的次数。如果想无限次重试，可以设置为-1
                         heartTimeoutReplayUseLastFrameShow: true,
@@ -249,7 +302,7 @@
                         useWebFullScreen: false,// 是否使用web全屏(旋转90度)（只会在移动端生效）。
                     });
                     // -----------方法-----------------------
-                    this.jessibuca.setDebug(true)
+                    // this.jessibuca.setDebug(true)
                     // this.jessibuca.play("url")//播放视频
                     // this.jessibuca.isPlaying()//返回是否正在播放中状态。
                     // this.jessibuca.setTimeout(10)//设置超时时长, 单位秒 在连接成功之前和播放中途,如果超过设定时长无数据返回,则回调timeout事件
@@ -283,9 +336,9 @@
 
                     this.jessibuca.on("play", () => {
                         console.log("listenerEvent", "on play");
-                        this.playing = true;
-                        this.loaded = true;
-                        this.quieting = this.jessibuca.isMute();
+                        _this.playing = true;
+                        _this.loaded = true;
+                        _this.quieting = _this.jessibuca.isMute();
                         _this.playing = true;
                     });
                     this.jessibuca.on("pause", function () {
