@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import pandas
 
-from apply.issue.issure_db_excel.models import MysqlColumns, MysqlTables
+from apply.issue.issue_db_excel.models import MysqlColumns, MysqlTables
 from config.conf import DATA_DIR
 from config.db_conf import localhost_oa_session
 

@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import jinja2
 
-from apply.issue.issure_js_auto_code.db_util import res_to_dict
+from apply.issue.issue_js_auto_code.db_util import res_to_dict
 from config.db_conf import localhost_oa_engine
 from util.str_util import to_lower_camel, to_snake, to_upper_camel
 
