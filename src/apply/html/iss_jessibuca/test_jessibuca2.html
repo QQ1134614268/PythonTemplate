@@ -61,7 +61,8 @@
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 30rem">
-            <el-input placeholder="单位：秒" type="text" v-model="jessiConf.videoBufferDelay" style="width: 5rem"></el-input>
+            <el-input placeholder="单位：秒" type="text" v-model="jessiConf.videoBufferDelay"
+                      style="width: 5rem"></el-input>
         </el-form-item>
         <el-form-item label="解码:" style="width: 30rem">
             <el-checkbox v-model="jessiConf.useMSE" @change="replay">MediaSource</el-checkbox>
@@ -129,7 +130,6 @@
         <el-form-item label="时间:" style="width: 30rem">
             <div>{{ playTimesArray }}</div>
         </el-form-item>
-        <span>性能：{{ performance }}</span>
         <el-form-item label="浏览器配置：" style="width: 30rem">
             <div>
                 <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
@@ -154,7 +154,7 @@
                         debugLevel: 'debug',
                         container: document.getElementById('container'),
                         videoBuffer: 0.2, // 缓存时长
-                        videoBufferDelay: 10000, // 10s
+                        videoBufferDelay: 10, // 10s 缓存延迟(延迟超过会触发丢帧)
                         // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
                         timeout: 10, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
@@ -180,7 +180,7 @@
                         forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式（提升渲染能力）
                         useWebGPU: true, // 使用WebGPU
 
-                        // demuxUseWorker: this.demuxUseWorker, // work 多线程解封装
+                        // demuxUseWorker: false, // work 多线程解封装
                         // audioEngine: "worklet", // 多路 ??
 
                         isNotMute: false,// 是否开启声音，默认是关闭声音播放的。
@@ -232,7 +232,6 @@
                         useWebFullScreen: false,// 是否使用web全屏(旋转90度)（只会在移动端生效）。
                     },
 
-
                     percentage: 0,
                     startTime: new Date(),
                     endTime: new Date(new Date().getTime() + 3600000),
@@ -244,36 +243,16 @@
 
                     playUrl: '',
                     playUrlConfig: [],
-                    demuxUseWorker: '',
-                    showLastIframe: '',
 
                     isUseFpsRender: false,
                     isCacheBeforeDecodeForFpsRender: true,
-                    onlyDecoderIFrame: 4,
                     playbackFps: 25,
-                    isPlaybackPauseClearCache: false, // 不断流暂停是否清除缓存数据
+                    isPlaybackPauseClearCache: true, // 不断流暂停是否清除缓存数据
                     uiUsePlaybackPause: false,
                     playbackUseWCS: false,
                     playTimesArray: [],
 
-                    decodeType: '',
                     jessibuca: null,
-                    version: '',
-                    wasm: false,
-                    playing: false,
-                    quieting: true,
-                    loaded: false, // mute
-                    showOperateBtns: true,
-                    showBandwidth: false,
-                    err: "",
-                    speed: 0,
-                    performance: "",
-                    volume: 1,
-                    rotate: 0,
-
-
-                    recording: false,
-                    recordType: 'webm',
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportWCS: checkSupportWCS(),
@@ -291,6 +270,7 @@
             },
             methods: {
                 create() {
+                    this.jessiConf.container = document.getElementById('container');
                     this.jessibuca = new JessibucaPro(this.jessiConf);
                     // -----------方法-----------------------
                     // this.jessibuca.setDebug(true)
@@ -327,14 +307,9 @@
 
                     this.jessibuca.on("play", () => {
                         console.log("listenerEvent", "on play");
-                        _this.playing = true;
-                        _this.loaded = true;
-                        _this.quieting = _this.jessibuca.isMute();
-                        _this.playing = true;
                     });
                     this.jessibuca.on("pause", function () {
                         console.log("listenerEvent", "on pause");
-                        _this.playing = false;
                     });
                     this.jessibuca.on("start", function () {
                         console.log("listenerEvent", 'start render')
@@ -394,7 +369,6 @@
                     // });
                     this.jessibuca.on("performance", function (performance) { //渲染性能统计，流开始播放后回调，每秒1次。0: 表示卡顿;1: 表示流畅;2: 表示非常流程
                         console.log("listenerEvent", "performance", performance)
-                        _this.performance = performance;
                     });
                     this.jessibuca.on("log", function (msg) { //信息，包含错误信息
                         console.log("listenerEvent", "on log", msg);
@@ -446,9 +420,6 @@
                     }, 100)
                 },
                 pause() {
-                    this.playing = false;
-                    this.err = "";
-                    this.performance = "";
                     this.jessibuca.pause();
                 },
                 destroy() {
@@ -456,9 +427,6 @@
                         this.jessibuca.destroy();
                     }
                     this.create();
-                    this.playing = false;
-                    this.loaded = false;
-                    this.performance = "";
                 },
                 mute() {
                     this.jessibuca.mute();
@@ -476,9 +444,7 @@
                     this.jessibuca.setFullscreen(true);
                 },
                 clearView() {
-                    if (this.playing) {
-                        this.jessibuca.clearView();
-                    }
+                     this.jessibuca.clearView();
                 },
 
                 startRecord() {

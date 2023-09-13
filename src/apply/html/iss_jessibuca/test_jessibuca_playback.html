@@ -128,14 +128,6 @@
         <el-form-item label="FPS（定频(本地设置)生效）：" style="width: 30rem">
             <el-input v-model="jessiConf.playbackFps" style="width: 5rem"></el-input>
         </el-form-item>
-        <el-form-item label="只解码I帧(点击重播按钮生效):" style="width: 30rem">
-            <el-select v-model="jessiConf.playbackForwardMaxRateDecodeIFrame">
-                <el-option label="1倍" :value="1"></el-option>
-                <el-option label="2倍" :value="2"></el-option>
-                <el-option label="4倍" :value="4" selected></el-option>
-                <el-option label="8倍" :value="8"></el-option>
-            </el-select>
-        </el-form-item>
         <el-form-item label="不断流暂停是否清除缓存数据：" style="width: 30rem">
             <el-select v-model="isPlaybackPauseClearCache">
                 <el-option label="是" :value="true" selected></el-option>
@@ -180,7 +172,6 @@
         <el-form-item label="时间:" style="width: 30rem">
             <div>{{ playTimesArray }}</div>
         </el-form-item>
-        <span>性能：{{ performance }}</span>
         <el-form-item label="浏览器配置：" style="width: 30rem">
             <div>
                 <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
@@ -231,12 +222,12 @@
                         forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式（提升渲染能力）
                         useWebGPU: true, // 使用WebGPU
 
-                        // demuxUseWorker: this.demuxUseWorker, // work 多线程解封装
+                        // demuxUseWorker: false, // work 多线程解封装
                         // audioEngine: "worklet", // 多路 ??
 
                         isNotMute: false,// 是否开启声音，默认是关闭声音播放的。
                         hasAudio: false, // 是否有音频，如果设置false，则不对音频数据解码，提升性能。
-                        playbackForwardMaxRateDecodeIFrame: 4,
+                        playbackForwardMaxRateDecodeIFrame: 4, // 只解码I帧(点击重播按钮生效)
 
                         autoWasm: true, //在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
                         wasmDecodeErrorReplay: true,//是否开启解码失败重新播放;wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
@@ -284,48 +275,30 @@
                         useWebFullScreen: false,// 是否使用web全屏(旋转90度)（只会在移动端生效）。
                     },
 
-
                     percentage: 0,
-                    startTime: new Date(),
-                    endTime: new Date(new Date().getTime() + 3600000),
-                    seekTime: new Date(),
+                    seekTime: null,
                     videoInfo: {},
                     statsArr: [],
 
                     form: {},
 
                     playUrl: '',
-                    playUrlConfig: [],
-                    demuxUseWorker: '',
-                    showLastIframe: '',
+                    playUrlConfig: [
+                        {
+                            label: 12,
+                            value: get452BanDao()
+                        }
+                    ],
 
                     isUseFpsRender: false,
                     isCacheBeforeDecodeForFpsRender: true,
-                    onlyDecoderIFrame: 4,
                     playbackFps: 25,
-                    isPlaybackPauseClearCache: false, // 不断流暂停是否清除缓存数据
+                    isPlaybackPauseClearCache: true, // 不断流暂停是否清除缓存数据
                     uiUsePlaybackPause: false,
                     playbackUseWCS: false,
                     playTimesArray: [{"start": 1653840000, "end": 1653841624}],
 
-                    decodeType: '',
                     jessibuca: null,
-                    version: '',
-                    wasm: false,
-                    playing: false,
-                    quieting: true,
-                    loaded: false, // mute
-                    showOperateBtns: true,
-                    showBandwidth: false,
-                    err: "",
-                    speed: 0,
-                    performance: "",
-                    volume: 1,
-                    rotate: 0,
-
-
-                    recording: false,
-                    recordType: 'webm',
 
                     rate: 1,
                     rateConfig: [
@@ -367,14 +340,9 @@
 
                     this.jessibuca.on("play", () => {
                         console.log("listenerEvent", "on play");
-                        _this.playing = true;
-                        _this.loaded = true;
-                        _this.quieting = _this.jessibuca.isMute();
-                        _this.playing = true;
                     });
                     this.jessibuca.on("pause", function () {
                         console.log("listenerEvent", "on pause");
-                        _this.playing = false;
                     });
                     this.jessibuca.on("playbackPreRateChange", function (rate) { //信息，包含错误信息
                         console.log("listenerEvent", 'playbackPreRateChange', rate)
@@ -449,7 +417,6 @@
                     // });
                     this.jessibuca.on("performance", function (performance) { //渲染性能统计，流开始播放后回调，每秒1次。0: 表示卡顿;1: 表示流畅;2: 表示非常流程
                         console.log("listenerEvent", "performance", performance)
-                        _this.performance = performance;
                     });
                     this.jessibuca.on("log", function (msg) { //信息，包含错误信息
                         console.log("listenerEvent", "on log", msg);
@@ -490,11 +457,6 @@
                     });
 
                     this.isPlaybackPause = false;
-                    //     $player.style.display = 'none';
-                    //    $pause.style.display = 'inline-block';
-                    //   $playbackPause.style.display = 'inline-block';
-                    //   $playScroll.style.display = 'inline-block';
-                    //  $destroy.style.display = 'inline-block';
                 },
                 async replay() {
                     await this.getUrl();
@@ -507,10 +469,6 @@
                     }, 100)
                 },
                 async pause() {
-                    // $playbackPause.style.display = 'none';
-                    // $pause.style.display = 'none';
-                    // $playScroll.style.display = 'none';
-                    // $player.style.display = 'inline-block';
                     this.jessibuca.pause();
                 },
                 async playbackPause() {
@@ -523,9 +481,6 @@
                         this.jessibuca.destroy();
                     }
                     this.create();
-                    this.playing = false;
-                    this.loaded = false;
-                    this.performance = "";
                 },
                 currentTimeScroll() {
                     if (this.jessibuca) {
@@ -572,8 +527,10 @@
                 mousemove(event) {
                     console.log('mousemove')
                     let ele = document.getElementById("id1")
-                    console.log(event.offsetX, ele.offsetWidth, event.offsetX / ele.offsetWidth, this.endTime.getTime(), this.startTime.getTime())
-                    let diff = this.startTime.getTime() + (this.endTime.getTime() - this.startTime.getTime()) * ((event.offsetX + 50) / ele.offsetWidth)
+                    let startTimeStamp = this.videoInfo.startTime.getTime();
+                    let endTimeStamp = this.videoInfo.endTime.getTime();
+                    console.log(event.offsetX, ele.offsetWidth, event.offsetX / ele.offsetWidth, endTimeStamp, startTimeStamp)
+                    let diff = startTimeStamp + (endTimeStamp - startTimeStamp) * ((event.offsetX + 50) / ele.offsetWidth)
                     this.seekTime = new Date(diff)
                     // console.log(event, event.offsetX, event.offsetY)
                 },
@@ -581,16 +538,18 @@
                     if (!this.playUrl) {
                         return
                     }
-                    let offset = parseInt((this.seekTime.getTime() - this.startTime.getTime()) / 1000)
-                    await gbSeek(this.videoInfo.stream, offset)
-                    this.percentage = (this.seekTime.getTime() - this.startTime.getTime()) / (this.endTime.getTime() - this.startTime.getTime()) * 100
+                    let startTimeStamp = this.videoInfo.startTime.getTime();
+                    let endTimeStamp = this.videoInfo.endTime.getTime();
+                    await gbSeek(this.videoInfo.stream, Math.floor((this.seekTime.getTime() - startTimeStamp) / 1000))
+                    this.percentage = (this.seekTime.getTime() - startTimeStamp) / (endTimeStamp - startTimeStamp) * 100
+
                 },
                 async getUrl() {
                     let res = await get452BanDao()
                     this.videoInfo = res.data.data
-                    this.playUrl = this.videoInfo.wss_flv // wss_flv, ws_flv, fmp4
-                    this.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
-                    this.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    this.playUrl = this.videoInfo.fmp4 // wss_flv, ws_flv, fmp4
+                    this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
+                    this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
                 },
             },
         }
