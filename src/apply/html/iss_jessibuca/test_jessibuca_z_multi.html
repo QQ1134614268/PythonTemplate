@@ -20,7 +20,7 @@
             <el-input type="number" v-model="videoBuffer" style="width: 6rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 30rem">
-            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
+            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay"></el-input>
         </el-form-item>
         <el-form-item label="解码:" style="width: 30rem">
             <el-checkbox v-model="useMSE" @change="replay">MediaSource</el-checkbox>
