@@ -17,16 +17,30 @@
 <div id="app">
     <div style="width: 70%">
         <div id="container"></div>
-        <div id="id1" @mouseup="log('mouseup')" @mousemove="mousemove" @mouseover="log"
-             @mouseenter="log('mouseenter')"
-             @click="seek">
-            <el-progress :percentage="percentage"></el-progress>
+        <div style="display: flex">
+            <el-date-picker v-model="videoInfo.startTime" format="yyyy-MM-dd HH:mm:ss"
+                            value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+            <div id="id1" @mouseup="log('mouseup')" @mousemove="mousemove" @mouseover="log"
+                 @mouseenter="log('mouseenter')"
+                 @click="seek" style="width: 50%">
+                <el-progress :percentage="percentage"></el-progress>
+            </div>
+            <el-date-picker v-model="videoInfo.endTime" format="yyyy-MM-dd HH:mm:ss"
+                            value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
         </div>
         <el-date-picker v-model="seekTime" format="yyyy-MM-dd HH:mm:ss"
                         value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
         <el-form>
             <el-form-item label="播放地址:" style="width: 30rem">
-                <el-input v-model="playUrl"></el-input>
+                <el-input v-model="playUrl">
+                    <el-select v-model="playUrl" slot="prepend">
+                        <el-option v-for="item in playUrlConfig" :key="item.value" :label="item.label"
+                                   :value="item.value">
+                        </el-option>
+                    </el-select>
+                    <el-button slot="append" icon="el-icon-search">
+                    </el-button>
+                </el-input>
             </el-form-item>
             <el-button @click="play">播放</el-button>
             <el-button @click="replay">重播</el-button>
@@ -39,6 +53,9 @@
                     <el-option v-for="item in rateConfig" :key="item.value" :label="item.label" :value="item.value">
                     </el-option>
                 </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button @click="startFinsh">结束事件</el-button>
             </el-form-item>
             <el-form-item label="时间戳:" style="width: 30rem">
                 <el-button @click="startTimeRecord">录制时间戳数据</el-button>
@@ -55,9 +72,7 @@
                     <el-table-column prop="buf" label="buf"></el-table-column>
                     <el-table-column prop="videoCurrentTime" label="videoCurrentTime"></el-table-column>
                     <el-table-column prop="videoCurrentTimeDiff" label="videoCurrentTimeDiff"></el-table-column>
-                    <!--                    -->
                 </el-table>
-                <!--                <el-pagination @current-change="page" :current-page="page" :total="total"></el-pagination>-->
             </el-form-item>
         </el-form>
         <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
@@ -198,11 +213,12 @@
                     form: {},
                     debug: false,
                     debugLevel: 'debug',
-                    timeout: 10,
-                    loadingTimeout: 10,
-                    heartTimeout: 5,
+                    timeout: 20,
+                    loadingTimeout: 20,
+                    heartTimeout: 10,
 
                     playUrl: '',
+                    playUrlConfig: [],
                     demuxUseWorker: '',
                     showLastIframe: '',
                     renderDom: 'canvas',
@@ -253,6 +269,10 @@
                         {label: '4X', value: 4},
                         {label: '8X', value: 8},
                         {label: '16X', value: 16},
+                        {label: '-1X', value: -1},
+                        {label: '-2X', value: -2},
+                        {label: '-4X', value: -4},
+                        {label: '-8X', value: -8},
                     ],
 
                     isSupportMSEH264: checkSupportMSEH264(),
@@ -359,9 +379,9 @@
 
                     this.jessibuca.on("play", () => {
                         console.log("listenerEvent", "on play");
-                        this.playing = true;
-                        this.loaded = true;
-                        this.quieting = this.jessibuca.isMute();
+                        _this.playing = true;
+                        _this.loaded = true;
+                        _this.quieting = _this.jessibuca.isMute();
                         _this.playing = true;
                     });
                     this.jessibuca.on("pause", function () {
@@ -431,7 +451,7 @@
                                 _this.statsArr.slice(400, _this.statsArr.length)
                             }
                         }
-                        console.log("listenerEvent", "stats", stats);
+                        // console.log("listenerEvent", "stats", stats);
                     })
                     // this.jessibuca.on("kBps", function (kBps) {
                     //     console.log("listenerEvent","kBps", kBps);
@@ -544,6 +564,20 @@
 
                     record(1, 20);
                 },
+                startFinsh() {
+                    if (!this.playUrl) {
+                        return
+                    }
+                    let interval = setInterval(async (streamId) => {
+                        let res = await gbExist(streamId)
+                        console.log(this.videoInfo.stream, new Date(), res.data && res.data.data, this.jessibuca.isPlaying(), "todo 连接")
+                        // console.log(this.jessibuca.isLive, this.jessibuca.isEof, this.jessibuca.isEos, this.jessibuca.performance, this.jessibuca.endTime)
+                    }, 1000, this.videoInfo.stream)
+
+                    setTimeout(() => {
+                        clearInterval(interval)
+                    }, 60000)
+                },
                 log(event) {
                     console.log(event)
                 },
@@ -566,10 +600,9 @@
                 async getUrl() {
                     let res = await get452BanDao()
                     this.videoInfo = res.data.data
-                    this.playUrl = this.videoInfo.wss_flv // wss_flv
+                    this.playUrl = this.videoInfo.wss_flv // wss_flv, ws_flv, fmp4
                     this.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
                     this.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
-                    console.log(this.videoInfo, this.startTime)
                 },
             },
         }
