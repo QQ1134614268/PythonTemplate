@@ -537,20 +537,20 @@
                     this.jessibuca.forward(this.rate);
                 },
 
-                startTimeRecord() {
+                async startTimeRecord() {
                     this.statsArr = [{}]
                     let _this = this;
 
-                    function record(x, total) {
+                    async function record(x, total) {
                         console.log(new Date(), x)
                         if (x < total) {
                             setTimeout(record, 5000, x + 1, total)
-                            let res = gbSeek(_this.videoInfo.stream, 3600)
+                            let res = await gbSeek(_this.videoInfo.stream, 3600)
                             console.log(res)
                         }
                     }
 
-                    record(1, 20);
+                    await record(1, 20);
                 },
                 startFinsh() {
                     if (!this.playUrl) {
