@@ -115,13 +115,3 @@ class TestMysql(TestCase):
         cursor = connection.cursor()
         cursor.callproc('insert_performance_user_t', (10000000,))
         connection.commit()
-
-    @staticmethod
-    def _table_arg(_id=None, create_time=None, create_by=None):
-        return {
-            "id": _id,
-            "create_time": create_time,
-            "update_time": create_time,
-            "create_by": create_by,
-            "update_by": create_by,
-        }
