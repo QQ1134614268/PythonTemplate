@@ -48,9 +48,6 @@ class TestMmsi(TestCase):
         for vo in vos:
             task.put(vo)
 
-        # todo 保存报错,, session多线程不安全??
-
-        # todo 队列, 线程分布式
         t = []
         for i in range(16):
             t1 = threading.Thread(target=self.for_que, args=(task,))

@@ -20,7 +20,7 @@ class TestXml(unittest.TestCase):
         print(envelop_ele.tag, envelop_ele.attrib, envelop_ele.text, envelop_ele.tail, envelop_ele.getchildren())
         envelop_ele.find('{http://www.w3.org/2003/05/soap-envelope}Header')
         envelop_ele.find('env:Header', namespaces={"env": "http://www.w3.org/2003/05/soap-envelope"})
-        namespace = dict([node for _, node in ElementTree.iterparse(StringIO(xml_txt), events=['start-ns'])])  # todo
+        namespace = dict([node for _, node in ElementTree.iterparse(StringIO(xml_txt), events=['start-ns'])])
         print(namespace)
         envelop_ele.find('env:Header', namespace)
         body_ele = envelop_ele.find('env:Body', namespace)

@@ -7,8 +7,6 @@ from kafka.admin import NewTopic
 from apply.test.kafka_test.kafka_conf import KAFKA_GGOK, MY_TOPIC1
 
 
-# todo kafka-python 2.0.2, 2020-09; kafka-python3, 3.0.0 2022-5
-
 class TestKafkaProduce(unittest.TestCase):
 
     def test_create_topic(self):
