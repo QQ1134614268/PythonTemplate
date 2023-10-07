@@ -63,8 +63,7 @@ class TestPcap(TestCase):
         # https://www.cnpython.com/pypi/scapy-ssl_tls
 
     def test_tls_https(self):
-        # scapy-ssl_tls
-        # todo
+        # todo scapy-ssl_tls
         load_layer('tls')
         pkts = rdpcap('ship.pcap')
         for pkt in pkts:
