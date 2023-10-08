@@ -12,63 +12,122 @@
     <script src="./util.js"></script>
 </head>
 <body>
-<div id="app" style="height: 100vh; display: flex">
-    <div id="container" style="width: 50%"></div>
-    <el-form ref="form" :model="form" style="width: 50%">
+<div id="app">
+    <div style="width: 70%">
+        <div id="container"></div>
+        <el-form>
+            <el-form-item label="播放地址:" style="width: 30rem">
+                <el-input v-model="playUrl">
+                    <el-select v-model="playUrl" slot="prepend">
+                        <el-option v-for="item in playUrlConfig" :key="item.value" :label="item.label"
+                                   :value="item.value">
+                        </el-option>
+                    </el-select>
+                    <el-button slot="append" icon="el-icon-search">
+                    </el-button>
+                </el-input>
+            </el-form-item>
+            <el-button @click="play">播放</el-button>
+            <el-button @click="replay">重播</el-button>
+            <el-button @click="pause">停止</el-button>
+            <el-button @click="fullscreen">全屏</el-button>
+            <el-button @click="screenShot">截图</el-button>
+            <el-button @click="clearView">清屏</el-button>
+            <el-button @click="destroy">销毁</el-button>
+            <el-form-item label="时间戳:" style="width: 30rem">
+                <el-button @click="startTimeRecord">录制时间戳数据</el-button>
+                <el-table :data="statsArr">
+                    <el-table-column prop="ts" label="ts">
+                        <template slot-scope="scope">
+                            {{Math.floor(scope.row.ts/1000)}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="dts" label="dts"></el-table-column>
+                    <el-table-column prop="pTs" label="pTs"></el-table-column>
+                    <el-table-column prop="delayTs" label="delayTs"></el-table-column>
+                    <el-table-column prop="totalDelayTs" label="totalDelayTs"></el-table-column>
+                    <el-table-column prop="buf" label="buf"></el-table-column>
+                    <el-table-column prop="videoCurrentTime" label="videoCurrentTime"></el-table-column>
+                    <el-table-column prop="videoCurrentTimeDiff" label="videoCurrentTimeDiff"></el-table-column>
+                </el-table>
+            </el-form-item>
+        </el-form>
+        <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
+    </div>
+    <el-form ref="form" :model="form" style="width: 30%; display: flex; flex-wrap: wrap">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
-            <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="replay"></el-input>
+            <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
-        <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 100rem">
-            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
+        <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 30rem">
+            <el-input placeholder="单位：秒" type="text" v-model="jessiConf.videoBufferDelay"
+                      style="width: 5rem"></el-input>
         </el-form-item>
-        <el-form-item label="解码:" style="width: 100rem">
-            <el-checkbox v-model="useMSE" @change="replay('mse')">MediaSource</el-checkbox>
-            <el-checkbox v-model="useWCS" @change="replay('wcs')">webcodecs</el-checkbox>
-            <el-checkbox v-model="useWASM" @change="replay('wasm')">wasm</el-checkbox>
-            <el-checkbox v-model="useSIMD" @change="replay('simd')">wasm(simd)</el-checkbox>
+        <el-form-item label="解码:" style="width: 30rem">
+            <el-checkbox v-model="jessiConf.useMSE" @change="replay">MediaSource</el-checkbox>
+            <el-checkbox v-model="jessiConf.useWCS" @change="replay">webcodecs</el-checkbox>
+            <el-checkbox v-model="jessiConf.useWASM" @change="replay">wasm</el-checkbox>
+            <el-checkbox v-model="jessiConf.useSIMD" @change="replay">wasm(simd)</el-checkbox>
         </el-form-item>
-        <el-form-item label="硬解码(MediaSource，Webcodec)worker解封装:" style="width: 100rem">
-            <el-checkbox @click="replay" v-model="demuxUseWorker">备选项</el-checkbox>
+        <el-form-item label="渲染标签:" style="width: 30rem">
+            <el-checkbox @click="replay" v-model="jessiConf.useVideoRender">video</el-checkbox>
+            <el-checkbox @click="replay" v-model="jessiConf.useCanvasRender">canvas(性能更好)</el-checkbox>
         </el-form-item>
-        <el-form-item label="渲染标签:" style="width: 100rem">
-            <el-select v-model="renderDom" onchange="replay">
-                <el-option value="video" selected>video</el-option>
-                <el-option value="canvas">canvas</el-option>
-            </el-select>
+        <el-form-item label="canvas渲染技术(自动降级webgl):" style="width: 30rem">
+            <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
+            <el-checkbox @click="replay" disabled>webgl(pro 支持 webgl2)</el-checkbox>
         </el-form-item>
-        <el-form-item label="canvas渲染技术:" style="width: 100rem">
-            <el-select v-model="renderCanvas" onchange="replay">
-                <el-option value="webgl">webgl</el-option>
-                <el-option value="webgpu" selected>webgpu</el-option>
-            </el-select>
+        <el-form-item label="是否使用离屏模式：" style="width: 30rem">
+            <el-radio v-model="jessiConf.forceNoOffscreen" label="true">是（提升渲染能力）</el-radio>
+            <el-radio v-model="jessiConf.forceNoOffscreen" label="false">否</el-radio>
         </el-form-item>
-        <el-form-item label="离屏渲染:" style="width: 30rem">
-            <el-checkbox v-model="showBandwidth">备选项</el-checkbox>
+        <el-form-item label="worker解封装(硬解码MSE,WCS):" style="width: 30rem">
+            <el-checkbox @click="replay" v-model="jessiConf.demuxUseWorker">使用</el-checkbox>
         </el-form-item>
         <el-form-item label="操作按钮:" style="width: 30rem">
-            <el-checkbox v-model="showOperateBtns">备选项</el-checkbox>
+            <el-checkbox v-model="jessiConf.showOperateBtns">显示</el-checkbox>
         </el-form-item>
         <el-form-item label="网速:" style="width: 30rem">
-            <el-checkbox v-model="showBandwidth">备选项</el-checkbox>
+            <el-checkbox v-model="jessiConf.showBandwidth">显示</el-checkbox>
         </el-form-item>
         <el-form-item label="缩放:" style="width: 30rem">
-            <el-select v-model="scale" @change="scaleChange">
+            <el-select v-model="jessiConf.scale" @change="scaleChange">
                 <el-option value="0">完全填充(拉伸)</el-option>
                 <el-option value="1">等比缩放</el-option>
                 <el-option value="2">完全填充(未拉伸)</el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="播放地址:" style="width: 30rem">
-            <el-input v-model="playUrl"></el-input>
+        <el-form-item label="日志:" style="width: 30rem">
+            <el-select v-model="jessiConf.debug">
+                <el-option label="是" :value="true"></el-option>
+                <el-option label="否" :value="false"></el-option>
+            </el-select>
+            <el-select v-model="jessiConf.debugLevel">
+                <el-option value="debug"></el-option>
+                <el-option value="warn"></el-option>
+            </el-select>
+            <el-checkbox v-model="isSupportMSEH264" disabled>操作按钮</el-checkbox>
+            <el-checkbox v-model="isSupportMSEH264" disabled>网速</el-checkbox>
+            <el-checkbox v-model="isSupportMSEH264" disabled>键盘快捷键</el-checkbox>
+            <el-checkbox v-model="isSupportMSEH264" disabled>性能面板</el-checkbox>
+            <el-input v-model="jessiConf.timeout" style="width: 10rem">
+                <template slot="prepend">
+                    timeout:
+                </template>
+            </el-input>
+            <el-input v-model="jessiConf.loadingTimeout" style="width: 15rem">
+                <template slot="prepend">
+                    loadingTimeout:
+                </template>
+            </el-input>
+            <el-input v-model="jessiConf.heartTimeout" style="width: 15rem">
+                <template slot="prepend">
+                    heartTimeout:
+                </template>
+            </el-input>
         </el-form-item>
-        <el-button @click="play">播放</el-button>
-        <el-button @click="replay">重播</el-button>
-        <el-button @click="pause">停止</el-button>
-        <el-button @click="destroy">销毁</el-button>
-        <el-button @click="fullscreen">全屏</el-button>
-        <el-button @click="screenShot">截图</el-button>
-        <el-button @click="clearView">清屏</el-button>
-        <span>性能：{{ performance }}</span>
+        <el-form-item label="时间:" style="width: 30rem">
+            <div>{{ playTimesArray }}</div>
+        </el-form-item>
         <el-form-item label="浏览器配置：" style="width: 30rem">
             <div>
                 <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
@@ -87,118 +146,79 @@
             el: '#app',
             data() {
                 return {
-                    form: {},
-                    playUrl: '',
-                    demuxUseWorker: '',
-                    showLastIframe: '',
-                    renderDom: '',
-                    renderCanvas: '',
-
-                    isUseFpsRender: false,
-                    isCacheBeforeDecodeForFpsRender: true,
-                    onlyDecoderIFrame: 4,
-                    playbackFps: 25,
-                    isPlaybackPauseClearCache: true,
-                    uiUsePlaybackPause: '',
-                    useWebGPU: '',
-                    playbackUseWCS: false,
-                    playTimesArray: [],
-
-                    videoBuffer: 0.2,
-                    videoBufferDelay: 1,
-                    decodeType: '',
-                    jessibuca: null,
-                    version: '',
-                    wasm: false,
-                    vc: "ff",
-                    playing: false,
-                    quieting: true,
-                    loaded: false, // mute
-                    showOperateBtns: false,
-                    showBandwidth: false,
-                    err: "",
-                    speed: 0,
-                    performance: "",
-                    volume: 1,
-                    rotate: 0,
-
-                    useWCS: false,
-                    useMSE: true,
-                    useWASM: false,
-                    useSIMD: false,
-
-                    useOffscreen: false,
-                    recording: false,
-                    recordType: 'webm',
-                    scale: '0',
-
-                    isSupportMSEH264: checkSupportMSEH264(),
-                    isSupportWCS: checkSupportWCS(),
-                    isSupportWasm: checkSupportWasm(),
-                    isSupportSIMD: checkSupportSIMD(),
-                };
-            },
-            mounted() {
-                this.create();
-                window.onerror = (msg) => (this.err = msg);
-            },
-            unmounted() {
-                this.jessibuca.destroy();
-            },
-            methods: {
-                create() {
-                    this.jessibuca = new JessibucaPro({
+                    jessiConf: {
                         // 基础, 调试
                         debug: true,
                         debugLevel: 'debug',
                         container: document.getElementById('container'),
-                        videoBuffer: this.videoBuffer, // 缓存时长
-                        videoBufferDelay: this.videoBufferDelay, // 1000s
-                        decoder: 'decoder.js', // 1 默认引用的是根目录下面的decoder.js文件 ，decoder.js 与 decoder.wasm文件必须是放在同一个目录下面
+                        videoBuffer: 0.2, // 缓存时长
+                        videoBufferDelay: 10, // 10s 缓存延迟(延迟超过会触发丢帧)
+                        // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
                         timeout: 10, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
                         loadingTimeout: 10,//设置超时时长, 单位秒,在连接成功之前,如果超过设定时长无数据返回,则回调timeout事件
                         loadingTimeoutReplay: true,//loadingTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         loadingTimeoutReplayTimes: -1,// loadingTimeoutReplay 重试失败之后，不再重新播放视频地址。如果想无限次重试，可以设置为-1
-                        heartTimeout: 5, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
+                        heartTimeout: 10, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
                         heartTimeoutReplay: true,//heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         heartTimeoutReplayTimes: -1,//heartTimeoutReplay 重试失败之后，不再重新播放视频地址。是整个生命周期中重试的次数。如果想无限次重试，可以设置为-1
                         heartTimeoutReplayUseLastFrameShow: true,
                         // 性能, 解码, useMSE 等 互斥??
                         // videoBuffer
                         // decoder
-                        useMSE: this.useMSE, //是否开启MediaSource硬解码;视频编码只支持H.264视频（Safari on iOS不支持）,不支持 forceNoOffscreen 为 false (开启离屏渲染),优先级高于useWCS:true
-                        useWCS: this.useWCS, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false （开启离屏渲染）
-                        useWASM: this.useWASM,
-                        useSIMD: this.useSIMD,
-                        forceNoOffscreen: !this.useOffscreen,//是否不使用离屏模式（提升渲染能力）
-                        wcsUseVideoRender: true, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
-                        useCanvasRender: this.renderDom,
-                        isNotMute: true,//是否开启声音，默认是关闭声音播放的。
+                        useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频（Safari on iOS不支持）; 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
+                        useWCS: true, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false （开启离屏渲染）
+                        useWASM: false,
+                        useSIMD: false,
+
+                        useVideoRender: false,
+                        useCanvasRender: true,
+                        wcsUseVideoRender: false, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
+
+                        forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式（提升渲染能力）
+                        useWebGPU: true, // 使用WebGPU
+
+                        // demuxUseWorker: false, // work 多线程解封装
+                        // audioEngine: "worklet", // 多路 ??
+
+                        isNotMute: false,// 是否开启声音，默认是关闭声音播放的。
                         hasAudio: false, // 是否有音频，如果设置false，则不对音频数据解码，提升性能。
+
                         autoWasm: true, //在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
                         wasmDecodeErrorReplay: true,//是否开启解码失败重新播放;wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
-                        useWebGPU: this.useWebGPU === 'webgpu', // 使用WebGPU
-                        audioEngine: "worklet", // 多路 ??
-                        // demuxUseWorker: this.demuxUseWorker,
                         // UI 配置
                         isResize: false,//当为true的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 setScaleMode(1) 当为false的时候：视频画面完全填充canvas区域,画面会被拉伸。等同于 setScaleMode(0)
                         controlAutoHide: true,//只有鼠标聚焦到播放器内部才会显示，移除之后，会消失。
-                        text: "",
-                        loadingText: "加载中",
-                        showBandwidth: this.showBandwidth, // 显示网速
-                        showPerformance: this.showOperateBtns, // 显示性能
+                        text: "text 1111",
+                        loadingText: "疯狂加载中...",//加载过程中文案。
+                        showBandwidth: true, // 显示网速
+                        showPerformance: true, // 显示性能
                         hiddenAutoPause: false, //是否开启当页面的'visibilityState'变为'hidden'的时候，自动暂停播放。
-                        rotate: true, //设置旋转角度，只支持，0(默认) ，180，270 三个值。
+                        rotate: 0, //设置旋转角度，只支持，0(默认) ，180，270 三个值。
                         isFullResize: false,// 当为true的时候：视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全。等同于 setScaleMode(2)
                         supportDblclickFullscreen: true,//是否支持屏幕的双击事件，触发全屏，取消全屏事件。点击底部的 controls UI条(里面元素)不会触发全屏事件。
                         operateBtns: {
-                            fullscreen: this.showOperateBtns,//fullscreen 是否显示全屏按钮
-                            screenshot: this.showOperateBtns,//是否显示截图按钮
-                            play: this.showOperateBtns,//是否显示播放暂停按钮
-                            audio: this.showOperateBtns,//是否显示声音按钮
-                            record: this.showOperateBtns,//record 是否显示录制按钮
-                            performance: this.showOperateBtns,
+                            fullscreen: false, //fullscreen 是否显示全屏按钮
+                            screenshot: false, //是否显示截图按钮
+                            play: true,//是否显示播放暂停按钮
+                            audio: false,//是否显示声音按钮
+                            record: false,//record 是否显示录制按钮
+                            ptz: false,
+                            quality: false,
+                            zoom: false,
+                            close: false,
+                            scale: false,
+                            performance: false,
+                            logSave: false,
+                            aiFace: false,
+                            aiObject: false,
+                            fullscreenFn: null,
+                            fullscreenExitFn: null,
+                            screenshotFn: null,
+                            playFn: null,
+                            pauseFn: null,
+                            recordFn: null,
+                            recordStopFn: null
                         },
                         keepScreenOn: true,// 开启屏幕常亮
                         background: "", //背景图片。
@@ -208,9 +228,50 @@
                         hotKey: false,//是否开启键盘快捷键; esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
                         recordType: 'mp4',//默认录制的视频格式;支持 webm,mp4 参数
                         useWebFullScreen: false,// 是否使用web全屏(旋转90度)（只会在移动端生效）。
-                    });
+                    },
+
+                    percentage: 0,
+                    startTime: new Date(),
+                    endTime: new Date(new Date().getTime() + 3600000),
+                    seekTime: new Date(),
+                    videoInfo: {},
+                    statsArr: [],
+
+                    form: {},
+
+                    playUrl: '',
+                    playUrlConfig: [],
+
+                    isUseFpsRender: false,
+                    isCacheBeforeDecodeForFpsRender: true,
+                    playbackFps: 25,
+                    isPlaybackPauseClearCache: true, // 不断流暂停是否清除缓存数据
+                    uiUsePlaybackPause: false,
+                    playbackUseWCS: false,
+                    playTimesArray: [],
+
+                    jessibuca: null,
+
+                    isSupportMSEH264: checkSupportMSEH264(),
+                    isSupportWCS: checkSupportWCS(),
+                    isSupportWasm: checkSupportWasm(),
+                    isSupportSIMD: checkSupportSIMD(),
+                    isSupportGpu: 'gpu' in navigator,
+
+                };
+            },
+            mounted() {
+                this.create();
+            },
+            unmounted() {
+                this.jessibuca.destroy();
+            },
+            methods: {
+                create() {
+                    this.jessiConf.container = document.getElementById('container');
+                    this.jessibuca = new JessibucaPro(this.jessiConf);
                     // -----------方法-----------------------
-                    this.jessibuca.setDebug(true)
+                    // this.jessibuca.setDebug(true)
                     // this.jessibuca.play("url")//播放视频
                     // this.jessibuca.isPlaying()//返回是否正在播放中状态。
                     // this.jessibuca.setTimeout(10)//设置超时时长, 单位秒 在连接成功之前和播放中途,如果超过设定时长无数据返回,则回调timeout事件
@@ -243,77 +304,72 @@
                     let _ts = 0;
 
                     this.jessibuca.on("play", () => {
-                        console.log("on play");
-                        this.playing = true;
-                        this.loaded = true;
-                        this.quieting = this.jessibuca.isMute();
-                        _this.playing = true;
+                        console.log("listenerEvent", "on play");
+                    });
+                    this.jessibuca.on("pause", function () {
+                        console.log("listenerEvent", "on pause");
                     });
                     this.jessibuca.on("start", function () {
-                        console.log('start render')
+                        console.log("listenerEvent", 'start render')
                         // 如果有截图需求。需要延迟一下，因为代码中无法感应到画面被渲染出来了。
                         // 1s 之后截图
                         // setTimeout(function () {
                         //   this. jessibuca.screenshot('xxx')
                         // }, 1 * 1000)
                     })
-                    this.jessibuca.on("pause", function () {
-                        console.log("on pause");
-                        _this.playing = false;
-                    });
                     this.jessibuca.on("load", function () {
-                        console.log("on load");
+                        console.log("listenerEvent", "on load");
                     });
                     this.jessibuca.on("timeout", function (error) {
                         //jessibuca.TIMEOUT.loadingTimeout ; 同loadingTimeout
                         //jessibuca.TIMEOUT.delayTimeout ; 同delayTimeout
-                        console.log('timeout:', error)
+                        console.log("listenerEvent", "timeout", error)
                     })
                     this.jessibuca.on("loadingTimeout", function () {
-                        console.log('timeout')
+                        console.log("listenerEvent", "loadingTimeout")
                     })
                     this.jessibuca.on("delayTimeout", function () {
-                        console.log('timeout')
+                        console.log("listenerEvent", "delayTimeout")
                     })
                     // 信息
-                    this.jessibuca.on('buffer', function (buffer) {
-                        console.log('buffer', buffer);
+                    this.jessibuca.on("buffer", function (buffer) {
+                        console.log("listenerEvent", "buffer", buffer);
                     })
-                    this.jessibuca.on('timeUpdate', (value) => {
-                        console.log('timeUpdate', value);
+                    this.jessibuca.on("timeUpdate", (value) => {
+                        console.log("listenerEvent", "timeUpdate", value);
                     })
                     this.jessibuca.on("videoInfo", function (info) {
-                        console.log("videoInfo", info);
+                        console.log("listenerEvent", "videoInfo", info);
                     });
                     this.jessibuca.on("audioInfo", function (msg) {
-                        console.log("audioInfo", msg);
+                        console.log("listenerEvent", "audioInfo", msg);
                     });
                     this.jessibuca.on("timeUpdate", function (ts) {
-                        console.log('timeUpdate,old,new,timestamp', _ts, ts, ts - _ts);
+                        console.log("listenerEvent", "timeUpdate,old,new,timestamp", _ts, ts, ts - _ts);
                         _ts = ts;
                     });
                     this.jessibuca.on("playToRenderTimes", function (times) { // 监听调用play方法 经过 初始化-> 网络请求-> 解封装 -> 解码 -> 渲染 一系列过程的时间消耗
-                        console.log("playToRenderTimes is", times)
+                        console.log("listenerEvent", "playToRenderTimes is", times)
                     })
-                    this.jessibuca.on('stats', function (stats) {
+                    this.jessibuca.on("stats", function (stats) {
                         // buf: 当前缓冲区时长，单位毫秒,
                         // fps: 当前视频帧率,
                         // abps: 当前音频码率，单位byte,
                         // vbps: 当前视频码率，单位byte，
                         // ts:当前视频帧pts，单位毫秒
-                        console.log('stats', stats);
+                        console.log("listenerEvent", "stats", stats);
                     })
-                    this.jessibuca.on('kBps', function (kBps) {
-                        console.log('kBps', kBps);
-                    });
-                    this.jessibuca.on("bps", function (bps) {
-                        console.log('bps', bps);
-                    });
+                    // this.jessibuca.on("kBps", function (kBps) {
+                    //     console.log("listenerEvent","kBps", kBps);
+                    // });
+                    // this.jessibuca.on("bps", function (bps) {
+                    //     console.log("listenerEvent","bps", bps);
+                    // });
                     this.jessibuca.on("performance", function (performance) { //渲染性能统计，流开始播放后回调，每秒1次。0: 表示卡顿;1: 表示流畅;2: 表示非常流程
-                        _this.performance = performance;
+                        console.log("listenerEvent", "performance", performance)
                     });
                     this.jessibuca.on("log", function (msg) { //信息，包含错误信息
-                        console.log("on log", msg);
+                        console.log("listenerEvent", "on log", msg);
                     });
                     this.jessibuca.on("error", function (error) {
                         // jessibuca.ERROR.playError ;播放错误，url 为空的时候，调用play方法
@@ -322,9 +378,8 @@
                         // jessibuca.ERROR.webcodecsH265NotSupport; webcodecs 解码 h265 失败
                         // jessibuca.ERROR.mediaSourceH265NotSupport; mediaSource 解码 h265 失败
                         // jessibuca.ERROR.wasmDecodeError ; wasm 解码失败
-                        console.log("error", error);
+                        console.log("listenerEvent", "error", error);
                     });
-
 
                     // 其他
                     this.jessibuca.on("mute", function (msg) {
@@ -349,22 +404,13 @@
                     })
                 },
                 play() {
-                    // this.jessibuca.onPlay = () => (this.playing = true);
                     if (this.playUrl) {
                         this.jessibuca.play(this.playUrl);
                     }
                 },
-                replay() {
+                async replay() {
                     if (this.jessibuca) {
-                        this.jessibuca.destroy()
-                    }
-                    if (type === 'mse') {
-                        this.useWCS = false;
-                        this.useOffscreen = false;
-                    } else if (type === 'wcs') {
-                        this.useMSE = false
-                    } else if (type === 'offscreen') {
-                        this.useMSE = false
+                        await this.jessibuca.destroy()
                     }
                     this.create();
                     setTimeout(() => {
@@ -372,9 +418,6 @@
                     }, 100)
                 },
                 pause() {
-                    this.playing = false;
-                    this.err = "";
-                    this.performance = "";
                     this.jessibuca.pause();
                 },
                 destroy() {
@@ -382,9 +425,6 @@
                         this.jessibuca.destroy();
                     }
                     this.create();
-                    this.playing = false;
-                    this.loaded = false;
-                    this.performance = "";
                 },
                 mute() {
                     this.jessibuca.mute();
@@ -401,11 +441,8 @@
                 fullscreen() {
                     this.jessibuca.setFullscreen(true);
                 },
-
                 clearView() {
-                    if (this.playing) {
-                        this.jessibuca.clearView();
-                    }
+                     this.jessibuca.clearView();
                 },
 
                 startRecord() {
@@ -426,6 +463,21 @@
                 scaleChange() {
                     this.jessibuca.setScaleMode(this.scale);
                 },
+                startTimeRecord() {
+                    this.statsArr = [{}]
+                    let _this = this;
+
+                    function record(x, total) {
+                        console.log(new Date(), x)
+                        if (x < total) {
+                            setTimeout(record, 5000, x + 1, total)
+                            let res = gbSeek(_this.videoInfo.stream, 3600)
+                            console.log(res)
+                        }
+                    }
+
+                    record(1, 20);
+                },
             },
         }
     );
@@ -434,6 +486,11 @@
 <style>
     * {
         -webkit-user-select: text;
+    }
+
+    #app {
+        height: 100vh;
+        display: flex;
     }
 
     #container {

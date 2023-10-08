@@ -24,7 +24,7 @@ class TestMysql(TestCase):
         Base.metadata.create_all(localhost_test_engine)
 
     def test_drop_table(self):
-        # Base.metadata.drop_all(engine)
+        Base.metadata.drop_all(localhost_test_engine)
         ...
 
     def test_insert_user(self):
@@ -115,13 +115,3 @@ class TestMysql(TestCase):
         cursor = connection.cursor()
         cursor.callproc('insert_performance_user_t', (10000000,))
         connection.commit()
-
-    @staticmethod
-    def _table_arg(_id=None, create_time=None, create_by=None):
-        return {
-            "id": _id,
-            "create_time": create_time,
-            "update_time": create_time,
-            "create_by": create_by,
-            "update_by": create_by,
-        }

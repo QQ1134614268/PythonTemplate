@@ -2,8 +2,6 @@ import curses
 from collections import defaultdict
 from random import randrange, choice
 
-# todo 一直判断边界
-
 letter_codes = [ord(ch) for ch in 'WASDRQwasdrq']
 actions = ['Up', 'Left', 'Down', 'Right', 'Restart', 'Exit']
 actions_dict = dict(zip(letter_codes, actions * 2))

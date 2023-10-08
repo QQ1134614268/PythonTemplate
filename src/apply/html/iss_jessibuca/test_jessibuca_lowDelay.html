@@ -19,13 +19,13 @@
             <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧)：" style="width: 30rem">
-            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px"></el-input>
+            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay"></el-input>
         </el-form-item>
-        <el-form-item label="解码:" style="width: 100rem">
-            <el-checkbox v-model="useMSE" @change="replay('mse')">MediaSource</el-checkbox>
-            <el-checkbox v-model="useWCS" @change="replay('wcs')">webcodecs</el-checkbox>
-            <el-checkbox v-model="useWASM" @change="replay('wasm')">wasm</el-checkbox>
-            <el-checkbox v-model="useSIMD" @change="replay('simd')">wasm(simd)</el-checkbox>
+        <el-form-item label="解码:" style="width: 30rem">
+            <el-checkbox v-model="useMSE" @change="replay">MediaSource</el-checkbox>
+            <el-checkbox v-model="useWCS" @change="replay">webcodecs</el-checkbox>
+            <el-checkbox v-model="useWASM" @change="replay">wasm</el-checkbox>
+            <el-checkbox v-model="useSIMD" @change="replay">wasm(simd)</el-checkbox>
         </el-form-item>
         <el-form-item label="渲染标签：" style="width: 30rem">
             <el-select v-model="renderDom" @change="replay">
@@ -88,7 +88,6 @@
                     jessibuca: null,
                     version: '',
                     wasm: false,
-                    vc: "ff",
                     playing: false,
                     quieting: true,
                     loaded: false, // mute

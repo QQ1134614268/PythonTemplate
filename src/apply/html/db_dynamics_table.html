@@ -9,8 +9,7 @@
     <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
     <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
 
-    <!--    <link rel="stylesheet" href="vue-virtual-scroller/dist/vue-virtual-scroller.css"/>-->
-    <!--    <script src="vue-virtual-scroller/dist/vue-virtual-scroller.min.js"></script>-->
+    <!--    todo 数据库 映射 表格, 动态表单 -->
 
 </head>
 <body>
@@ -41,9 +40,8 @@
         <div style="width: 50%; display: flex;flex-direction: column">
             <textarea v-model="history.sql" rows="10" autocomplete="on"> </textarea>
             <div>
-                <el-button @click="trans_sql_func" type="primary" size="mini" style="float: right"> 翻译
-                </el-button>
-                <el-button @click="searchData" type="primary" size="mini" style="float: right"> 确定</el-button>
+                <el-button @click="trans_sql_func" type="primary" size="mini" style="float: right"> 翻译 </el-button>
+                <el-button @click="searchData" type="primary" size="mini" style="float: right"> 确定 </el-button>
             </div>
         </div>
         <div style="width: 20%; ">
