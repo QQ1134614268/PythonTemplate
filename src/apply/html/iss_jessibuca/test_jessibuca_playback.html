@@ -208,7 +208,7 @@
                         heartTimeoutReplay: true,//heartTimeout 心跳超时之后自动再播放,不再抛出异常，而直接重新播放视频地址。
                         heartTimeoutReplayTimes: -1,//heartTimeoutReplay 重试失败之后，不再重新播放视频地址。是整个生命周期中重试的次数。如果想无限次重试，可以设置为-1
                         heartTimeoutReplayUseLastFrameShow: true,
-                        // 性能, 解码, useMSE 等 互斥?? todo
+                        // 性能, 解码, useMSE 等 互斥??
                         // videoBuffer
                         // decoder
                         useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频(Safari on iOS不支持); 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
@@ -444,7 +444,7 @@
                         return
                     }
                     this.jessibuca.playback(this.playUrl, {
-                        playList: this.playTimesArray, // todo
+                        playList: this.playTimesArray,
                         fps: this.playbackFps,
                         showControl: true,
                         isUseFpsRender: this.isUseFpsRender,
@@ -514,7 +514,7 @@
                     }
                     let interval = setInterval(async (streamId) => {
                         let res = await gbExist(streamId)
-                        console.log(this.videoInfo.stream, new Date(), res.data && res.data.data, this.jessibuca.isPlaying(), "todo 连接")
+                        console.log(this.videoInfo.stream, new Date(), res.data && res.data.data, this.jessibuca.isPlaying())
                         // console.log(this.jessibuca.isLive, this.jessibuca.isEof, this.jessibuca.isEos, this.jessibuca.performance, this.jessibuca.endTime)
                     }, 1000, this.videoInfo.stream)
 

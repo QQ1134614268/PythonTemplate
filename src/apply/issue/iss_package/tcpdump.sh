@@ -5,7 +5,6 @@
 #      dir: 方向 src dst
 #      type: 类型 host net port
 
-# todo tcpdump
 1. 根据ip/网段
 tcpdump -i enp0s20f0u1 -s 0 -w out.pcap src host 44.39.52.214
 2. 根据端口

@@ -14,30 +14,7 @@ import psutil
 from apply.test.test_pc_info.model import PidInfo
 
 
-# todo
-# 获取进程 ps -ef | grep {cmd}
-# 内存相关:
-# cat /proc/12375/smaps
-# cat /proc/24546/status
-# cat /proc/meminfo
-# cat /proc/9776/maps
-
-# 获取线程堆栈
-#     子进程
-#     获取线程
-#  方法栈
-
-# pstack $(pgrep "python3.7")
-
-# 进程
-# 子进程
-#         线程
-#             堆栈
-# 评级? 嵌套?
-# 对比分析 同一进程线程对比
-# 不同进程对比 名与职和
-# 类似 电脑排名
-# 叶子节点
+# todo 内存
 def exec_cmd():
     pass
 
