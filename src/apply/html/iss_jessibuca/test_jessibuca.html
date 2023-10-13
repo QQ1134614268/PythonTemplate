@@ -54,12 +54,12 @@
         </el-form>
         <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
     </div>
-    <el-form ref="form" :model="form" style="width: 30%; display: flex; flex-wrap: wrap">
+    <el-form style="width: 30%; display: flex; flex-wrap: wrap">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 30rem">
-            <el-input placeholder="单位：秒" type="text" v-model="jessiConf.videoBufferDelay"
+            <el-input placeholder="单位:秒" type="text" v-model="jessiConf.videoBufferDelay"
                       style="width: 5rem"></el-input>
         </el-form-item>
         <el-form-item label="解码:" style="width: 30rem">
@@ -74,10 +74,10 @@
         </el-form-item>
         <el-form-item label="canvas渲染技术(自动降级webgl):" style="width: 30rem">
             <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
-            <el-checkbox @click="replay" disabled>webgl(pro 支持 webgl2)</el-checkbox>
+            <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
         </el-form-item>
-        <el-form-item label="是否使用离屏模式：" style="width: 30rem">
-            <el-radio v-model="jessiConf.forceNoOffscreen" label="true">是（提升渲染能力）</el-radio>
+        <el-form-item label="是否使用离屏模式:" style="width: 30rem">
+            <el-radio v-model="jessiConf.forceNoOffscreen" label="true">是(提升渲染能力)</el-radio>
             <el-radio v-model="jessiConf.forceNoOffscreen" label="false">否</el-radio>
         </el-form-item>
         <el-form-item label="worker解封装(硬解码MSE,WCS):" style="width: 30rem">
@@ -126,16 +126,17 @@
             </el-input>
         </el-form-item>
         <el-form-item label="时间:" style="width: 30rem">
-            <div>{{ playTimesArray }}</div>
+            <div>{{ jessiConf.playList }}</div>
         </el-form-item>
-        <el-form-item label="浏览器配置：" style="width: 30rem">
+        <el-form-item label="浏览器配置:" style="width: 30rem">
             <div>
                 <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
                 <el-checkbox value="false" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
                 <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
-                <el-checkbox value="false" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持Webcodecs H265解码(不一定准确)；</el-checkbox>
                 <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
-                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)
+                </el-checkbox>
             </div>
         </el-form-item>
     </el-form>
@@ -166,16 +167,16 @@
                         // 性能, 解码, useMSE 等 互斥??
                         // videoBuffer
                         // decoder
-                        useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频（Safari on iOS不支持）; 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
-                        useWCS: true, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false （开启离屏渲染）
+                        useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频(Safari on iOS不支持); 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
+                        useWCS: true, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false (开启离屏渲染)
                         useWASM: false,
                         useSIMD: false,
 
                         useVideoRender: false,
                         useCanvasRender: true,
-                        wcsUseVideoRender: false, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后（通过OffscreenCanvas渲染之），wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
+                        wcsUseVideoRender: false, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后(通过OffscreenCanvas渲染之)，wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
 
-                        forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式（提升渲染能力）
+                        forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式(提升渲染能力)
                         useWebGPU: true, // 使用WebGPU
 
                         // demuxUseWorker: false, // work 多线程解封装
@@ -183,11 +184,12 @@
 
                         isNotMute: false,// 是否开启声音，默认是关闭声音播放的。
                         hasAudio: false, // 是否有音频，如果设置false，则不对音频数据解码，提升性能。
+                        playbackForwardMaxRateDecodeIFrame: 4, // 只解码I帧(点击重播按钮生效)
 
                         autoWasm: true, //在使用MSE或者Webcodecs 播放H265的时候，是否自动降级到wasm模式。设置为false 则直接关闭播放，抛出Error 异常，设置为true 则会自动切换成wasm模式播放。
                         wasmDecodeErrorReplay: true,//是否开启解码失败重新播放;wasm解码报错之后，不再抛出异常，而是直接重新播放视频地址。
                         // UI 配置
-                        isResize: false,//当为true的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 setScaleMode(1) 当为false的时候：视频画面完全填充canvas区域,画面会被拉伸。等同于 setScaleMode(0)
+                        isResize: false,//当为true的时候:视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 setScaleMode(1) 当为false的时候:视频画面完全填充canvas区域,画面会被拉伸。等同于 setScaleMode(0)
                         controlAutoHide: true,//只有鼠标聚焦到播放器内部才会显示，移除之后，会消失。
                         text: "text 1111",
                         loadingText: "疯狂加载中...",//加载过程中文案。
@@ -195,7 +197,7 @@
                         showPerformance: true, // 显示性能
                         hiddenAutoPause: false, //是否开启当页面的'visibilityState'变为'hidden'的时候，自动暂停播放。
                         rotate: 0, //设置旋转角度，只支持，0(默认) ，180，270 三个值。
-                        isFullResize: false,// 当为true的时候：视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全。等同于 setScaleMode(2)
+                        isFullResize: false,// 当为true的时候:视频画面做等比缩放后,完全填充canvas区域,画面不被拉伸,没有黑边,但画面显示不全。等同于 setScaleMode(2)
                         supportDblclickFullscreen: true,//是否支持屏幕的双击事件，触发全屏，取消全屏事件。点击底部的 controls UI条(里面元素)不会触发全屏事件。
                         operateBtns: {
                             fullscreen: false, //fullscreen 是否显示全屏按钮
@@ -223,34 +225,60 @@
                         keepScreenOn: true,// 开启屏幕常亮
                         background: "", //背景图片。
 
+                        // 回放配置
+                        playbackConfig: {
+                            playList: [{"start": 1653840000, "end": 1653841624}],
+                            fps: 25,
+                            showControl: !0,
+                            controlType: "normal",
+                            duration: 0,
+                            startTime: "",
+                            showRateBtn: !1,
+                            rateConfig: [
+                                {label: '0.25X', value: 0.25},
+                                {label: '0.5X', value: 0.5},
+                                {label: '1X', value: 1},
+                                {label: '2X', value: 2},
+                                {label: '4X', value: 4},
+                                {label: '8X', value: 8},
+                                {label: '16X', value: 16},
+                                {label: '-1X', value: -1},
+                                {label: '-2X', value: -2},
+                                {label: '-4X', value: -4},
+                                {label: '-8X', value: -8},
+                            ],
+                            showPrecision: "",
+                            showPrecisionBtn: !0,
+                            isCacheBeforeDecodeForFpsRender: true,
+                            uiUsePlaybackPause: false,
+                            isPlaybackPauseClearCache: true, // 不断流暂停是否清除缓存数据
+                            isUseFpsRender: false,
+                            isUseLocalCalculateTime: !1,
+                            localOneFrameTimestamp: 40,
+                            supportWheel: !1,
+                            useWCS: !1,
+                            playbackUseWCS: false,
+                        },
                         // 其他
-                        isFlv: false, //当为true的时候：ws协议不检验是否以.flv为依据，进行协议解析。
+                        isFlv: false, //当为true的时候:ws协议不检验是否以.flv为依据，进行协议解析。
                         hotKey: false,//是否开启键盘快捷键; esc -> 退出全屏；arrowUp -> 声音增加；arrowDown -> 声音减少；
                         recordType: 'mp4',//默认录制的视频格式;支持 webm,mp4 参数
-                        useWebFullScreen: false,// 是否使用web全屏(旋转90度)（只会在移动端生效）。
+                        useWebFullScreen: false,// 是否使用web全屏(旋转90度)(只会在移动端生效)。
                     },
 
-                    percentage: 0,
-                    startTime: new Date(),
-                    endTime: new Date(new Date().getTime() + 3600000),
-                    seekTime: new Date(),
-                    videoInfo: {},
-                    statsArr: [],
-
-                    form: {},
-
-                    playUrl: '',
-                    playUrlConfig: [],
-
-                    isUseFpsRender: false,
-                    isCacheBeforeDecodeForFpsRender: true,
-                    playbackFps: 25,
-                    isPlaybackPauseClearCache: true, // 不断流暂停是否清除缓存数据
-                    uiUsePlaybackPause: false,
-                    playbackUseWCS: false,
-                    playTimesArray: [],
-
                     jessibuca: null,
+                    playUrl: '',
+                    videoInfo: {},
+                    percentage: 0,
+                    seekTime: new Date(),
+                    statsArr: [],
+                    rate: 1,
+                    playUrlConfig: [
+                        {
+                            label: 12,
+                            // value: getUrl2()
+                        }
+                    ],
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportWCS: checkSupportWCS(),
@@ -344,7 +372,7 @@
                     this.jessibuca.on("audioInfo", function (msg) {
                         console.log("listenerEvent", "audioInfo", msg);
                     });
-                    this.jessibuca.on("timeUpdate", function (ts) {
+                    this.jessibuca.on("timeUpdate", function (ts) {// 点击自带进度条触发??
                         console.log("listenerEvent", "timeUpdate,old,new,timestamp", _ts, ts, ts - _ts);
                         _ts = ts;
                     });
@@ -384,7 +412,6 @@
                     // 其他
                     this.jessibuca.on("mute", function (msg) {
                         console.log("on mute", msg);
-                        _this.quieting = msg;
                     });
                     this.jessibuca.on("fullscreen", function (msg) {
                         console.log("on fullscreen", msg);
@@ -403,12 +430,13 @@
                         console.log("recordingTimestamp is", timestamp)
                     })
                 },
-                play() {
+                async play() {
                     if (this.playUrl) {
                         this.jessibuca.play(this.playUrl);
                     }
                 },
                 async replay() {
+                    await this.getUrl(); // 自动获取地址
                     if (this.jessibuca) {
                         await this.jessibuca.destroy()
                     }
@@ -417,10 +445,10 @@
                         this.play();
                     }, 100)
                 },
-                pause() {
+                async pause() {
                     this.jessibuca.pause();
                 },
-                destroy() {
+                async destroy() {
                     if (this.jessibuca) {
                         this.jessibuca.destroy();
                     }
@@ -477,6 +505,13 @@
                     }
 
                     record(1, 20);
+                },
+                async getUrl() {
+                    let res = await get452BanDao()
+                    this.videoInfo = res.data.data
+                    this.playUrl = this.videoInfo.fmp4 // wss_flv, ws_flv, fmp4
+                    this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
+                    this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
                 },
             },
         }

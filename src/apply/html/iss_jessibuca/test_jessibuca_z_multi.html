@@ -60,7 +60,7 @@
                 <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
                 <el-checkbox value="false" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
                 <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
-                <el-checkbox value="false" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持Webcodecs H265解码(不一定准确)；</el-checkbox>
                 <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
                 <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
             </div>
@@ -82,16 +82,6 @@
                     showLastIframe: '',
                     renderDom: '',
                     renderCanvas: '',
-
-                    isUseFpsRender: 'false',
-                    isCacheBeforeDecodeForFpsRender: 'true',
-                    onlyDecoderIFrame: 4,
-                    playbackFps: 25,
-                    isPlaybackPauseClearCache: 'true',
-                    uiUsePlaybackPause: '',
-                    isUseWebGPU: '',
-                    playbackUseWCS: false,
-                    playTimesArray: [],
 
                     videoBuffer: 0.2,
                     videoBufferDelay: 1,
