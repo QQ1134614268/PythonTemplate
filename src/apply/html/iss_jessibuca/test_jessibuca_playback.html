@@ -79,7 +79,7 @@
         </el-form>
         <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
     </div>
-    <el-form ref="form" :model="form" style="width: 30%; display: flex; flex-wrap: wrap">
+    <el-form style="width: 30%; display: flex; flex-wrap: wrap">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
@@ -330,7 +330,6 @@
                     isSupportWasm: checkSupportWasm(),
                     isSupportSIMD: checkSupportSIMD(),
                     isSupportGpu: 'gpu' in navigator,
-
                 };
             },
             mounted() {

@@ -14,7 +14,7 @@
 <body>
 <div id="app" style="height: 100vh; display: flex">
     <div id="container" style="width: 50%"></div>
-    <el-form ref="form" :model="form" style="width: 50%">
+    <el-form style="width: 50%">
         <span style="color:red;">注意：将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了;即：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play</span>
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="videoBuffer" style="width: 6rem" @change="replay"></el-input>
@@ -73,7 +73,6 @@
             el: '#app',
             data() {
                 return {
-                    form: {},
                     playUrl: '',
                     playUrl1: "",
                     playUrl2: "",

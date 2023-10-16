@@ -15,7 +15,6 @@
     <div style="width: 70%">
         <div id="container"></div>
         <el-form>
-            <span style="color:red;">注意:将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了</span>即:webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play
             <el-form-item label="播放地址:" style="width: 30rem">
                 <el-input v-model="playUrl"></el-input>
             </el-form-item>
@@ -192,10 +191,10 @@
                         console.log('streamQualityChange', value);
                     })
                     this.jessibuca.on('timeUpdate', (value) => {
-                        console.log('timeUpdate', value);
+                        // console.log('timeUpdate', value); // 直播触发
                     })
                     this.jessibuca.on('stats', (stats) => {
-                        console.log('stats', stats);
+                        // console.log('stats', stats); // 直播触发
                     })
                 },
                 async play() {
@@ -216,11 +215,20 @@
                 async pause() {
                     this.jessibuca.pause();
                 },
-                destroy() {
+                async destroy() {
                     if (this.jessibuca) {
                         this.jessibuca.destroy();
                     }
                     this.create();
+                },
+                async getUrl() {
+                    let res = await get452BanDao()
+                    this.videoInfo = res.data.data
+                    this.playUrl = this.videoInfo.fmp4 // wss_flv, ws_flv, fmp4
+                    if (this.videoInfo.startTime !== undefined) {
+                        this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
+                        this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    }
                 },
             },
         }
