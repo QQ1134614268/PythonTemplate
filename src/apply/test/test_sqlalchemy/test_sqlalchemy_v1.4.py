@@ -26,9 +26,13 @@ class User(Base):
 
 
 if __name__ == '__main__':
-    # todo 函数 label aliased alias select_from join_from 右连接
+    # todo 函数 outerjoin label aliased alias select_from join_from 右连接
     #  https://docs.sqlalchemy.org/en/14/orm/queryguide.html#controlling-what-to-join-from
-
+    # vos = UserVO.query.outerjoin(
+    #     WorkerVO, UserVO.id == WorkerVO.belong
+    # ).filter(
+    #     and_(UserVO.email.isnot(None), WorkerVO.id.isnot(None))
+    # ).distinct().all()
     # print( select(User).where(User.username .is_( None)))
 
     with engine.connect() as conn:
