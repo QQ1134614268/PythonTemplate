@@ -8,14 +8,10 @@
     <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
     <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
     <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
-
-    <!--    <link rel="stylesheet" href="vue-virtual-scroller/dist/vue-virtual-scroller.css"/>-->
-    <!--    <script src="vue-virtual-scroller/dist/vue-virtual-scroller.min.js"></script>-->
-
 </head>
 <body>
 <div id="app">
-    <div>
+    <div class="nav">
         <el-form :model="history">
             <el-form-item label="token">
                 <el-input v-model="history.token" autocomplete="on" style="width: 300px;">
@@ -29,35 +25,32 @@
                 <el-radio v-model="history.need_trans" :label="0">否</el-radio>
             </el-form-item>
         </el-form>
-    </div>
-    <div style="display: flex; justify-content: center">
-        <div style="width: 20%; border: #0b9ef2 solid 1px ;height: 300px">
-            <div v-for="history in sql_history" style="border: aquamarine solid 1px; margin: 1px;">
-                <a @click="getHistory(history)">
-                    <div style=" width: 100%">{{ history.sql }}</div>
-                </a>
+        <div class="historyList">
+            <div @click="getHistory(history)" v-for="history in sql_history" class="history">
+                {{ history.sql }}
             </div>
         </div>
+    </div>
+    <div class="body">
         <div style="width: 50%; display: flex;flex-direction: column">
             <textarea v-model="history.sql" rows="10" autocomplete="on"> </textarea>
             <div>
-                <el-button @click="trans_sql_func" type="primary" size="mini" style="float: right"> 翻译
-                </el-button>
+                <el-button @click="trans_sql_func" type="primary" size="mini" style="float: right"> 翻译</el-button>
                 <el-button @click="searchData" type="primary" size="mini" style="float: right"> 确定</el-button>
             </div>
         </div>
-        <div style="width: 20%; ">
+        <div style="width: 100%;height: 10rem;border: #0a53be 1px solid">
             <div>
                 <span class="span_key">翻译后sql: </span>
                 <span>{{ history.trans_sql }}</span>
             </div>
         </div>
+        <el-table :data="tableData" :render-header="labelHead" style="height: 60%">
+            <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
+                             :show-overflow-tooltip="true" align="center">
+            </el-table-column>
+        </el-table>
     </div>
-    <el-table :data="tableData" :render-header="labelHead" style="height: 60%">
-        <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
-                         :show-overflow-tooltip="true" align="center">
-        </el-table-column>
-    </el-table>
 </div>
 <script>
     class History {
@@ -197,14 +190,29 @@
     }
 
     #app {
-        height: 100vh;
+        min-height: 100%;
+
+        display: flex;
     }
 
-    .span_key {
-        display: inline-block;
-        width: 6rem;
-        color: blue;
-        /*border: black solid 1px;*/
+    .nav {
+        width: 20rem;
+    }
+
+    .body {
+        width: 100%;
+    }
+
+    .historyList {
+        width: 20%;
+        border: #0b9ef2 solid 1px;
+        height: 300px;
+    }
+
+    .history {
+        width: 100%;
+        border: aquamarine solid 1px;
+        margin: 1px;
     }
 </style>
 </html>

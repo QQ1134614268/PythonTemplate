@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>test</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+    <el-table :data="tableData" :render-header="labelHead" style="height: 60%">
+        <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
+                         :show-overflow-tooltip="true" align="center">
+        </el-table-column>
+    </el-table>
+</div>
+<script>
+
+    let t = new Vue(
+        {
+            el: '#app',
+            data() {
+                return {
+                    tableData: [],
+                    header: []
+                }
+            },
+            created() {
+                this.init()
+            },
+            methods: {
+                init() {
+                    this.tableData = [
+                        {name: "tom", age: 19},
+                        {name: "tom2", age: 19},
+                        {name: "tom3", age: 19}
+                    ]
+                    this.header = Object.keys(this.tableData[0])
+                },
+                labelHead(h, {column, index}) { // 自定义表头样式
+                    //let l = column.label.length;
+                    //let f = 12; //每个字大小,其实是每个字的比例值,大概会比字体大小打差不多大
+                    //column.minWidth = f * l; //字大小乘个数即长度 ,注意不要加px像素，这里minWidth只是一个比例值，不是真正的长度
+                    //然后将列标题放在一个div块中，注意块的宽度一定要100%，否则表格显示不完全
+                    return h('span', {class: 'table-head', style: {width: '100%'}}, [column.label])
+                },
+            },
+        }
+    );
+</script>
+</body>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+</html>
