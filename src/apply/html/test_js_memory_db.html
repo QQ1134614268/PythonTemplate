@@ -4,10 +4,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>test</title>
+    <title>网页穿透-js内存数据库(对比H5 indexedDB ??)</title>
+
     <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
     <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
     <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -32,24 +35,25 @@
         </div>
     </div>
     <div class="body">
-        <div style="width: 50%; display: flex;flex-direction: column">
+        <div style="width: 100%; display: flex;flex-direction: column;">
             <textarea v-model="history.sql" rows="10" autocomplete="on"> </textarea>
             <div>
-                <el-button @click="trans_sql_func" type="primary" size="mini" style="float: right"> 翻译</el-button>
+                <el-button @click="trans_sql_func" type="primary" size="mini" style="float: right"> 查看翻译后sql
+                </el-button>
                 <el-button @click="searchData" type="primary" size="mini" style="float: right"> 确定</el-button>
             </div>
         </div>
-        <div style="width: 100%;height: 10rem;border: #0a53be 1px solid">
-            <div>
-                <span class="span_key">翻译后sql: </span>
-                <span>{{ history.trans_sql }}</span>
-            </div>
-        </div>
-        <el-table :data="tableData" :render-header="labelHead" style="height: 60%">
+        <el-table class="table" :data="tableData" :render-header="labelHead" style="height: 60%">
             <el-table-column :label="value" :property="value" :key="key" v-for="(value, key) in header"
                              :show-overflow-tooltip="true" align="center">
             </el-table-column>
         </el-table>
+        <el-dialog :visible.sync="dialogVisible">
+            <h1>翻译后sql</h1>
+            <div>
+                {{ history.trans_sql }}
+            </div>
+        </el-dialog>
     </div>
 </div>
 <script>
@@ -61,37 +65,87 @@
             this.need_trans = need_trans
             this.trans_sql = trans_sql
         }
-    }
 
-    class HistoryTable {
         static historyTable = []
         static tableName = "history_table"
+        static interval = ""
 
-        static add(rowData) {
-            this.historyTable.push(rowData)
-            this.save()
-        }
-
-        static save() {
-            localStorage.setItem(this.tableName, JSON.stringify(this.historyTable));
-        }
-
-        static getByIndex(index) {
-            this.historyTable = JSON.parse(localStorage.getItem(this.tableName))
-            if (this.historyTable.length === 0) {
-                return new History();
+        static saveToDb() {
+            // 1.定时任务(同步持久化) 持久化 如果有更新 2.重复数据清除, 保留最多10数据  3.最新使用数据
+            if (!this.interval) {
+                let _this = this
+                this.interval = setInterval(() => {
+                    console.log("开始-持久化")
+                    _this.historyTable = History.filterRepeat(_this.historyTable).slice(0, 10)
+                    if (localStorage.getItem(_this.tableName) !== JSON.stringify(_this.historyTable)) {
+                        console.log(localStorage.getItem(_this.tableName), JSON.stringify(_this.historyTable))
+                        localStorage.setItem(_this.tableName, JSON.stringify(_this.historyTable));
+                    }
+                }, 5 * 1000)
             }
-            return this.historyTable[index]
         }
 
-        static get() {
-            let tableStr = localStorage.getItem(this.tableName) || "[]"
-            this.historyTable = JSON.parse(tableStr)
-            return this.historyTable
+        static saveToDbV2() {
+            // 手动持久化,有数据变更时
+            this.historyTable = History.filterRepeat(this.historyTable).slice(0, 10)
+            if (localStorage.getItem(this.tableName) !== JSON.stringify(this.historyTable)) {
+                console.log(localStorage.getItem(this.tableName), JSON.stringify(this.historyTable))
+                localStorage.setItem(this.tableName, JSON.stringify(this.historyTable));
+            }
+        }
+
+        static instance() {
+            this.saveToDb();
+            if (this.historyTable === undefined || this.historyTable.length === 0) {
+                let tmp = JSON.parse(localStorage.getItem(this.tableName));
+                if (tmp) {
+                    this.historyTable = tmp;
+                }
+            }
+            return this.historyTable;
+        }
+
+        static save(data) {
+            // 1、使用splice()方法（数组中间）；2、使用push() 方法（数组末尾）3、使用unshift() 方法（数组开头）
+            this.instance().unshift(data); // 去重添加
+            // this.saveToDbV2() // 入库
+        }
+
+        static filterRepeat(arr) {
+            // 数组去重 -- 对象数组去重
+            let newArr = []
+            for (let a of arr) {
+                let flag = false
+                for (let b of newArr) {
+                    if (History.isObjectEqual(a, b)) {
+                        flag = true
+                    }
+                }
+                if (flag === false) {
+                    newArr.push(a)
+                }
+            }
+            return newArr;
+        }
+
+        static isObjectEqual(obj1, obj2) {
+            const obj1Keys = Object.keys(obj1);
+            const obj2Keys = Object.keys(obj2);
+
+            if (obj1Keys.length !== obj2Keys.length) {
+                return false;
+            }
+
+            for (let key of obj1Keys) {
+                if (obj1[key] !== obj2[key]) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
-    let t = new Vue(
+    new Vue(
         {
             el: '#app',
             data: {
@@ -100,18 +154,20 @@
                 sql_history: [
                     new History()
                 ],
-                history: new History()
+                history: new History(),
+                dialogVisible: false,
             },
             methods: {
                 remember() {
                     let rowData = new History(this.history.url, this.history.token, this.history.sql, this.need_trans, this.trans_sql);
-                    HistoryTable.add(rowData)
+                    History.save(rowData)
+                    this.sql_history = History.instance()
                 },
                 getHistory(history) {
                     this.history = new History(history.url, history.token, history.sql, history.need_trans, history.trans_sql);
                 },
                 init() {
-                    this.sql_history = HistoryTable.get()
+                    this.sql_history = History.instance()
                     if (this.sql_history.length > 0) {
                         let history = this.sql_history[0];
                         this.history = new History(history.url, history.token, history.sql, history.need_trans, history.trans_sql);
@@ -125,6 +181,7 @@
                         upperSql = upperSql.slice(0, index) + "__FRO2__" + upperSql.slice(index + 4)
                         this.history.trans_sql = this.history.trans_sql.slice(0, index) + "__FRO2__" + this.history.trans_sql.slice(index + 4)
                     }
+                    this.dialogVisible = true
                 },
                 async searchData() {
                     this.remember()
@@ -132,10 +189,12 @@
                     if (this.history.need_trans) {
                         data.sql = this.history.trans_sql
                     }
-                    let res = await this.post(this.history.url, data)
-                    this.tableData = res.data.data
-                    let obj = this.tableData[0]
-                    this.header = Object.keys(obj)
+                    if (this.history.url) {
+                        let res = await this.post(this.history.url, data)
+                        this.tableData = res.data.data
+                        let obj = this.tableData[0]
+                        this.header = Object.keys(obj)
+                    }
                 },
                 labelHead(h, {column, index}) { //动态表头渲染
                     //let l = column.label.length;
@@ -189,6 +248,10 @@
         padding: 0;
     }
 
+    html {
+        font-size: 16px;
+    }
+
     #app {
         min-height: 100%;
 
@@ -197,14 +260,16 @@
 
     .nav {
         width: 20rem;
+        margin: 1rem;
     }
 
     .body {
         width: 100%;
+        padding: 1rem;
     }
 
     .historyList {
-        width: 20%;
+        width: 100%;
         border: #0b9ef2 solid 1px;
         height: 300px;
     }
@@ -213,6 +278,10 @@
         width: 100%;
         border: aquamarine solid 1px;
         margin: 1px;
+    }
+
+    .table {
+        border: #0b9ef2 solid 1px;
     }
 </style>
 </html>
