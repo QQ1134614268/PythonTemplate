@@ -1,0 +1,8 @@
+{% for row in list %}
+export const {{row.tableConst}}_API = '/api/{{row.tableLowerCaml}}';
+export const {{row.tableConst}}_CREATE_API = "/api/{{row.tableLowerCaml}}/create";
+export const {{row.tableConst}}_PAGE_API = "/api/{{row.tableLowerCaml}}/getPage";
+export const {{row.tableConst}}_UPDATE_API = "/api/{{row.tableLowerCaml}}/updateById";
+export const {{row.tableConst}}_DELETE_API = "/api/{{row.tableLowerCaml}}/deleteById";
+export const {{row.tableConst}}_DELETE_BATCH_API = "/api/{{row.tableLowerCaml}}/deleteByIds";
+{% endfor %}

@@ -1,0 +1,13 @@
+{% for row in list %}
+export const {{row.tableConst}}_URL = '/{{row.tableUpperCaml}}';
+{% endfor %}
+
+const routes = [
+    {% for row in list %}
+    {
+        path: {{row.tableConst}}_URL,
+        component: () => import('@/views/{{row.tableUpperCaml}}'),
+    },
+    {% endfor %}
+];
+export default routes;
