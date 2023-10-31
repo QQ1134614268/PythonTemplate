@@ -10,13 +10,10 @@ from dataclasses import dataclass
 #   自定义无参 init 需要在field中实例化
 
 
-@dataclass()
+@dataclass
 class Person:
-    def __init__(self):
-        self.dd = 2  # 可以被提示
-
-    aaa: str = 123  # 可以被提示
-    name: str = "tom"
+    _id: int = 1
+    name: str = "tom"  # 可以被提示
     age: int = 22
 
     @property
@@ -29,6 +26,5 @@ class Person:
 
 
 if __name__ == '__main__':
-    aa = Person.get_instance()
-    print(aa)
-    print(aa.name)
+    print(Person.get_instance())
+    print(Person(_id=3, name="123", age=12))
