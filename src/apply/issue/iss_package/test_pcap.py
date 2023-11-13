@@ -50,7 +50,7 @@ class TestPcap(TestCase):
     # 抓包
     def test_to_file(self):
         package = sniff(iface='WLAN', timeout=10)
-        wrpcap("test.pcap", package)  # 将抓取的包保存为test.pcap文件
+        wrpcap("data/test.pcap", package)  # 将抓取的包保存为test.pcap文件
 
         # 过滤报文
         # sniff(iface='WLAN', timeout=10, filter="tcp port 80", prn=lambda x: x.sprintf("{IP:%IP.src% -> %IP.dst%}"))
@@ -72,7 +72,7 @@ class TestPcap(TestCase):
 
     def test_read_file(self):
         field = 'dst=00:0c:29:d9:98:c7'
-        pkts = rdpcap("test.pcap")
+        pkts = rdpcap("data/test.pcap")
         for packet in pkts:
             if packet.haslayer('DHCP6_Solicit'):
                 packet_text = repr(packet)
