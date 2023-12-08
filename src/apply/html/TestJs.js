@@ -52,7 +52,7 @@ console.log(Object.is(obj1, obj3)); // true
 console.log(obj1 === obj2); // false
 console.log(obj1 === obj3); // true
 
-const arr = [{"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}, {"sql": "fffffffddffff"}];
+const arr = [{"sql": "ff"}, {"sql": "ff"}, {"sql": "ff"}];
 
 console.log(Array.from(new Set(arr)));
 console.log(filterRepeat(arr));
