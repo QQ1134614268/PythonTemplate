@@ -1,9 +1,8 @@
+参考: https://blog.csdn.net/u011374856/article/details/124802856
 
 zlm:
-    参考: https://blog.csdn.net/u011374856/article/details/124802856
     docker run -id -p 1935:1935 -p 8080:80 -p 8443:443 -p 8554:554 -p 10000:10000 -p 10000:10000/udp -p 8000:8000/udp -p 9000:9000/udp zlmediakit/zlmediakit:master
-    
-    docker run -d -p 1935:1935 -p 8080:80 -p 8443:443 -p 8554:554 -p 10000:10000 -p 10000:10000/udp -p 8000:8000/udp \
+    docker run -d -p 8080:80 -p 8443:443 -p 8554:554 -p 1935:1935 -p 8000:8000 -p 9000:9000 -p 10000:10000\
         -v /home/docker/zlmediakit/media/bin:/opt/media/bin \
         -v /home/docker/zlmediakit/media/conf:/opt/media/conf \
         --name zlmediakit \
@@ -26,15 +25,18 @@ zlm:
             http://159.75.92.195:8080/live/test/hls.m3u8
             http://159.75.92.195:8080/live/test.live.ts
             http://159.75.92.195:8080/live/test.live.mp4
-              
+            
             http://159.75.92.195:8080/index/api/webrtc?app=live&stream=test&type=play
+            https://159.75.92.195:8443/index/api/webrtc?app=live&stream=test&type=play
     h265:
-        转码: D:\dev\ffmpeg\bin\ffmpeg -i D:\桌面文件夹\1080p.mp4 -vcodec libx265 -preset slow -b:v 2000k -crf 21 -strict -2 D:\桌面文件夹\out.1080p.h265.mp4
-
+        - 转码: D:\dev\ffmpeg\bin\ffmpeg -i D:\桌面文件夹\1080p.mp4 -vcodec libx265 -preset slow -b:v 2000k -crf 21 -strict -2 D:\桌面文件夹\out.1080p.h265.mp4
+        - D:\dev\ffmpeg\bin\ffmpeg -re -stream_loop -1 -i D:\桌面文件夹\out.1080p.h265.mp4 -c copy -f flv rtmp://159.75.92.195/live/test
+    h265格式视频，webrtc播放异常，提示必须确保最少有一个活跃的track bug:
+        因为webrtc不支持H265, zlm会忽略浏览器声明不支持的track，如果都是浏览器不支持的，那么就会报你所说的错误。
 播放器:
     jessibuca:
-    h265web.js:
-        地址:   http://ggok.top:8080/live/123456
+    h265web.js: 不支持webrtc
+
     metaRTC: 全国产纯c webrtc sdk
 
 QA:
