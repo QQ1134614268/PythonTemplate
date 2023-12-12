@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>webRtc</title>
+
+    <script src="../js/vue.2.6.12.js"></script>
+    <script src="../js/element-ui.index.js"></script>
+    <link href="../css/element.index.css" rel="stylesheet">
+
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
@@ -24,7 +29,7 @@
             <el-button @click="pause">停止</el-button>
             <el-button @click="destroy">销毁</el-button>
         </el-form>
-        <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
+        <pre>{{ JSON.stringify(videoInfo, null, 2) }}</pre>
     </div>
     <el-form style="width: 30%; display: flex; flex-wrap: wrap">
         <el-form-item label="浏览器配置:" style="width: 30rem">

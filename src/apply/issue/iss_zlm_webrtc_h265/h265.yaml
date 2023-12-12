@@ -1,0 +1,42 @@
+
+zlm:
+    参考: https://blog.csdn.net/u011374856/article/details/124802856
+    docker run -id -p 1935:1935 -p 8080:80 -p 8443:443 -p 8554:554 -p 10000:10000 -p 10000:10000/udp -p 8000:8000/udp -p 9000:9000/udp zlmediakit/zlmediakit:master
+    
+    docker run -d -p 1935:1935 -p 8080:80 -p 8443:443 -p 8554:554 -p 10000:10000 -p 10000:10000/udp -p 8000:8000/udp \
+        -v /home/docker/zlmediakit/media/bin:/opt/media/bin \
+        -v /home/docker/zlmediakit/media/conf:/opt/media/conf \
+        --name zlmediakit \
+        zlmediakit/zlmediakit:master 
+    
+    mkdir -p /home/docker/zlmediakit && chmod 777 /home/docker/zlmediakit
+    docker cp -a zlmediakit:/opt/media /home/docker/zlmediakit
+    docker rm -f zlmediakit
+    docker logs -f zlmediakit
+    docker restart zlmediakit
+推流:
+    h264 1080p:
+        - D:\dev\ffmpeg\bin\ffmpeg -re -stream_loop -1 -i D:\桌面文件夹\1080p.mp4 -c copy -f flv rtmp://159.75.92.195/live/test
+        - http://159.75.92.195:8080/live/test.live.mp4
+        - D:\dev\ffmpeg\bin\ffplay rtmp://159.75.92.195/live/test
+        - D:\dev\ffmpeg\bin\ffprobe -v quiet -print_format json -show_streams D:\桌面文件夹\1080p.mp4
+        - 地址规则: rtsp://127.0.0.1/live/test
+            rtsp://159.75.92.195/live/test
+            rtmp://159.75.92.195/live/test
+            http://159.75.92.195:8080/live/test/hls.m3u8
+            http://159.75.92.195:8080/live/test.live.ts
+            http://159.75.92.195:8080/live/test.live.mp4
+              
+            http://159.75.92.195:8080/index/api/webrtc?app=live&stream=test&type=play
+    h265:
+        转码: D:\dev\ffmpeg\bin\ffmpeg -i D:\桌面文件夹\1080p.mp4 -vcodec libx265 -preset slow -b:v 2000k -crf 21 -strict -2 D:\桌面文件夹\out.1080p.h265.mp4
+
+播放器:
+    jessibuca:
+    h265web.js:
+        地址:   http://ggok.top:8080/live/123456
+    metaRTC: 全国产纯c webrtc sdk
+
+QA:
+  1. Your ip is not allowed to access the service.
+    设置: allow_ip_range
