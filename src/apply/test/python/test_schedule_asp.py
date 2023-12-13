@@ -3,7 +3,6 @@ import unittest
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.schedulers.background import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
-from pytz import timezone
 
 
 class TestScheduleAsp(unittest.TestCase):
@@ -18,8 +17,7 @@ class TestScheduleAsp(unittest.TestCase):
         }
 
         # 实例调度器对象
-        scheduler = BlockingScheduler(executors=executors, job_defaults=job_defaults,
-                                      timezone=timezone('Asia/Shanghai'))
+        scheduler = BlockingScheduler(executors=executors, job_defaults=job_defaults)
         # 每分钟第30秒执行一次 # trigger = ``date``, ``interval`` or ``cron``
         scheduler.add_job(func=TestScheduleAsp.job, trigger=CronTrigger(second=30))
 

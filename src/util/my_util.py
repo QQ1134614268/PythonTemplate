@@ -10,7 +10,6 @@ import string
 from base64 import b64encode, b64decode
 from binascii import b2a_base64, a2b_base64
 
-from openpyxl.utils import get_column_letter, column_index_from_string
 from sqlalchemy import insert
 
 from config.time_conf import DATE_TIME_FORMAT
@@ -230,14 +229,6 @@ class ExcelUtil:
                 for j in range(a, c + 1):
                     merged_cells.append((i, j))
         return merged_cells
-
-    @staticmethod
-    def get_column_letter(num):
-        return get_column_letter(num)
-
-    @staticmethod
-    def column_index_from_string(txt):
-        return column_index_from_string(txt)
 
     @staticmethod
     def get_data(cell, row_start, row_end, col_start, col_end):

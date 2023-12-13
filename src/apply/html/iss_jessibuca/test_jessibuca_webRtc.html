@@ -13,7 +13,7 @@
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
     <script src="../js/axios.js"></script>
-    <script src="gb28181.js"></script>
+    <script src="./gb28181.js"></script>
 </head>
 <body>
 <div id="app">
@@ -39,8 +39,7 @@
                 <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
                 <el-checkbox value="false" disabled> 支持Webcodecs H265解码(不一定准确)；</el-checkbox>
                 <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
-                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)
-                </el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
             </div>
         </el-form-item>
     </el-form>
@@ -55,6 +54,7 @@
                         // 基础, 调试
                         debug: true,
                         debugLevel: 'debug',
+                        container: document.getElementById('container'),
                         heartTimeout: 10, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
                         heartTimeoutReplayUseLastFrameShow: true,
                         audioEngine: "worklet", // 多路 ??

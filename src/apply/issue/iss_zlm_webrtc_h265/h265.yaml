@@ -28,6 +28,10 @@ zlm:
             
             http://159.75.92.195:8080/index/api/webrtc?app=live&stream=test&type=play
             https://159.75.92.195:8443/index/api/webrtc?app=live&stream=test&type=play
+              
+            webrtc://159.75.92.195:8080/index/api/webrtc?app=live&stream=test&type=play
+            webrtc://159.75.92.195:8443/index/api/webrtc?app=live&stream=test&type=play
+
     h265:
         - 转码: D:\dev\ffmpeg\bin\ffmpeg -i D:\桌面文件夹\1080p.mp4 -vcodec libx265 -preset slow -b:v 2000k -crf 21 -strict -2 D:\桌面文件夹\out.1080p.h265.mp4
         - D:\dev\ffmpeg\bin\ffmpeg -re -stream_loop -1 -i D:\桌面文件夹\out.1080p.h265.mp4 -c copy -f flv rtmp://159.75.92.195/live/test

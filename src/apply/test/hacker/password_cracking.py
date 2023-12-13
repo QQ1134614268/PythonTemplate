@@ -4,8 +4,6 @@ from itertools import chain
 from typing import List
 from zipfile import ZipFile
 
-from tqdm import tqdm
-
 
 def all_passwd(dictionary: List[str], max_len: int):
     # 返回由 dictionaries 中字符组成的所有长度为 max_len 的字符串
@@ -34,7 +32,8 @@ def extract(zip_file: ZipFile, pwd: str) -> bool:
     # 用 bool 类型的返回值告诉主程序是否破解成功 (意思就是返回 True 了以后就停止)
 
 
-if __name__ == '__main__':
+def method_name():
+    global start, total
     start = time.time()
     # chr(97) -> 'a' 这个变量保存了密码包含的字符集
     dictionaries = [chr(i) for i in chain(range(97, 123), range(65, 91), range(48, 58))]  # 0 - 9
@@ -43,6 +42,11 @@ if __name__ == '__main__':
     total = sum(len(dictionaries) ** k for k in lengths)  # 密码总数
     file_name = 'test.zip'
     zip_file2 = ZipFile(file_name, 'r')  # 很像open
-    for pwd2 in tqdm(chain.from_iterable(all_passwd(dictionaries, max_len) for max_len in lengths), total=total):
-        if extract(zip_file2, pwd2):  # 记得extract函数返回的是bool类型的哦
-            break
+    for max_len in lengths:
+        for pwd2 in all_passwd(dictionaries, max_len):
+            if extract(zip_file2, pwd2):  # 记得extract函数返回的是bool类型的哦
+                return True
+
+
+if __name__ == '__main__':
+    method_name()

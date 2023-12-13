@@ -174,7 +174,7 @@
                     isSupportWCS: checkSupportWCS(),
                     isSupportWasm: checkSupportWasm(),
                     isSupportSIMD: checkSupportSIMD(),
-                    isSupportGpu: 'gpu' in navigator,
+                    isSupportGpu: checkSupportGpu(),
                 };
             },
             mounted() {
