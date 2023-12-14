@@ -77,21 +77,17 @@
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.5/axios.js"></script>
 <script type="module">
-const getCacheConfig = (headers) => ({
-  method: 'get',
-  url: 'http://localhost:3009/has/cache',
-  headers,
-})
-
-const sendCacheRequest = async (hasCacheConfig, ele) => {
-  await axios(hasCacheConfig)
-  .then(function (response) {
+function getCacheConfig(headers){
+     return {
+      method: 'get',
+      url: 'http://localhost:3009/has/cache',
+      headers,
+    }
+  }
+async function sendCacheRequest(hasCacheConfig, ele){
+    let response = await axios(hasCacheConfig);
     $(`${ele} .txt`).text(response.data.txt);
     $(`${ele} .timestamps`).text(response.data.timestamps);
-  })
-  .catch(function (error) {
-    console.log(error);
-  });
 }
 
 sendCacheRequest(getCacheConfig(), '.cache');
