@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.5/axios.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="title">接口缓存DEMO</div>
+    <div class="cache item" v-for="(item,index) in headers" :key="index">
+        <div class="des">请求头Cache-Control字段设置为 {{ item.type }}</div>
+        <el-button @click="submit(item)">点我发送接口请求</el-button>
+        <div>
+            <span class="txt">{{ item.txt }}</span>
+            <span class="timestamps">{{ item.timestamps }}</span>
+        </div>
+    </div>
+</div>
+<script>
+    let v = new Vue(
+        {
+            el: '#app',
+            data: {
+                headers: [
+                    {type: 'max-age:0', timestamps: '',},
+                    {type: 'max-age:5', timestamps: '',},
+                    {type: 'no-store', timestamps: '',},
+                    {type: 'max-age=3, must-revalidate', timestamps: '',},
+                    {type: 'public', timestamps: '',},
+                ]
+            },
+            methods: {
+                async submit(row) {
+                    let url = 'http://localhost:3009/has/cache';
+                    let params = {
+                        // 'Cache-Control': row.type,
+                    };
+                    let headers = {
+                        'Cache-Control': row.type,
+                    };
+                    let res = await this.get(url, params,headers)
+                    row.txt = res.data.txt
+                    row.timestamps = res.data.timestamps
+                },
+                get(url, params = {}, headers = {}) {
+                    return new axios({
+                            method: 'GET',
+                            url: url,
+                            params: params,
+                            headers: headers,
+                        }
+                    );
+                },
+            },
+        }
+    );
+</script>
+</body>
+<style>
+    .title {
+        font-size: 20px;
+        width: 390px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .cache .txt,
+    .no-cache .txt {
+        display: inline-block;
+        width: 269px;
+        border-bottom: 1px dashed #eee;
+    }
+
+    .request-wrap .item {
+        padding: 20px 0;
+        border-bottom: 1px dashed #eee;
+        height: 100px;
+    }
+
+    .item .timestamps {
+        font-size: 26px;
+        font-weight: bold;
+    }
+
+    .request-wrap .item div {
+        margin: 8px auto;
+    }
+</style>
+</html>
