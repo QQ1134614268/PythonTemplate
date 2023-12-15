@@ -48,13 +48,6 @@
                         alert("浏览器不支持flvjs")
                     }
                 },
-
-                post(url, params, data) {
-                    return new axios({method: 'POST', url: url, params: params, data: data});
-                },
-                get(params, url) {
-                    return new axios({method: 'GET', url: url, params: params})
-                },
             },
         }
     );

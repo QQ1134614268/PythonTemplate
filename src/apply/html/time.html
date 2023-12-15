@@ -32,12 +32,6 @@
                     this.time = `${hour}-${m}-${s}.${ms}`
                     setTimeout(this.init, 10)
                 },
-                post(url, params, data) {
-                    return new axios({method: 'POST', url: url, params: params, data: data});
-                },
-                get(params, url) {
-                    return new axios({method: 'GET', url: url, params: params});
-                },
             },
             created() {
                 this.init()

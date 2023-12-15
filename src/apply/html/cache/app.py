@@ -35,9 +35,9 @@ def has_cache():
         'txt': '被缓存的数据, 服务端生成时间戳为：',
         'timestamps': datetime.datetime.now()
     })
-    cache_control_header = request.args.get('Cache-Control') or request.headers.get('Cache-Control')
-    if cache_control_header:
-        response.headers['Cache-Control'] = cache_control_header
+    res_cache = request.args.get('resCache') or request.headers.get('resCache')
+    if res_cache:
+        response.headers['Cache-Control'] = res_cache
 
     if request.args.get('lastModified') or request.headers.get('lastModified'):
         response.headers['Cache-Control'] = 'no-cache'
@@ -47,12 +47,10 @@ def has_cache():
         response.headers['Cache-Control'] = 'no-cache'
         response.headers['Etag'] = request.args.get('Etag') or request.headers.get('Etag')
 
-    #                 If-None-Match:协商缓存; 请求时携带 Etag的值; 优先级高于if-modified-since; 缓存有效服务器响应304;
-    #                 if-modified-since:协商缓存; 请求时携带Last-modified的值; 缓存有效服务器响应304;
-
+    # 模拟协商缓存,返回304
     if request.headers.get('status'):
         response.headers['Last-Modified'] = 'Thu, 14 Dec 2023 22:22:22 GMT'
-        return response, 304
+        return response, request.headers.get('status')
 
     return response
 

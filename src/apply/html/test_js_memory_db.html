@@ -204,10 +204,10 @@
                     return h('span', {class: 'table-head', style: {width: '100%'}}, [column.label])
                 },
                 post(url, data) {
-                    return new axios({method: 'POST', url: url, data: data});
+                    return axios.post(url, {data: data});
                 },
                 get(params, url) {
-                    return new axios({method: 'GET', url: url, params: params});
+                    return axios.get(url, {params: params});
                 },
             },
             created() {

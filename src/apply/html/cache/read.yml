@@ -15,18 +15,20 @@
     Expires: HTTP/1.0; 如果客户端的时间小于Expires的值时，直接使用缓存结果;
 
     Cache-Control(HTTP/1.1):
-        Request中:
-            Cache-control:no-cache 浏览器不使用缓存
+        Request中(强制取最新数据):
+            Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache)
+            Cache-control:max-age=0
         Response中:
             Cache-Control:public,max-age=5        客户端和代理服务器都可缓存;缓存5秒
             Cache-Control:private,max-age=5      客户端可以缓存; 默认值;缓存5秒
             Cache-Control:s-maxage=xxx  代理服务器缓存; 如果在其有效期内，不去访问CDN等。s-maxage会覆盖 max-age 和 Expires
             Cache-Control:max-age=xxx   缓存内容将在xxx秒后失效; 根据本地时间Date?? 优先级高于 Expires
-            Cache-Control:max-age=60,must-revalidate	优先max-age; must-revalidate- 失效后重新请求, 需要200, 返回304无效
+            Cache-Control:max-age=60,must-revalidate	优先max-age; must-revalidate- 重新请求, 需要200, 返回304无效
             Cache-Control:no-cache      客户端缓存; 协商验证
-                If-None-Match:协商缓存; 请求时携带 Etag的值; 优先级高于if-modified-since; 缓存有效服务器响应304;
-                if-modified-since:协商缓存; 请求时携带Last-modified的值; 缓存有效服务器响应304;
             Cache-Control:no-store      不缓存
+        协商缓存no-cache:
+            If-None-Match:协商缓存; 请求时携带 Etag的值; 优先级高于If-Modified-Since; 缓存有效服务器响应304;
+            If-Modified-Since:协商缓存; 请求时携带Last-modified的值; 缓存有效服务器响应304;
 
     隐式缓存(启发式): 没有Cache-Control, 但是有 Last-Modified, Date
 备注:
@@ -42,7 +44,7 @@ chrome 大小字段:
 用户行为对浏览器缓存的影响:
     打开网页，地址栏输入地址： 查找 disk cache 中是否有匹配。如有则使用；如没有则发送网络请求。
     普通刷新 (F5)：因为 TAB 并没有关闭，因此 memory cache 是可用的，会被优先使用(如果匹配的话)。其次才是 disk cache。
-    强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有 Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache),服务器直接返回 200 和最新内容。
+    强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有Cache-control:max-age=0,服务器直接返回 200 和最新内容。
 
 nginx配置:
     - expires 1d;
@@ -55,3 +57,13 @@ nginx配置:
         etag off|on;
     # more_clear_headers 'Content-Type'; 清理header
 
+axios:
+    304: 报错, 不能解析;
+    max-age=5,must-revalidate:
+        第一次: 返回200
+        非第一次强制返回304:
+            先走 max-age 强缓存: 缓存200;
+            强缓存失效: 返回304,不能解析; must-revalidate 重新请求, 304无效 ??;
+            再次出发max-age强缓存: 缓存的304
+浏览器协商缓存:
+    携带If-None-Match,If-Modified-Since: 如果缓存的是200, 浏览器状态码200,不置灰, size 大小不同
