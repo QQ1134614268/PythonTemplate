@@ -19,7 +19,7 @@ zlm:
         - http://159.75.92.195:8080/live/test.live.mp4
         - D:\dev\ffmpeg\bin\ffplay rtmp://159.75.92.195/live/test
         - D:\dev\ffmpeg\bin\ffprobe -v quiet -print_format json -show_streams D:\桌面文件夹\1080p.mp4
-        - 地址规则: rtsp://127.0.0.1/live/test
+        - zlm地址规则: rtsp://127.0.0.1/live/test
             rtsp://159.75.92.195/live/test
             rtmp://159.75.92.195/live/test
             http://159.75.92.195:8080/live/test/hls.m3u8

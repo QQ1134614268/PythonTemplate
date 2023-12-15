@@ -10,7 +10,7 @@ class TestNginx(TestCase):
     dirs_list = ['dir1', 'dir2', 'dir3']
     file_list = ['index.html', 'index.txt']
     conf_path = r'D:/dev/nginx-1.22.0/conf/nginx.conf'
-    host = 'http://localhost:20080'
+    host = 'http://localhost:20080/proxy2'
 
     def test_init_file(self):
         """dir1 有文件, dir2 空, dir3 不存在"""
@@ -34,17 +34,12 @@ class TestNginx(TestCase):
             # print('files', files)
 
     def test_nginx_index(self):
-        path_list = ['']
-        for d in self.dirs_list:
-            path_list.append(f'/{d}')
-            for d2 in self.file_list:
-                path_list.append(f'/{d}/{d2}')
-        # print(all_file)
+        path_list = self.get_uri()
 
         with open(self.conf_path, encoding='utf-8', mode='r') as f:
             lines = f.readlines()
 
-        index_files = ['/index.html', 'index.html']
+        index_files = ['/index.txt', 'index.txt']
         for index in index_files:
             lines[102] = f'\t\t\tindex {index};\n'
             lines[103] = f'\t\t\t# #\n'
@@ -58,20 +53,27 @@ class TestNginx(TestCase):
                 print(index, url,
                       res.text.replace(self.root, '').replace("\\", '/') if res.status_code == 200 else res.status_code)
 
+    def get_uri(self):
+        path_list = []
+        for l in ['', '/']:
+            path_list.append(f'{l}')
+            for d in self.dirs_list:
+                path_list.append(f'/{d}{l}')
+                for d2 in self.file_list:
+                    path_list.append(f'/{d}/{d2}{l}')
+        # print(all_file)
+        return path_list
+
     def test_nginx_try_files(self):
-        path_list = ['']
-        for d in self.dirs_list:
-            path_list.append(f'/{d}')
-            for d2 in self.file_list:
-                path_list.append(f'/{d}/{d2}')
+        path_list = self.get_uri()
 
         with open(self.conf_path, encoding='utf-8', mode='r') as f:
             lines = f.readlines()
 
         try_files = ['$uri', '$uri/', '$uri/index.txt', '/index.html', 'index.html']  # todo
         for try_file in try_files:
-            lines[102] = f'\t\t\tindex index.html;\n'
-            lines[103] = f'\t\t\ttry_files {try_file} index.html;\n'  # -- todo
+            lines[102] = f'\t\t\t# index index.html;\n'
+            lines[103] = f'\t\t\ttry_files {try_file} index.html; \n'  # -- todo
             with open(self.conf_path, encoding='utf-8', mode='w') as f:
                 f.writelines(lines)
             os.system(r'D: && cd D:\dev\nginx-1.22.0\ && nginx -s reload')

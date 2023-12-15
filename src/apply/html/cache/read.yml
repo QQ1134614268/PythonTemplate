@@ -15,8 +15,8 @@
     Expires: HTTP/1.0; 如果客户端的时间小于Expires的值时，直接使用缓存结果;
 
     Cache-Control(HTTP/1.1):
-        Request中(强制取最新数据):
-            Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache)
+        Request中:
+            Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache), 强制取最新数据
             Cache-control:max-age=0
         Response中:
             Cache-Control:public,max-age=5        客户端和代理服务器都可缓存;缓存5秒
@@ -44,7 +44,9 @@ chrome 大小字段:
 用户行为对浏览器缓存的影响:
     打开网页，地址栏输入地址： 查找 disk cache 中是否有匹配。如有则使用；如没有则发送网络请求。
     普通刷新 (F5)：因为 TAB 并没有关闭，因此 memory cache 是可用的，会被优先使用(如果匹配的话)。其次才是 disk cache。
-    强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有Cache-control:max-age=0,服务器直接返回 200 和最新内容。
+    强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有Cache-control:max-age=0,返回304
+    禁用缓存:Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache),服务器直接返回 200 和最新内容。
+
 
 nginx配置:
     - expires 1d;
