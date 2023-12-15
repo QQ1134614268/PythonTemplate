@@ -1,14 +1,9 @@
 function post(url, data) {
-    return new axios({
-        method: 'POST', url: url, // params: data,
-        data: data
-    })
+    return new axios({method: 'POST', url: url, data: data});
 }
 
-function get(url, data) {
-    return new axios({
-        method: 'GET', url: url, params: data
-    })
+function get(url, params) {
+    return new axios({method: 'GET', url: url, params: params});
 }
 
 function getDevice(params) {

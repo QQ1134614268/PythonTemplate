@@ -1,6 +1,6 @@
 
 缓存过程:
-    1. 查本地缓存
+    1. 查本地缓存, url和body相同
     2. 命中强缓存,未过期,直接使用;
     3. 命中协商缓存,发送请求(last-modified,etag); 304- 使用缓存; 200- 使用返回数据,更新资源 
     4. 没有缓存,从服务端获取资源
@@ -14,20 +14,21 @@
     pragma: HTTP/1.0; Request中, 表明不想获取缓存
     Expires: HTTP/1.0; 如果客户端的时间小于Expires的值时，直接使用缓存结果;
 
-    cache-control(HTTP/1.1;):
+    Cache-Control(HTTP/1.1):
         Request中:
             Cache-control:no-cache 浏览器不使用缓存
         Response中:
-            Cache-Control:public        客户端和代理服务器都可缓存; 配合Expires??
-            Cache-Control:private       客户端可以缓存; 默认值; 配合Expires??
+            Cache-Control:public,max-age=5        客户端和代理服务器都可缓存;缓存5秒
+            Cache-Control:private,max-age=5      客户端可以缓存; 默认值;缓存5秒
             Cache-Control:s-maxage=xxx  代理服务器缓存; 如果在其有效期内，不去访问CDN等。s-maxage会覆盖 max-age 和 Expires
             Cache-Control:max-age=xxx   缓存内容将在xxx秒后失效; 根据本地时间Date?? 优先级高于 Expires
-            Cache-Control:max-age=60,must-revalidate	告诉浏览器、缓存服务器，本地副本过期前，可以使用本地副本；本地副本一旦过期，必须去源服务器进行有效性校验
+            Cache-Control:max-age=60,must-revalidate	优先max-age; must-revalidate- 失效后重新请求, 需要200, 返回304无效
             Cache-Control:no-cache      客户端缓存; 协商验证
+                If-None-Match:协商缓存; 请求时携带 Etag的值; 优先级高于if-modified-since; 缓存有效服务器响应304;
+                if-modified-since:协商缓存; 请求时携带Last-modified的值; 缓存有效服务器响应304;
             Cache-Control:no-store      不缓存
-    If-None-Match: 协商缓存; 请求时携带 Etag的值; 优先级高于if-modified-since; 缓存有效服务器响应304;
-    if-modified-since: 协商缓存; 请求时携带Last-modified的值; 缓存有效服务器响应304;
 
+    隐式缓存(启发式): 没有Cache-Control, 但是有 Last-Modified, Date
 备注:
     1. 强缓存: 不会向服务器发送请求，直接从缓存中读取资源。
     2. 弱缓存: 验证后使用
@@ -44,8 +45,13 @@ chrome 大小字段:
     强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有 Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache),服务器直接返回 200 和最新内容。
 
 nginx配置:
-    expires 1d;
-    Cache-Control: max-age=172800
-    Expires: Sat, 28 Oct 2023 13:37:58 GMT
-    add_header cache control: no cache
-        304
+    - expires 1d;
+    - add_header Cache-Control max-age=3600;
+
+    - 开启 Last-Modified:
+        if_modified_since off|on;
+        add_header  Last-Modified $date_gmt;
+    - 开启 Last-Modified:
+        etag off|on;
+    # more_clear_headers 'Content-Type'; 清理header
+

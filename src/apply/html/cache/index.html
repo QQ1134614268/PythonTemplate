@@ -14,11 +14,12 @@
 <div id="app">
     <div class="title">接口缓存DEMO</div>
     <div class="cache item" v-for="(item,index) in headers" :key="index">
-        <div class="des">请求头Cache-Control字段设置为 {{ item.type }}</div>
+        <div class="des">请求头Cache-Control字段设置为 {{ item.type }} {{ item.status }}</div>
         <el-button @click="submit(item)">点我发送接口请求</el-button>
         <div>
             <span class="txt">{{ item.txt }}</span>
             <span class="timestamps">{{ item.timestamps }}</span>
+            <span class="timestamps" v-if="item.res ">{{ item.res.status }}</span>
         </div>
     </div>
 </div>
@@ -31,31 +32,44 @@
                     {type: 'max-age=0', timestamps: ''},
                     {type: 'max-age=5', timestamps: ''},
                     {type: 'no-store', timestamps: ''},
-                    {type: 'max-age=3, must-revalidate', timestamps: ''},
-                    {type: 'public', timestamps: ''},
+                    {type: 'max-age=5,must-revalidate', timestamps: ''},
+                    // {type: 'max-age=5,must-revalidate', timestamps: '', status: 304}, // 验证 must-revalidate 304
+                    {type: 'must-revalidate', timestamps: ''},
+                    {type: 'public,max-age=5', timestamps: ''},
+                    {type: 'no-cache', lastModified: 'Wed, 21 Oct 2015 07:28:00 GMT', timestamps: ''},
+                    {type: 'no-cache', lastModified: 'Wed, 21 Oct 2015 07:28:00 GMT', timestamps: '', status: 304},
+                    {type: 'no-cache', Etag: '33a64df551425fcc55e4d42a148795d9f25f89d4', timestamps: ''},
+                    {type: 'no-cache', Etag: '33a64df551425fcc55e4d42a148795d9f25f89d4', timestamps: '', status: 304},
                 ]
             },
             methods: {
                 async submit(row) {
                     let url = 'http://localhost:3009/has/cache';
                     let params = {
-                        // 'Cache-Control': row.type,
-                    };
-                    let headers = {
                         'Cache-Control': row.type,
                     };
-                    let res = await this.get(url, params,headers)
-                    row.txt = res.data.txt
+                    let headers = {
+                        // random: new Date().getTime()
+                        // 'Cache-Control': row.type,
+                    };
+                    if (row.status) {
+                        headers.status = row.status
+                    }
+                    if (row.lastModified) {
+                        params.lastModified = row.lastModified
+                    }
+                    if (row.Etag) {
+                        params.Etag = row.Etag
+                    }
+                    let res = await this.get(url, params, headers)
                     row.timestamps = res.data.timestamps
+                    row.res = res
                 },
                 get(url, params = {}, headers = {}) {
-                    return new axios({
-                            method: 'GET',
-                            url: url,
-                            params: params,
-                            headers: headers,
-                        }
-                    );
+                    return new axios({method: 'GET', url: url, params: params, headers: headers});
+                },
+                post(url, params = {}, headers = {}, data = {}) {
+                    return new axios({method: 'POST', url: url, params: params, headers: headers, data: data});
                 },
             },
         }

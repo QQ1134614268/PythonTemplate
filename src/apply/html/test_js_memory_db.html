@@ -204,27 +204,10 @@
                     return h('span', {class: 'table-head', style: {width: '100%'}}, [column.label])
                 },
                 post(url, data) {
-                    return new axios({
-                            method: 'POST',
-                            url: url,
-                            // params: data,
-                            data: data,
-                            headers: {
-                                Authorization: this.history.token,
-                            }
-                        }
-                    )
+                    return new axios({method: 'POST', url: url, data: data});
                 },
-                get(data, url) {
-                    return new axios({
-                            method: 'GET',
-                            url: url,
-                            params: data,
-                            headers: {
-                                Authorization: this.history.token,
-                            }
-                        }
-                    )
+                get(params, url) {
+                    return new axios({method: 'GET', url: url, params: params});
                 },
             },
             created() {
