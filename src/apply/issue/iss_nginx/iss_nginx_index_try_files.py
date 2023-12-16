@@ -66,27 +66,24 @@ class TestNginx(TestCase):
     def test_nginx_try_files(self):
         path_list = self.get_uri()
 
-        try_files = ['$uri', '$uri/', '$uri/index.txt', '/index.html', 'index.html']  # todo
+        try_files = ['$uri', '$uri/', '$uri/index.txt', '/index.txt', 'index.txt']
         for try_file in try_files:
             proxy = '/proxy'
-            tpl = f'server {{ listen 20080; location {proxy} {{ alias html; try_files {try_file} index.html; }} }}'
+            tpl = f'server {{ listen 20080; location {proxy} {{ alias html; try_files {try_file} {try_file}; }} }}'
             with open(self.conf_path, encoding='utf-8', mode='w') as f:
                 f.write(tpl)
             os.system(f'D: && cd {self.nginx_dir} && nginx -s reload')
             for path in path_list:
-                url = f'{self.host}{path}'  # todo /结尾
+                url = f'{self.host}{path}'
                 res = requests.get(url)
                 if res.status_code == 404:
                     with open(os.path.join(self.nginx_dir, 'logs/error.log'), mode='r', encoding='utf-8') as f:
                         for i, line in enumerate(f):
                             last = line
-                            arr = re.findall('\"(.*?)\"', last)
-                            if len(arr) == 3 and path in arr[1]:
-                                print(try_file, url, arr[0], 404)
+                    arr = re.findall('\"(.*?)\"', last)
+                    if len(arr) == 3 and path in arr[1]:
+                        print(try_file, url, arr[0], 404)
                 elif res.status_code == 200:
                     print(try_file, url, res.text.replace(self.root, '').replace("\\", '/'))
                 else:
                     print(try_file, url, res.status_code)
-
-    def test_nginx_internal_location(self):
-        pass
