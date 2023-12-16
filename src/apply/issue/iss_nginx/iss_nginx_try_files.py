@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from unittest import TestCase
 
@@ -6,11 +7,12 @@ import requests
 
 
 class TestNginx(TestCase):
-    root = r'D:\dev\nginx-1.22.0\html'
+    nginx_dir = 'D:/dev/nginx-1.17.7'
+    root = os.path.join(nginx_dir, 'html')
+    host = 'http://localhost:20080/proxy'
     dirs_list = ['dir1', 'dir2', 'dir3']
     file_list = ['index.html', 'index.txt']
-    conf_path = r'D:/dev/nginx-1.22.0/conf/nginx.conf'
-    host = 'http://localhost:20080/proxy2'
+    conf_path = os.path.join(nginx_dir, 'conf/test.conf')
 
     def test_init_file(self):
         """dir1 有文件, dir2 空, dir3 不存在"""
@@ -36,16 +38,13 @@ class TestNginx(TestCase):
     def test_nginx_index(self):
         path_list = self.get_uri()
 
-        with open(self.conf_path, encoding='utf-8', mode='r') as f:
-            lines = f.readlines()
-
         index_files = ['/index.txt', 'index.txt']
         for index in index_files:
-            lines[102] = f'\t\t\tindex {index};\n'
-            lines[103] = f'\t\t\t# #\n'
+            proxy = '/proxy'
+            tpl = f'server {{ listen 20080; location {proxy} {{ alias html; index {index}; }} }}'
             with open(self.conf_path, encoding='utf-8', mode='w') as f:
-                f.writelines(lines)
-            os.system(r'D: && cd D:\dev\nginx-1.22.0\ && nginx -s reload')
+                f.write(tpl)
+            os.system(f'D: && cd {self.nginx_dir} && nginx -s reload')
             #  # 访问文件, 目录; 返回结果一样,推测nginx先查文件,如果是目录,走index逻辑
             for path in path_list:
                 url = f'{self.host}{path}'
@@ -67,21 +66,27 @@ class TestNginx(TestCase):
     def test_nginx_try_files(self):
         path_list = self.get_uri()
 
-        with open(self.conf_path, encoding='utf-8', mode='r') as f:
-            lines = f.readlines()
-
         try_files = ['$uri', '$uri/', '$uri/index.txt', '/index.html', 'index.html']  # todo
         for try_file in try_files:
-            lines[102] = f'\t\t\t# index index.html;\n'
-            lines[103] = f'\t\t\ttry_files {try_file} index.html; \n'  # -- todo
+            proxy = '/proxy'
+            tpl = f'server {{ listen 20080; location {proxy} {{ alias html; try_files {try_file} index.html; }} }}'
             with open(self.conf_path, encoding='utf-8', mode='w') as f:
-                f.writelines(lines)
-            os.system(r'D: && cd D:\dev\nginx-1.22.0\ && nginx -s reload')
+                f.write(tpl)
+            os.system(f'D: && cd {self.nginx_dir} && nginx -s reload')
             for path in path_list:
                 url = f'{self.host}{path}'  # todo /结尾
                 res = requests.get(url)
-                print(try_file, url, res.headers.get("URI"),
-                      res.text.replace(self.root, '').replace("\\", '/') if res.status_code == 200 else res.status_code)
+                if res.status_code == 404:
+                    with open(os.path.join(self.nginx_dir, 'logs/error.log'), mode='r', encoding='utf-8') as f:
+                        for i, line in enumerate(f):
+                            last = line
+                            arr = re.findall('\"(.*?)\"', last)
+                            if len(arr) == 3 and path in arr[1]:
+                                print(try_file, url, arr[0], 404)
+                elif res.status_code == 200:
+                    print(try_file, url, res.text.replace(self.root, '').replace("\\", '/'))
+                else:
+                    print(try_file, url, res.status_code)
 
     def test_nginx_internal_location(self):
         pass

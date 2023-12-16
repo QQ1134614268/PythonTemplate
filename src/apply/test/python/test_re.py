@@ -86,5 +86,5 @@ class TestRe(unittest.TestCase):
             "北京西城区小县")
         print(ret)
 
-    def test_2(self):
+    def test_3(self):
         print(re.findall(r'<\w*?:|</\w*?:', "<wsa:a>aa<wsa:a>aa</wsa:a></wsa:a>"))
