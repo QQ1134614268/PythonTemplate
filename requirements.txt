@@ -43,3 +43,5 @@ numpy~=1.21.2
 
 # Appium-Python-Client~=2.8.1
 # selenium~=4.8.2
+
+pyttsx4~=3.0.15
