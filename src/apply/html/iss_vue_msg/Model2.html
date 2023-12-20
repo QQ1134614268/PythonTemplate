@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>v-model</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+    {{ message }}
+    <Child v-model="message"></Child>
+</div>
+<template id="child">
+    <div>
+        子组件 时间: {{ value }}
+        <el-button @click="getTime">刷新时间</el-button>
+        <el-input v-model="value" @input="getTime2">shezhi</el-input>
+    </div>
+</template>
+</body>
+<script type="text/javascript">
+    new Vue({
+        el: "#app",
+        data: {
+            message: '...',
+        },
+        components: {
+            Child: {
+                template: "#child",
+                props: {
+                    value: {
+                        type: String,
+                    },
+                },
+                data() {
+                    return {}
+                },
+                methods: {
+                    getTime() {
+                        this.value =new Date();
+                    },
+                    getTime2() {
+                        this.$emit("input", this.value);
+                    },
+                }
+            }
+        }
+    })
+</script>
+</html>
+

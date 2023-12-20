@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>v-model</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+</head>
+<style>
+    #app {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+<body>
+<div id="app">
+    <div>
+        {{ num }}
+    </div>
+    <Child v-model="num"></Child>
+    <el-button @click="reset">重置</el-button>
+</div>
+<template id="child">
+    <div>
+        <el-button @click="add">加1</el-button>
+    </div>
+</template>
+</body>
+<script type="text/javascript">
+    new Vue({
+        el: "#app",
+        data: {
+            num: 0,
+        },
+        components: {
+            Child: {
+                template: "#child",
+                props: {
+                    value: {
+                        type: Number  // 注意这里是value
+                    }
+                },
+                methods: {
+                    add() {
+                        this.$emit("input", this.value + 1)
+                    }
+                }
+            }
+        },
+        methods: {
+            reset() {
+                this.num = 0;
+            }
+        }
+    })
+</script>
+</html>
+

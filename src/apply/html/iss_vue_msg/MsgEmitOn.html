@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EmitOn</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+</head>
+<style>
+    #app {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+<body>
+<div id="app">
+    <div> {{ message }}</div>
+    <Child @child-fn="parentFn"></Child>
+</div>
+<template id="child">
+    <div>
+        <input type="text" v-model="message"/>
+        <button @click="click">Send</button>
+    </div>
+</template>
+</body>
+<script type="text/javascript">
+    new Vue({
+        el: "#app",
+        data: {
+            message: '0'
+        },
+        components: {
+            Child: {
+                template: "#child",
+                props: {
+                    value: {
+                        type: Number
+                    }
+                },
+                data() {
+                    return {
+                        message: '',
+                    }
+                },
+                methods: {
+                    click() {
+                        this.$emit('child-fn', this.message); //在html模板中，html解析不区分大小写，msgHead将自动转换为msghead
+                    }
+                }
+            }
+        },
+        methods: {
+            parentFn(payload) {
+                this.message = payload;
+            }
+        }
+    })
+</script>
+</html>
