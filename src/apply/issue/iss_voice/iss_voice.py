@@ -48,7 +48,7 @@ class TestSqlLite(TestCase):
         engine.say('this is an english text to voice test, listen it carefully and tell who i am.')
         engine.runAndWait()
 
-    def test_run3(self):
+    def test_run4(self):
         engine = pyttsx4.init('coqui_ai_tts')
         engine.setProperty('speaker_wav', './someones_voice.wav')
 
