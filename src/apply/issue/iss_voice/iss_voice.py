@@ -33,8 +33,8 @@ class TestSqlLite(TestCase):
         bs = b.getvalue()
         # add an wav file format header
         d = b'WAVEfmt\x20\x12\x00\x00\x00\x01\x00\x01\x00\x22\x56\x00\x00\x44\xac\x00\x00\x02\x00\x10\x00\x00\x00data'
-        b = bytes(b'RIFF') + (len(bs) + 38).to_bytes(4, byteorder='little') + d + (len(bs)).to_bytes(4,
-                                                                                                     byteorder='little') + bs
+        i = len(bs)
+        b = bytes(b'RIFF') + (i + 38).to_bytes(4, byteorder='little') + d + i.to_bytes(4, byteorder='little') + bs
         # changed to BytesIO
         b = BytesIO(b)
         audio = AudioSegment.from_file(b, format="wav")
