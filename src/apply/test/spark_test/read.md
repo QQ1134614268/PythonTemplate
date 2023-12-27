@@ -5,7 +5,7 @@ Lucene 搜索引擎
     Nutch : web服务器
 
 谷歌论文
-    Google File System -- ndfs
+    Google File System -- hdfs
     MapReduce编程模型 -- MapReduce编程模型
     BigTable  -- Hbase
 

@@ -2,13 +2,14 @@
 """
 @Time: 2021/10/9
 @Description:
+# ORM查询指南  https://www.osgeo.cn/sqlalchemy/orm/queryguide.html
 """
 from unittest import TestCase
 
-from sqlalchemy import Column, String, Integer, create_engine, Boolean, func, desc, FLOAT, DECIMAL, alias
+from sqlalchemy import Column, String, Integer, create_engine, Boolean, func, desc, FLOAT, DECIMAL, alias, or_, and_
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, aliased
 
 from config.db_conf import localhost_test_url, localhost_test_session
 
@@ -21,13 +22,14 @@ class TestUser(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, comment="主键")
     name = Column(String(64))
+    age = Column(Integer)
     uid = Column(String(64), unique=True)
     op_mode = Column(Boolean, default=1)
-    test_float = Column(FLOAT(precision=10, decimal_return_scale=12), comment="测试float")
-    test_float2 = Column(FLOAT(precision='10,2', decimal_return_scale=12), comment="测试float")
+    test_float = Column(FLOAT(precision='10,2', decimal_return_scale=12), comment="测试float")
+    test_float2 = Column(FLOAT(precision=10, decimal_return_scale=12), comment="测试float")
     test_decimal = Column(DECIMAL(precision=10, scale=2), comment="测试Decimal")
     # decimal 以字符串存储,存储空间大, 适用价格金额(精度不高,准确度高);
-    # float(double) 浮点类型,丢失精度 todo 测试,查看文档
+    # float,double 浮点类型,丢失精度
 
 
 class TestUserInfo(Base):
@@ -93,18 +95,34 @@ class TestSqlalchemy(TestCase):
         print(res)
         res = localhost_test_session.query(func.max(TestUser.id)).scalar()
         print(res)
-
-        # select_from
-        res = localhost_test_session.query(TestUser, TestUserInfo).select_from(TestUser) \
-            .join(TestUserInfo, TestUserInfo.user_id == TestUser.id).scalar()
+        res = localhost_test_session.query(TestUser).distinct().all()
         print(res)
-        res = localhost_test_session.query(TestUser, TestUserInfo) \
-            .join(TestUserInfo, TestUserInfo.user_id == TestUser.id).all()
+        res = localhost_test_session.query(TestUser).group_by(TestUser.age).order_by(desc("count")).with_entities(
+            TestUser.age, func.count(TestUser.test_float).label("count")).all()
+        print(res)
+        res = localhost_test_session.query(TestUser).group_by(TestUser.age).order_by(desc("count")).with_entities(
+            TestUser.age, func.count(TestUser.test_float).label("count")).all()
+        print(res)
+        res = localhost_test_session.query(TestUser).filter(
+            or_(TestUser.name == "tom", and_(TestUser.name == "cat", TestUser.age == 18).self_group())).all()
         print(res)
 
-        # 自连接
+    def test_join(self):
+        # outerjoin join(inner join)
+        res = localhost_test_session.query(TestUser, TestUserInfo).all()  # 笛卡尔积
+        print(res)
+
+        res = localhost_test_session.query(TestUser).outerjoin(TestUserInfo, TestUserInfo.user_id == TestUser.id) \
+            .filter(TestUser.id == 1, TestUserInfo.address == 'address1').all()
+        print(res)
+
+        # aliased, alias 参考: sqlalchemy.sql.Alias 自连接
+        alias1 = aliased(TestUser, name="t1")
+        alias2 = aliased(TestUser, name="t2")
+        res = localhost_test_session.query(alias1, alias2).join(alias2, alias1.id == alias2.id).all()
+        print(res)
+
         alias1 = alias(TestUser, name="t1")
         alias2 = alias(TestUser, name="t2")
-        # 参考: sqlalchemy.sql.Alias
         res = localhost_test_session.query(alias1, alias2).join(alias2, alias1.columns.id == alias2.columns.id).all()
         print(res)

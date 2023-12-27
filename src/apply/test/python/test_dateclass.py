@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 
 # 类变量, dataclass, namedtuple, 实例变量
@@ -8,6 +9,10 @@ from dataclasses import dataclass
 #   字段可以被提示
 #   默认__init__ 实例化需要实例化全部,
 #   自定义无参 init 需要在field中实例化
+@dataclass(order=True)
+class User:
+    _id: int
+    item: Any = field(compare=False)
 
 
 @dataclass

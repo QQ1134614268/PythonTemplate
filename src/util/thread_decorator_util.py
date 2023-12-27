@@ -3,8 +3,8 @@
 @Time: 2021/12/23
 @Description:
 """
+from multiprocessing import Pool
 from threading import Thread
-
 from time import sleep
 
 from config.base_obj import Human
@@ -22,6 +22,10 @@ def async_task(f):
     return wrapper
 
 
+def my_print(x):
+    print(x)
+
+
 # todo - 多进程,线程, 队列, task, demo, spark,kafka, 转文件,读文件, 装饰器,  file-util,
 #  任务分配, 函数-- hash
 #  资源设置, 系统配置, 内存, io(网络),cpu
@@ -36,6 +40,8 @@ def async_task(f):
 #  定时任务
 #  场景: 图片脚本, 数据清洗
 
+#  queue, 幂等, threading async process, @functools.lru_cache
+
 if __name__ == '__main__':
     @async_task
     def func_a():
@@ -49,3 +55,10 @@ if __name__ == '__main__':
 
     func_a()
     func_b()
+
+    arr = [1, 2, 3, 4, 5]
+
+    pool = Pool()
+    pool.map(my_print, arr)
+    pool.join()
+    pool.close()
