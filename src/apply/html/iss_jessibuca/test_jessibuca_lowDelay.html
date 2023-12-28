@@ -8,12 +8,12 @@
     <script src="../js/vue.2.6.12.js"></script>
     <script src="../js/element-ui.index.js"></script>
     <link href="../css/element.index.css" rel="stylesheet">
+    <script src="../js/axios.js"></script>
 
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
-    <script src="../js/axios.js"></script>
-    <script src="gb28181.js"></script>
+    <script src="./gb28181.js"></script>
 </head>
 <body>
 <div id="app">
@@ -21,16 +21,25 @@
         <div id="container"></div>
         <el-form>
             <el-form-item label="播放地址:" style="width: 30rem">
-                <el-input v-model="playUrl"></el-input>
+                <el-input v-model="playUrl">
+                    <el-dropdown slot="append" split-button @command="getUrl" @click="getUrl(playUrlConfig[0].value)">
+                        自动获取
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item v-for="item in playUrlConfig" :key="item.label" :command="item.value">
+                                {{item.label}}
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </el-input>
             </el-form-item>
             <el-button @click="play">播放</el-button>
             <el-button @click="replay">重播</el-button>
             <el-button @click="pause">停止</el-button>
             <el-button @click="destroy">销毁</el-button>
         </el-form>
-        <pre>{{ JSON.stringify(videoInfo, null, 2) }}</pre>
+        <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
     </div>
-    <el-form style="width: 30%; display: flex; flex-wrap: wrap">
+    <el-form style="width: 30%;">
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
@@ -60,8 +69,7 @@
                 <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
                 <el-checkbox value="false" disabled> 支持Webcodecs H265解码(不一定准确)；</el-checkbox>
                 <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
-                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)
-                </el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
             </div>
         </el-form-item>
     </el-form>
@@ -77,7 +85,7 @@
                         debug: true,
                         debugLevel: 'debug',
                         // container: document.getElementById('container'),
-                        videoBuffer: 0.2, // 缓存时长
+                        videoBuffer: 0, // 缓存时长
                         videoBufferDelay: 10, // 10s 缓存延迟(延迟超过会触发丢帧)
                         // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
@@ -94,8 +102,8 @@
                         // decoder
                         useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频(Safari on iOS不支持); 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
                         useWCS: false, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false (开启离屏渲染)
-                        useWASM: false,
-                        useSIMD: true,
+                        useWASM: true,
+                        useSIMD: false,
 
                         useVideoRender: false,
                         useCanvasRender: true,
@@ -169,6 +177,7 @@
                     jessibuca: null,
                     playUrl: '',
                     videoInfo: {},
+                    playUrlConfig: urlList,
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportWCS: checkSupportWCS(),
@@ -226,14 +235,11 @@
                     }
                     this.create();
                 },
-                async getUrl() {
-                    let res = await get452BanDao()
+                async getUrl(url) {
+                    let res = await getGbUrl(url)
                     this.videoInfo = res.data.data
-                    this.playUrl = this.videoInfo.fmp4 // wss_flv, ws_flv, fmp4
-                    if (this.videoInfo.startTime !== undefined) {
-                        this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
-                        this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
-                    }
+                    this.playUrl = this.videoInfo.ws_flv // wss_flv, ws_flv, fmp4
+                    await this.play();
                 },
             },
         }

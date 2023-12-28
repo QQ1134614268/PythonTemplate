@@ -8,11 +8,11 @@
     <script src="../js/vue.2.6.12.js"></script>
     <script src="../js/element-ui.index.js"></script>
     <link href="../css/element.index.css" rel="stylesheet">
+    <script src="../js/axios.js"></script>
 
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
-    <script src="../js/axios.js"></script>
     <script src="./gb28181.js"></script>
 </head>
 <body>
@@ -20,66 +20,53 @@
     <div style="width: 70%">
         <div id="container"></div>
         <div style="display: flex">
-            <el-date-picker v-model="videoInfo.startTime" format="yyyy-MM-dd HH:mm:ss"
-                            value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
-            <div id="id1" @mouseup="log('mouseup')" @mousemove="mousemove" @mouseover="log"
-                 @mouseenter="log('mouseenter')"
-                 @click="seek" style="width: 50%">
-                <el-progress :percentage="percentage"></el-progress>
-            </div>
-            <el-date-picker v-model="videoInfo.endTime" format="yyyy-MM-dd HH:mm:ss"
-                            value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+            <el-tooltip :content="seekTime" :offset="200" :disabled="noTip">
+                <div id="id1" @mousemove="mousemove" @click="seek" class="progress">
+                    <el-progress :percentage="percentage" :show-text="false" define-back-color="#999999"></el-progress>
+                </div>
+            </el-tooltip>
         </div>
-        <el-date-picker v-model="seekTime" format="yyyy-MM-dd HH:mm:ss"
-                        value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
         <el-form>
             <el-form-item label="播放地址:" style="width: 30rem">
                 <el-input v-model="playUrl">
-                    <el-select v-model="playUrl" slot="prepend">
-                        <el-option v-for="item in playUrlConfig" :key="item.value" :label="item.label"
-                                   :value="item.value">
-                        </el-option>
-                    </el-select>
-                    <el-button slot="append" icon="el-icon-search">
-                    </el-button>
+                    <el-dropdown slot="append" split-button @command="getUrl" @click="getUrl(playUrlConfig[0].value)">
+                        自动获取
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item v-for="item in playUrlConfig" :key="item.label" :command="item.value">
+                                {{item.label}}
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </el-input>
             </el-form-item>
             <el-button @click="play">播放</el-button>
             <el-button @click="replay">重播</el-button>
             <el-button @click="pause">停止(流会断开)</el-button>
             <el-button @click="playbackPause">停止(流不断开)</el-button>
+            <el-button @click="resume">暂停恢复</el-button>
+            <el-button @click="stop">结束</el-button>
+            <el-button @click="exist">存在</el-button>
             <el-button @click="destroy">销毁</el-button>
-            <el-button @click="currentTimeScroll">滚动到当前时间</el-button>
             <el-form-item label="倍速:" style="width: 30rem">
                 <el-select v-model="rate" @change="ratePlay">
-                    <el-option v-for="item in rateConfig" :key="item.value" :label="item.label" :value="item.value">
+                    <el-option v-for="item in jessiConf.playbackConfig.rateConfig" :key="item.label" :label="item.label"
+                               :value="item.value">
                     </el-option>
                 </el-select>
             </el-form-item>
             <el-form-item>
                 <el-button @click="startFinsh">结束事件</el-button>
             </el-form-item>
-            <el-form-item label="时间戳:" style="width: 30rem">
-                <el-button @click="startTimeRecord">录制时间戳数据</el-button>
-                <el-table :data="statsArr">
-                    <el-table-column prop="ts" label="ts">
-                        <template slot-scope="scope">
-                            {{ Math.floor(scope.row.ts/1000) }}
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="dts" label="dts"></el-table-column>
-                    <el-table-column prop="pTs" label="pTs"></el-table-column>
-                    <el-table-column prop="delayTs" label="delayTs"></el-table-column>
-                    <el-table-column prop="totalDelayTs" label="totalDelayTs"></el-table-column>
-                    <el-table-column prop="buf" label="buf"></el-table-column>
-                    <el-table-column prop="videoCurrentTime" label="videoCurrentTime"></el-table-column>
-                    <el-table-column prop="videoCurrentTimeDiff" label="videoCurrentTimeDiff"></el-table-column>
-                </el-table>
-            </el-form-item>
         </el-form>
-        <pre>{{ JSON.stringify(videoInfo, null, 2) }}</pre>
+        <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
     </div>
-    <el-form style="width: 30%; display: flex; flex-wrap: wrap">
+    <el-form style="width: 30%;">
+        <el-form-item label="播放器模式:" style="width: 30rem">
+            <el-select v-model="jessiConf.playType" @change="replay">
+                <el-option label="直播流" value="player"></el-option>
+                <el-option label="录像流(TF卡流)" value="playbackTF"></el-option>
+            </el-select>
+        </el-form-item>
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
@@ -88,18 +75,18 @@
                       style="width: 5rem"></el-input>
         </el-form-item>
         <el-form-item label="解码(录像流暂只支持SIMD解码):" style="width: 30rem">
-            <el-checkbox v-model="jessiConf.useMSE" @change="replay" disabled>MediaSource</el-checkbox>
-            <el-checkbox v-model="jessiConf.useWCS" @change="replay" disabled>webcodecs</el-checkbox>
-            <el-checkbox v-model="jessiConf.useWASM" @change="replay" disabled>wasm</el-checkbox>
-            <el-checkbox v-model="jessiConf.useSIMD" @change="replay" disabled>wasm(simd)</el-checkbox>
+            <el-checkbox v-model="jessiConf.useMSE" @change="replay">MediaSource</el-checkbox>
+            <el-checkbox v-model="jessiConf.useWCS" @change="replay">webcodecs</el-checkbox>
+            <el-checkbox v-model="jessiConf.useWASM" @change="replay">wasm</el-checkbox>
+            <el-checkbox v-model="jessiConf.useSIMD" @change="replay">wasm(simd)</el-checkbox>
         </el-form-item>
         <el-form-item label="渲染标签(录像流暂只支持canvas):" style="width: 30rem">
-            <el-checkbox @click="replay" v-model="jessiConf.useVideoRender" disabled>video</el-checkbox>
+            <el-checkbox @click="replay" v-model="jessiConf.useVideoRender">video</el-checkbox>
             <el-checkbox @click="replay" v-model="jessiConf.useCanvasRender">canvas(性能更好)</el-checkbox>
         </el-form-item>
         <el-form-item label="canvas渲染技术(自动降级webgl):" style="width: 30rem">
+            <el-checkbox @click="replay" disabled>webgl</el-checkbox>
             <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
-            <el-checkbox @click="replay" disabled>webgl(pro 支持 webgl2)</el-checkbox>
         </el-form-item>
         <el-form-item label="是否使用离屏模式:" style="width: 30rem">
             <el-radio v-model="jessiConf.forceNoOffscreen" label="true">是(提升渲染能力)</el-radio>
@@ -196,7 +183,7 @@
                         debug: true,
                         debugLevel: 'debug',
                         container: document.getElementById('container'),
-                        videoBuffer: 0.2, // 缓存时长
+                        videoBuffer: 0, // 缓存时长
                         videoBufferDelay: 10, // 10s 缓存延迟(延迟超过会触发丢帧)
                         // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
@@ -211,10 +198,10 @@
                         // 性能, 解码, useMSE 等 互斥??
                         // videoBuffer
                         // decoder
-                        useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频(Safari on iOS不支持); 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
+                        useMSE: true, //是否开启MediaSource硬解码;视频编码只支持H.264视频(Safari on iOS不支持); 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
                         useWCS: false, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false (开启离屏渲染)
                         useWASM: false,
-                        useSIMD: true,
+                        useSIMD: false,
 
                         useVideoRender: false,
                         useCanvasRender: true,
@@ -276,6 +263,7 @@
                         useWebFullScreen: false,// 是否使用web全屏(旋转90度)(只会在移动端生效)。
 
                         // 回放配置
+                        playType: "player",
                         playbackConfig: {
                             playList: [{"start": 1653840000, "end": 1653841624}],
                             fps: 25,
@@ -315,15 +303,10 @@
                     playUrl: '',
                     videoInfo: {},
                     percentage: 0,
-                    seekTime: new Date(),
-                    statsArr: [],
+                    seekTime: null,
+                    noTip: true,
                     rate: 1,
-                    playUrlConfig: [
-                        {
-                            label: 12,
-                            // value: getUrl2()
-                        }
-                    ],
+                    playUrlConfig: urlList,
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportWCS: checkSupportWCS(),
@@ -367,7 +350,7 @@
                         // 如果有截图需求。需要延迟一下，因为代码中无法感应到画面被渲染出来了。
                         // 1s 之后截图
                         // setTimeout(function () {
-                        //   this. jessibuca.screenshot('xxx')
+                        //   this.jessibuca.screenshot('xxx')
                         // }, 1 * 1000)
                     })
                     this.jessibuca.on("load", function () {
@@ -388,19 +371,16 @@
                     this.jessibuca.on("buffer", function (buffer) {
                         console.log("listenerEvent", "buffer", buffer);
                     })
-                    this.jessibuca.on("timeUpdate", (value) => {
-                        console.log("listenerEvent", "timeUpdate", value);
-                    })
                     this.jessibuca.on("videoInfo", function (info) {
                         console.log("listenerEvent", "videoInfo", info);
                     });
                     this.jessibuca.on("audioInfo", function (msg) {
                         console.log("listenerEvent", "audioInfo", msg);
                     });
-                    this.jessibuca.on("timeUpdate", function (ts) {// 点击自带进度条触发??
-                        console.log("listenerEvent", "timeUpdate,old,new,timestamp", _ts, ts, ts - _ts);
-                        _ts = ts;
-                    });
+                    // this.jessibuca.on("timeUpdate", function (ts) {// 点击自带进度条触发??
+                    //     console.log("listenerEvent", "timeUpdate,old,new,timestamp", _ts, ts, ts - _ts);
+                    //     _ts = ts;
+                    // });
                     this.jessibuca.on("playToRenderTimes", function (times) { // 监听调用play方法 经过 初始化-> 网络请求-> 解封装 -> 解码 -> 渲染 一系列过程的时间消耗
                         console.log("listenerEvent", "playToRenderTimes is", times)
                     })
@@ -410,12 +390,6 @@
                         // abps: 当前音频码率，单位byte,
                         // vbps: 当前视频码率，单位byte，
                         // ts:当前视频帧pts，单位毫秒
-                        if (_this.statsArr.length !== 0) {
-                            _this.statsArr.push(Object.assign({}, stats))
-                            if (_this.statsArr.length > 500) {
-                                _this.statsArr.slice(400, _this.statsArr.length)
-                            }
-                        }
                         console.log("listenerEvent", "stats", stats, stats.dts, stats.pTs);
                     })
                     this.jessibuca.on("playbackStats", function (stats) {
@@ -443,35 +417,42 @@
                         console.log("listenerEvent", "error", error);
                     });
                 },
+                async exist() {
+                    let newVar = await gbExist(this.videoInfo.stream);
+                    console.log("exist", newVar)
+                    return newVar
+                },
                 async play() {
                     if (!this.playUrl) {
                         return
                     }
                     if (this.isPlaybackPause) {
                         console.log(await gbExist(this.videoInfo.stream))
-                        await gbResume(this.videoInfo.stream)
+                        await this.resume(this.videoInfo.stream)
                         this.jessibuca.playbackResume()
                         this.isPlaybackPause = false;
                         return
                     }
-                    this.jessibuca.playback(this.playUrl, {
-                        playList: this.jessiConf.playbackConfig.playList,
-                        fps: this.jessiConf.playbackConfig.fps,
-                        showControl: true,
-                        isUseFpsRender: this.jessiConf.playbackConfig.isUseFpsRender,
-                        isCacheBeforeDecodeForFpsRender: this.jessiConf.playbackConfig.isCacheBeforeDecodeForFpsRender,
-                        showRateBtn: true,
-                        supportWheel: true,
-                        uiUsePlaybackPause: this.jessiConf.playbackConfig.uiUsePlaybackPause,
-                        isPlaybackPauseClearCache: this.jessiConf.playbackConfig.isPlaybackPauseClearCache,
-                        rateConfig: this.jessiConf.playbackConfig.rateConfig,
-                        useWCS: this.playbackConfig.playbackUseWCS,
-                    });
-
+                    if (this.jessiConf.playType === 'player') {
+                        this.jessibuca.play(this.playUrl);
+                    } else {
+                        this.jessibuca.playback(this.playUrl, {
+                            playList: this.jessiConf.playbackConfig.playList,
+                            fps: this.jessiConf.playbackConfig.fps,
+                            showControl: true,
+                            isUseFpsRender: this.jessiConf.playbackConfig.isUseFpsRender,
+                            isCacheBeforeDecodeForFpsRender: this.jessiConf.playbackConfig.isCacheBeforeDecodeForFpsRender,
+                            showRateBtn: true,
+                            supportWheel: true,
+                            uiUsePlaybackPause: this.jessiConf.playbackConfig.uiUsePlaybackPause,
+                            isPlaybackPauseClearCache: this.jessiConf.playbackConfig.isPlaybackPauseClearCache,
+                            rateConfig: this.jessiConf.playbackConfig.rateConfig,
+                            useWCS: this.jessiConf.playbackConfig.playbackUseWCS,
+                        });
+                    }
                     this.isPlaybackPause = false;
                 },
                 async replay() {
-                    await this.getUrl();
                     if (this.jessibuca) {
                         await this.jessibuca.destroy()
                     }
@@ -482,6 +463,12 @@
                 },
                 async pause() {
                     this.jessibuca.pause();
+                },
+                async resume() {
+                    await gbResume(this.videoInfo.stream)
+                },
+                async stop() {
+                    await gbStop(this.videoInfo.deviceId, this.videoInfo.channelId, this.videoInfo.stream)
                 },
                 async playbackPause() {
                     await gbPause(this.videoInfo.stream)
@@ -494,30 +481,9 @@
                     }
                     this.create();
                 },
-                currentTimeScroll() {
-                    if (this.jessibuca) {
-                        this.jessibuca.playbackCurrentTimeScroll();
-                    }
-                },
                 async ratePlay() {
                     await gbSpeed(this.videoInfo.stream, this.rate)
                     this.jessibuca.forward(this.rate);
-                },
-
-                async startTimeRecord() {
-                    this.statsArr = [{}]
-                    let _this = this;
-
-                    async function record(x, total) {
-                        console.log(new Date(), x)
-                        if (x < total) {
-                            setTimeout(record, 10000, x + 1, total)
-                            let res = await gbSeek(_this.videoInfo.stream, 3600)
-                            console.log(res)
-                        }
-                    }
-
-                    await record(1, 20);
                 },
                 startFinsh() {
                     if (!this.playUrl) {
@@ -535,13 +501,13 @@
                 },
                 mousemove(event) {
                     console.log('mousemove')
-                    let ele = document.getElementById("id1")
-                    let startTimeStamp = this.videoInfo.startTime.getTime();
-                    let endTimeStamp = this.videoInfo.endTime.getTime();
-                    // console.log(event.offsetX, ele.offsetWidth, event.offsetX / ele.offsetWidth)
-                    let diff = startTimeStamp + (endTimeStamp - startTimeStamp) * ((event.offsetX + 50) / ele.offsetWidth)
-                    this.seekTime = new Date(diff)
-                    // console.log(event, event.offsetX, event.offsetY)
+                    if (this.videoInfo && this.videoInfo.startTime && this.videoInfo.endTime) {
+                        let startTimeStamp = this.videoInfo.startTime.getTime();
+                        let endTimeStamp = this.videoInfo.endTime.getTime();
+                        // console.log(event.offsetX, ele.offsetWidth, event.offsetX / ele.offsetWidth)
+                        let diff = startTimeStamp + (endTimeStamp - startTimeStamp) * (event.offsetX / event.target.offsetWidth)
+                        this.seekTime = new Date(diff).toLocaleString()
+                    }
                 },
                 async seek() {
                     if (!this.playUrl) {
@@ -549,18 +515,25 @@
                     }
                     let startTimeStamp = this.videoInfo.startTime.getTime();
                     let endTimeStamp = this.videoInfo.endTime.getTime();
-                    await gbSeek(this.videoInfo.stream, Math.floor((this.seekTime.getTime() - startTimeStamp) / 1000))
-                    this.percentage = (this.seekTime.getTime() - startTimeStamp) / (endTimeStamp - startTimeStamp) * 100
-
+                    await gbSeek(this.videoInfo.stream, Math.floor((new Date(this.seekTime).getTime() - startTimeStamp) / 1000))
+                    this.percentage = (new Date(this.seekTime).getTime() - startTimeStamp) / (endTimeStamp - startTimeStamp) * 100
                 },
-                async getUrl() {
-                    let res = await get452BanDao()
+                async getUrl(url) {
+                    let res = await getGbUrl(url)
                     this.videoInfo = res.data.data
-                    this.playUrl = this.videoInfo.fmp4 // wss_flv, ws_flv, fmp4
-                    this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
-                    this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    this.playUrl = this.videoInfo.ws_flv // wss_flv, ws_flv, fmp4
+                    if (this.videoInfo.startTime !== undefined) {
+                        this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
+                        this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    }
+                    await this.play();
                 },
             },
+            watch: {
+                seekTime(oldVal, newVal) {
+                    this.noTip = newVal === undefined;
+                },
+            }
         }
     );
 </script>
@@ -579,6 +552,13 @@
         background: rgba(13, 14, 27, 0.7);
         width: 640px;
         height: 398px;
+    }
+    .progress {
+        width: 50%;
+        height: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 </style>
 </html>

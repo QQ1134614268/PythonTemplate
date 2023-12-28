@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>demo</title>
-    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
-    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
-    <link href="https://cdn.bootcss.com/element-ui/2.6.1/theme-chalk/index.css" rel="stylesheet">
+    <script src="../js/vue.2.6.12.js"></script>
+    <script src="../js/element-ui.index.js"></script>
+    <link href="../css/element.index.css" rel="stylesheet">
+    <script src="../js/axios.js"></script>
+
     <script src="./vconsole.js"></script>
     <script src="./jessibuca-pro-demo.js"></script>
     <script src="./util.js"></script>
+    <script src="./gb28181.js"></script>
 </head>
 <body>
 <div id="app">
@@ -18,13 +21,14 @@
         <el-form>
             <el-form-item label="播放地址:" style="width: 30rem">
                 <el-input v-model="playUrl">
-                    <el-select v-model="playUrl" slot="prepend">
-                        <el-option v-for="item in playUrlConfig" :key="item.value" :label="item.label"
-                                   :value="item.value">
-                        </el-option>
-                    </el-select>
-                    <el-button slot="append" icon="el-icon-search">
-                    </el-button>
+                    <el-dropdown slot="append" split-button @command="getUrl" @click="getUrl(playUrlConfig[0].value)">
+                        自动获取
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item v-for="item in playUrlConfig" :key="item.label" :command="item.value">
+                                {{item.label}}
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </el-input>
             </el-form-item>
             <el-button @click="play">播放</el-button>
@@ -54,7 +58,13 @@
         </el-form>
         <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
     </div>
-    <el-form style="width: 30%; display: flex; flex-wrap: wrap">
+    <el-form style="width: 30%;">
+        <el-form-item label="播放模式:" style="width: 30rem">
+            <el-select v-model="jessiConf.playType" @change="replay">
+                <el-option label="播放器" value="player"></el-option>
+                <el-option label="录像流(TF卡流)" value="playbackTF"></el-option>
+            </el-select>
+        </el-form-item>
         <el-form-item label="缓冲(秒):" style="width: 30rem">
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
@@ -73,7 +83,7 @@
             <el-checkbox @click="replay" v-model="jessiConf.useCanvasRender">canvas(性能更好)</el-checkbox>
         </el-form-item>
         <el-form-item label="canvas渲染技术(自动降级webgl):" style="width: 30rem">
-            <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
+            <el-checkbox @click="replay" disabled>webgl</el-checkbox>
             <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
         </el-form-item>
         <el-form-item label="是否使用离屏模式:" style="width: 30rem">
@@ -135,8 +145,7 @@
                 <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
                 <el-checkbox value="false" disabled> 支持Webcodecs H265解码(不一定准确)；</el-checkbox>
                 <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
-                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)
-                </el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
             </div>
         </el-form-item>
     </el-form>
@@ -152,7 +161,7 @@
                         debug: true,
                         debugLevel: 'debug',
                         container: document.getElementById('container'),
-                        videoBuffer: 0.2, // 缓存时长
+                        videoBuffer: 0, // 缓存时长
                         videoBufferDelay: 10, // 10s 缓存延迟(延迟超过会触发丢帧)
                         // decoder: 'decoder-pro.js', // 1 默认引用的是根目录下面的decoder-pro.js文件 ，decoder-pro.js 与 decoder-pro.wasm文件必须是放在同一个目录下面
 
@@ -226,6 +235,7 @@
                         background: "", //背景图片。
 
                         // 回放配置
+                        playType: "player",
                         playbackConfig: {
                             playList: [{"start": 1653840000, "end": 1653841624}],
                             fps: 25,
@@ -271,14 +281,8 @@
                     videoInfo: {},
                     percentage: 0,
                     seekTime: new Date(),
-                    statsArr: [],
                     rate: 1,
-                    playUrlConfig: [
-                        {
-                            label: 12,
-                            // value: getUrl2()
-                        }
-                    ],
+                    playUrlConfig: urlList,
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportWCS: checkSupportWCS(),
@@ -341,7 +345,7 @@
                         // 如果有截图需求。需要延迟一下，因为代码中无法感应到画面被渲染出来了。
                         // 1s 之后截图
                         // setTimeout(function () {
-                        //   this. jessibuca.screenshot('xxx')
+                        //   this.jessibuca.screenshot('xxx')
                         // }, 1 * 1000)
                     })
                     this.jessibuca.on("load", function () {
@@ -435,7 +439,6 @@
                     }
                 },
                 async replay() {
-                    await this.getUrl(); // 自动获取地址
                     if (this.jessibuca) {
                         await this.jessibuca.destroy()
                     }
@@ -490,27 +493,15 @@
                 scaleChange() {
                     this.jessibuca.setScaleMode(this.scale);
                 },
-                startTimeRecord() {
-                    this.statsArr = [{}]
-                    let _this = this;
-
-                    function record(x, total) {
-                        console.log(new Date(), x)
-                        if (x < total) {
-                            setTimeout(record, 5000, x + 1, total)
-                            let res = gbSeek(_this.videoInfo.stream, 3600)
-                            console.log(res)
-                        }
-                    }
-
-                    record(1, 20);
-                },
-                async getUrl() {
-                    let res = await get452BanDao()
+                async getUrl(url) {
+                    let res = await getGbUrl(url)
                     this.videoInfo = res.data.data
-                    this.playUrl = this.videoInfo.fmp4 // wss_flv, ws_flv, fmp4
-                    this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
-                    this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    this.playUrl = this.videoInfo.ws_flv // wss_flv, ws_flv, fmp4
+                    if (this.videoInfo.startTime !== undefined) {
+                        this.videoInfo.startTime = new Date(this.videoInfo.startTime.replace(/-/g, '/') + ':000')
+                        this.videoInfo.endTime = new Date(this.videoInfo.endTime.replace(/-/g, '/') + ':000')
+                    }
+                    await this.play();
                 },
             },
         }

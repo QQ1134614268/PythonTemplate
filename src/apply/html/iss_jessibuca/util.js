@@ -107,7 +107,7 @@ function checkSupportSIMD() {
 }
 
 function checkSupportGpu() {
-    return 'gpu' in window.navigator;
+    return 'gpu' in navigator;
 }
 
 function isMobile() {
