@@ -17,7 +17,7 @@ class TestExecjs(TestCase):
         with open('test_input.js', encoding='utf-8') as f:
             txt = f.read()
         ctx = node.compile(txt)
-        print(ctx._runtime.name)
+        print("当前js环境: ", ctx._runtime.name)
         data = ctx.eval('menu_list')
         print(data)
         data = ctx.call('add', 1, 2)
