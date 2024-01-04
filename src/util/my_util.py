@@ -7,36 +7,10 @@ import datetime
 import random
 import re
 import string
-from base64 import b64encode, b64decode
-from binascii import b2a_base64, a2b_base64
 
 from sqlalchemy import insert
 
 from config.time_conf import DATE_TIME_FORMAT
-
-
-def s_2_b64(text):
-    return b2a_base64(text.encode("utf8"), newline=False).decode("utf8")
-
-
-def b64_2_s(text):
-    # base64转字符串
-    return a2b_base64(text.encode("utf8")).decode("utf8")
-
-
-def s_2_b64_v2(text):
-    return b64encode(text.encode("utf8")).decode("utf8")
-
-
-def b64_2_s_v2(text):
-    # base64转字符串
-    return b64decode(text.encode("utf8")).decode("utf8")
-
-
-if __name__ == '__main__':
-    text1 = "永恒a"
-    print(text1 == b64_2_s(s_2_b64(text1)))
-    print(text1 == b64_2_s_v2(s_2_b64_v2(text1)))
 
 
 class MyStrUti:
