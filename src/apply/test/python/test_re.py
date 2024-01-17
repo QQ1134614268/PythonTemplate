@@ -49,11 +49,10 @@ class TestRe(unittest.TestCase):
         print(re.search(r'\d+', info).groups())  # 没有(), 返回空元祖
         print(re.search(r'(\d+)', info).groups())
 
-        res = re.search(r"我叫(.+?),.*?名称:([a-z]+\s*?[a-z]+)", info)
+        res = re.search(r"^大家好,我叫(.+?),.*?名称:([a-z]+\s*?[a-z]+).*$", info)
         print("groups:", res.groups())
         print("group:", res.group(), res.group(0), res.group(1))
         print("span:", res.span())
-        print("groupdict:", res.groupdict())
 
     def test_high_namespace(self):
         # ?P 是一个命名组的语法,用于给匹配的子模式定义一个名称 eg: (?P<phone>\d{11})
