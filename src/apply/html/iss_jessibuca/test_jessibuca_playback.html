@@ -59,6 +59,11 @@
             </el-form-item>
         </el-form>
         <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
+        <el-button @click="query">历史记录</el-button>
+        <el-table :data="queryData">
+            <el-table-column prop="startTime" label="startTime"></el-table-column>
+            <el-table-column prop="endTime" label="endTime"></el-table-column>
+        </el-table>
     </div>
     <el-form style="width: 30%;">
         <el-form-item label="播放器模式:" style="width: 30rem">
@@ -282,6 +287,7 @@
                     seekTime: null,
                     noTip: true,
                     rate: 1,
+                    queryData: [],
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportMSEH265: checkSupportMSEHevc(),
@@ -502,6 +508,10 @@
                     }
                     await this.play();
                 },
+                async query() {
+                    let res = await gbQuery()
+                    this.queryData = res.data.data.recordlist
+                }
             },
             watch: {
                 decodeType(newVal, oldVal) {

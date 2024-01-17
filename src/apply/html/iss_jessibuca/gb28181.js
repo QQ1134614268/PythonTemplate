@@ -36,6 +36,17 @@ let urlList = [
     },
 ]
 
+async function gbQuery() {
+    let now = new Date();
+    let year= now.getFullYear()
+    let month= ('0' + (now.getMonth() + 1)).slice(-2)
+    let dd= ('0' + now.getDate()).slice(-2)
+    let hh= ('0' + now.getHours()).slice(-2)
+    let mm= ('0' + now.getMinutes()).slice(-2)
+    // return get(`${host}/api/gb_record/query/44030500101325107087/44030500101325407087?startTime=2024-01-15+18:00:00&endTime=${year}-${month}-${dd}+${hh}:${mm}:00`)
+    return get(`${host}/api/gb_record/query/44030500101325107087/44030500101325407087?startTime=2024-01-16+09:40:00&endTime=${year}-${month}-${dd}+${hh}:${mm}:00`)
+}
+
 async function getGbUrl(url) {
     if (url.includes("playback") && !url.includes("startTime")) {
         let now = new Date();
