@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jessica Pro simd demo</title>
+    <title>Jessica webrtc for zlm demo</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="./vconsole.js"></script>
@@ -26,7 +26,7 @@
         }
 
         .container-shell:before {
-            content: "jessibuca simd demo player";
+            content: "jessibuca webrtc for zlm ";
             position: absolute;
             color: darkgray;
             top: 4px;
@@ -36,8 +36,8 @@
 
         #container {
             background: rgba(13, 14, 27, 0.7);
-            width: 640px;
-            height: 398px;
+            width: 960px;
+            height: 597px;
         }
 
         .input {
@@ -76,7 +76,7 @@
         }
 
         .page {
-            background: url('http://jessibuca.monibuca.com/bg.jpg');
+            background: url('./bg.jpg');
             background-repeat: no-repeat;
             background-position: top;
         }
@@ -94,16 +94,24 @@
     <div class="container-shell">
         <div id="container"></div>
         <div class="input">
+            <div>
+                zlm的webrtc 是 http://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play  其中 <span style="color: red">stream=test  'test' </span>就是需要替换的id
+                <br>
+                <span style="color: red">注意：zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了</span>
+            </div>
+        </div>
+        <div class="input">
             <div>输入URL：</div>
             <input
                 autocomplete="on"
                 id="playUrl"
+                placeholder="将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了 例如：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play"
                 value=""
             />
             <button id="play">播放</button>
             <button id="pause" style="display: none">停止</button>
         </div>
-        <div class="input input-more" style="line-height: 30px">
+        <div class="input" style="line-height: 30px">
             <button id="destroy">销毁</button>
             <span class="fps-inner"></span>
         </div>
@@ -116,7 +124,10 @@
     var $playHref = document.getElementById('playUrl');
     var $container = document.getElementById('container');
     var $destroy = document.getElementById('destroy');
-    var $fps = document.querySelector('.fps-inner');
+
+    var showOperateBtns = true; // 是否显示按钮
+    var forceNoOffscreen = true; //
+    var jessibuca = null;
 
     function isMobile() {
         return (/iphone|ipad|android.*mobile|windows.*phone|blackberry.*mobile/i.test(window.navigator.userAgent.toLowerCase()));
@@ -133,23 +144,16 @@
     }
 
 
-    var showOperateBtns = true; // 是否显示按钮
-    var forceNoOffscreen = true; //
-    var jessibuca = null;
-
     function create() {
         jessibuca = new JessibucaPro({
             container: $container,
-            videoBuffer: 0.1, // 缓存时长
-            videoBufferDelay: 0.2, //
-            decoder: './decoder-pro-simd.js',
             isResize: false,
             text: "",
             loadingText: "加载中",
             debug: true,
-            debugLevel: 'debug',
+            debugLevel: "debug",
             showBandwidth: showOperateBtns, // 显示网速
-            showPerformance: showOperateBtns,
+            showPerformance: showOperateBtns, // 显示性能
             operateBtns: {
                 fullscreen: showOperateBtns,
                 screenshot: showOperateBtns,
@@ -159,35 +163,30 @@
                 quality: showOperateBtns,
                 performance: showOperateBtns,
             },
-            qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
-            forceNoOffscreen: forceNoOffscreen,
+            heartTimeoutReplayUseLastFrameShow: true,
+            audioEngine: "worklet",
             isNotMute: false,
             heartTimeout: 10,
-            watermarkConfig: {
-                text: {
-                    content: 'jessibuca-pro'
-                },
-                right: 10,
-                top: 10
-            },
+            isWebrtcForZLM:true
         },);
 
 
-        // jessibuca.on('ptz', (arrow) => {
-        //     console.log('ptz', arrow);
-        // })
-        //
-        // jessibuca.on('streamQualityChange', (value) => {
-        //     console.log('streamQualityChange', value);
-        // })
+        jessibuca.on('streamQualityChange', (value) => {
+            console.log('streamQualityChange', value);
+        })
+
+        jessibuca.on('timeUpdate', (value) => {
+            // console.log('timeUpdate', value);
+        })
 
         jessibuca.on('stats', (stats) => {
-            console.log('stats', stats);
-            $fps.textContent = `FPS: ${stats.fps} DFPS: ${stats.dfps}`
+            // console.log('stats', stats);
         })
+
         jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
             console.log('crashLog', log)
         })
+
 
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
@@ -197,7 +196,7 @@
 
     create();
 
-    $player.addEventListener('click', function () {
+    function play() {
         var href = $playHref.value;
         if (href) {
             jessibuca.play(href);
@@ -205,28 +204,43 @@
             $pause.style.display = 'inline-block';
             $destroy.style.display = 'inline-block';
         }
+    }
+
+
+    function replay() {
+        if (jessibuca) {
+            jessibuca.destroy().then(() => {
+                create();
+                play();
+            });
+        } else {
+            create();
+            play();
+        }
+    }
+
+
+    $player.addEventListener('click', function () {
+        play();
     }, false)
 
 
     $pause.addEventListener('click', function () {
         $player.style.display = 'inline-block';
         $pause.style.display = 'none';
-        $fps.textContent = '';
         jessibuca.pause();
     })
 
     $destroy.addEventListener('click', function () {
         if (jessibuca) {
-            jessibuca.destroy().then(()=>{
-                $fps.textContent = '';
+            jessibuca.destroy().then(() => {
                 create();
             });
-        }
-        else {
+        } else {
             create();
         }
-    })
 
+    })
 </script>
 
 </body>

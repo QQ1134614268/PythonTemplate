@@ -78,27 +78,12 @@ function checkSupportMSEH264() {
 
 function checkSupportWCSHevc() {
     const browserInfo = getBrowser();
-    const supportWCS = checkSupportWCS();
 
-    return supportWCS && browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+    return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
 }
 
 function checkSupportWCS() {
     return "VideoEncoder" in window;
-}
-
-function checkSupportWasm() {
-    try {
-        if (typeof window.WebAssembly === 'object' && typeof window.WebAssembly.instantiate === 'function') {
-            const module = new window.WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
-            if (module instanceof window.WebAssembly.Module) {
-                return new window.WebAssembly.Instance(module) instanceof window.WebAssembly.Instance;
-            }
-        }
-        return false;
-    } catch (e) {
-        return false;
-    }
 }
 
 
@@ -123,5 +108,3 @@ const useVConsole = isMobile() || isPad()
 if (useVConsole && window.VConsole) {
     new window.VConsole();
 }
-
-

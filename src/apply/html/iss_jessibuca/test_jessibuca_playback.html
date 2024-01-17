@@ -67,25 +67,25 @@
                 <el-option label="录像流(TF卡流)" value="playbackTF"></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item label="缓冲(秒):" style="width: 30rem">
+        <el-form-item label="缓存时长(秒):" style="width: 30rem">
             <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
-        <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 30rem">
-            <el-input placeholder="单位:秒" type="text" v-model="jessiConf.videoBufferDelay"
-                      style="width: 5rem"></el-input>
+        <el-form-item label="缓存延迟(延迟超过会触发丢帧)(秒):" style="width: 30rem">
+            <el-input type="text" v-model="jessiConf.videoBufferDelay" style="width: 5rem" @change="replay"></el-input>
         </el-form-item>
         <el-form-item label="解码(录像流暂只支持SIMD解码):" style="width: 30rem">
-            <el-checkbox v-model="jessiConf.useMSE" @change="replay">MediaSource</el-checkbox>
-            <el-checkbox v-model="jessiConf.useWCS" @change="replay">webcodecs</el-checkbox>
-            <el-checkbox v-model="jessiConf.useWASM" @change="replay">wasm</el-checkbox>
-            <el-checkbox v-model="jessiConf.useSIMD" @change="replay">wasm(simd)</el-checkbox>
+            <el-radio-group v-model="decodeType" @change="replay">
+                <el-radio label="useMSE">MediaSource</el-radio>
+                <el-radio label="useWCS">webcodecs</el-radio>
+                <el-radio label="useSIMD">simd</el-radio>
+                <el-radio label="useWASM">wasm</el-radio>
+            </el-radio-group>
         </el-form-item>
         <el-form-item label="渲染标签(录像流暂只支持canvas):" style="width: 30rem">
             <el-checkbox @click="replay" v-model="jessiConf.useVideoRender">video</el-checkbox>
             <el-checkbox @click="replay" v-model="jessiConf.useCanvasRender">canvas(性能更好)</el-checkbox>
         </el-form-item>
         <el-form-item label="canvas渲染技术(自动降级webgl):" style="width: 30rem">
-            <el-checkbox @click="replay" disabled>webgl</el-checkbox>
             <el-checkbox @click="replay" v-model="jessiConf.useWebGPU" :disabled="!isSupportGpu">webgpu</el-checkbox>
         </el-form-item>
         <el-form-item label="是否使用离屏模式:" style="width: 30rem">
@@ -95,10 +95,31 @@
         <el-form-item label="worker解封装(硬解码MSE,WCS):" style="width: 30rem">
             <el-checkbox @click="replay" v-model="jessiConf.demuxUseWorker">使用</el-checkbox>
         </el-form-item>
-        <el-form-item label="是否使用硬解码(https支持):" style="width: 30rem">
-            <el-select v-model="jessiConf.playbackConfig.playbackUseWCS">
+        <el-form-item label="日志:" style="width: 30rem">
+            <el-select v-model="jessiConf.debug">
                 <el-option label="是" :value="true"></el-option>
-                <el-option label="否" :value="false" selected></el-option>
+                <el-option label="否" :value="false"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="日志级别:" style="width: 30rem">
+            <el-select v-model="jessiConf.debugLevel">
+                <el-option value="debug"></el-option>
+                <el-option value="warn"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="超时时间:" style="width: 30rem">
+            <el-input v-model="jessiConf.timeout" style="width: 10rem"></el-input>
+        </el-form-item>
+        <el-form-item label="连接时间:" style="width: 30rem">
+            <el-input v-model="jessiConf.loadingTimeout" style="width: 15rem"></el-input>
+        </el-form-item>
+        <el-form-item label="心跳超时:" style="width: 30rem">
+            <el-input v-model="jessiConf.heartTimeout" style="width: 15rem"></el-input>
+        </el-form-item>
+        <el-form-item label="不断流暂停是否清除缓存数据:" style="width: 30rem">
+            <el-select v-model="jessiConf.playbackConfig.isPlaybackPauseClearCache">
+                <el-option label="是" :value="true" selected></el-option>
+                <el-option label="否" :value="false"></el-option>
             </el-select>
         </el-form-item>
         <el-form-item label="FPS设置:" style="width: 30rem">
@@ -116,59 +137,12 @@
         <el-form-item label="FPS(定频(本地设置)生效):" style="width: 30rem">
             <el-input v-model="jessiConf.playbackConfig.fps" style="width: 5rem"></el-input>
         </el-form-item>
-        <el-form-item label="不断流暂停是否清除缓存数据:" style="width: 30rem">
-            <el-select v-model="jessiConf.playbackConfig.isPlaybackPauseClearCache">
-                <el-option label="是" :value="true" selected></el-option>
-                <el-option label="否" :value="false"></el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item label="ui是否使用playbackPause:" style="width: 30rem">
-            <el-select v-model="jessiConf.playbackConfig.uiUsePlaybackPause">
-                <el-option label="是" :value="true"></el-option>
-                <el-option label="否" :value="false"></el-option>
-            </el-select>
-        </el-form-item>
-        <el-form-item label="日志:" style="width: 30rem">
-            <el-select v-model="jessiConf.debug">
-                <el-option label="是" :value="true"></el-option>
-                <el-option label="否" :value="false"></el-option>
-            </el-select>
-            <el-select v-model="jessiConf.debugLevel">
-                <el-option value="debug"></el-option>
-                <el-option value="warn"></el-option>
-            </el-select>
-            <el-checkbox v-model="isSupportMSEH264" disabled>操作按钮</el-checkbox>
-            <el-checkbox v-model="isSupportMSEH264" disabled>网速</el-checkbox>
-            <el-checkbox v-model="isSupportMSEH264" disabled>键盘快捷键</el-checkbox>
-            <el-checkbox v-model="isSupportMSEH264" disabled>性能面板</el-checkbox>
-            <el-input v-model="jessiConf.timeout" style="width: 10rem">
-                <template slot="prepend">
-                    timeout:
-                </template>
-            </el-input>
-            <el-input v-model="jessiConf.loadingTimeout" style="width: 15rem">
-                <template slot="prepend">
-                    loadingTimeout:
-                </template>
-            </el-input>
-            <el-input v-model="jessiConf.heartTimeout" style="width: 15rem">
-                <template slot="prepend">
-                    heartTimeout:
-                </template>
-            </el-input>
-        </el-form-item>
-        <el-form-item label="时间:" style="width: 30rem">
-            <div>{{ jessiConf.playList }}</div>
-        </el-form-item>
         <el-form-item label="浏览器配置:" style="width: 30rem">
-            <div>
-                <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
-                <el-checkbox value="false" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
-                <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
-                <el-checkbox value="false" disabled> 支持Webcodecs H265解码(不一定准确)；</el-checkbox>
-                <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
-                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
-            </div>
+            <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码</el-checkbox>
+            <el-checkbox v-model="isSupportMSEH265" disabled>支持MSE H265解码(自动降级wasm解码)</el-checkbox>
+            <el-checkbox v-model="isSupportWCS264" disabled>支持Webcodecs H264解码</el-checkbox>
+            <el-checkbox v-model="isSupportWCS265" disabled>支持Webcodecs H265解码(自动降级wasm解码)</el-checkbox>
+            <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(自动降级wasm解码)</el-checkbox>
         </el-form-item>
     </el-form>
 </div>
@@ -208,7 +182,7 @@
                         wcsUseVideoRender: false, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后(通过OffscreenCanvas渲染之)，wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
 
                         forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式(提升渲染能力)
-                        useWebGPU: true, // 使用WebGPU
+                        useWebGPU: checkSupportGpu(), // 使用WebGPU
 
                         // demuxUseWorker: false, // work 多线程解封装
                         // audioEngine: "worklet", // 多路 ??
@@ -302,15 +276,17 @@
                     jessibuca: null,
                     playUrl: '',
                     videoInfo: {},
+                    decodeType: 'useMSE',
+                    playUrlConfig: urlList,
                     percentage: 0,
                     seekTime: null,
                     noTip: true,
                     rate: 1,
-                    playUrlConfig: urlList,
 
                     isSupportMSEH264: checkSupportMSEH264(),
-                    isSupportWCS: checkSupportWCS(),
-                    isSupportWasm: checkSupportWasm(),
+                    isSupportMSEH265: checkSupportMSEHevc(),
+                    isSupportWCS264: checkSupportWCS(),
+                    isSupportWCS265: checkSupportWCSHevc(),
                     isSupportSIMD: checkSupportSIMD(),
                     isSupportGpu: checkSupportGpu(),
                 };
@@ -327,9 +303,6 @@
                     this.jessibuca = new JessibucaPro(this.jessiConf);
 
                     // -----------事件-----------------------
-                    let _this = this;
-                    let _ts = 0;
-
                     this.jessibuca.on("play", () => {
                         console.log("listenerEvent", "on play");
                     });
@@ -457,12 +430,19 @@
                         await this.jessibuca.destroy()
                     }
                     this.create();
-                    setTimeout(() => {
-                        this.play();
-                    }, 100)
+                    await this.play();
                 },
                 async pause() {
-                    this.jessibuca.pause();
+                    if (this.jessibuca) {
+                        this.jessibuca.pause();
+                    }
+                },
+                async destroy() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy();
+                        this.jessibuca = null;
+                    }
+                    this.create();
                 },
                 async resume() {
                     await gbResume(this.videoInfo.stream)
@@ -474,12 +454,6 @@
                     await gbPause(this.videoInfo.stream)
                     this.jessibuca.playbackPause();
                     this.isPlaybackPause = true;
-                },
-                async destroy() {
-                    if (this.jessibuca) {
-                        this.jessibuca.destroy();
-                    }
-                    this.create();
                 },
                 async ratePlay() {
                     await gbSpeed(this.videoInfo.stream, this.rate)
@@ -530,10 +504,16 @@
                 },
             },
             watch: {
-                seekTime(oldVal, newVal) {
+                decodeType(newVal, oldVal) {
+                    this.jessiConf.useMSE = newVal === 'useMSE';
+                    this.jessiConf.useWCS = newVal === 'useWCS';
+                    this.jessiConf.useSIMD = newVal === 'useSIMD';
+                    this.jessiConf.useWASM = newVal === 'useWASM';
+                },
+                seekTime(newVal, oldVal) {
                     this.noTip = newVal === undefined;
                 },
-            }
+            },
         }
     );
 </script>

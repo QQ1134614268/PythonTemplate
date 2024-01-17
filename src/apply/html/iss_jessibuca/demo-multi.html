@@ -2,13 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Jessica Pro NxN demo</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Jessibuca Pro 不规则多屏 demo</title>
-    <link rel="stylesheet" href="./demo.css">
     <style>
+        .root {
+            display: flex;
+            place-content: center;
+            margin-top: 3rem;
+        }
+
+        .container-shell {
+            backdrop-filter: blur(5px);
+            background: hsla(0, 0%, 50%, 0.5);
+            padding: 30px 4px 10px 4px;
+            /* border: 2px solid black; */
+            width: auto;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px;
+        }
+
         .container-shell:before {
-            content: "jessibuca pro mobile demo";
+            content: "jessibuca Pro NxN demo player";
+            position: absolute;
+            color: darkgray;
+            top: 4px;
+            left: 10px;
+            text-shadow: 1px 1px black;
+        }
+
+        #container {
+            background: rgba(13, 14, 27, 0.7);
+            width: 1040px;
+            height: 698px;
+        }
+
+        .input {
+            display: flex;
+            margin-top: 10px;
+            color: white;
+            place-content: stretch;
+        }
+
+        .input2 {
+            bottom: 0px;
+        }
+
+        .input input {
+            flex: auto;
+        }
+
+        .err {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            color: red;
+        }
+
+        .option {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            display: flex;
+            place-content: center;
+            font-size: 12px;
+        }
+
+        .option span {
+            color: white;
+        }
+
+        .page {
+            background: url('./bg.jpg');
+            background-repeat: no-repeat;
+            background-position: top;
+        }
+
+        @media (max-width: 720px) {
+            #container {
+                width: 90vw;
+                height: 52.7vw;
+            }
         }
     </style>
     <script src="./vconsole.js"></script>
@@ -23,8 +98,8 @@
                 当前浏览器：
                 <span id="mseSupport264" style="color: green;display: none">支持MSE H264解码；</span>
                 <span id="mseSupport" style="color: green;display: none">支持MSE H265解码；</span>
-                <span id="mseNotSupport264" style="color: red;display: none">不支持MSE H264解码；</span>
-                <span id="mseNotSupport"
+                <span id="mseNotSupport" style="color: red;display: none">不支持MSE H264解码；</span>
+                <span id="mseNotSupport264"
                       style="color: red;display: none">不支持MSE H265解码,会自动切换成wasm解码；</span>
             </div>
         </div>
@@ -32,7 +107,7 @@
             <div>
                 当前浏览器：
                 <span id="wcsSupport264" style="color: green;display: none">支持Webcodecs H264解码；</span>
-                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码（不一定准确）；</span>
+                <span id="wcsSupport" style="color: green;display: none">支持Webcodecs H265解码；</span>
                 <span id="wcsNotSupport264"
                       style="color: red;display: none">不支持Webcodecs H264解码(https/localhost)；</span>
                 <span id="wcsNotSupport" style="color: red;display: none">不支持Webcodecs H265解码(https/localhost),会自动切换成wasm解码</span>
@@ -46,38 +121,64 @@
                       style="color: red;display: none">不支持WASM SIMD解码,会自动切换成wasm解码</span>
             </div>
         </div>
+
         <div class="input">
-            <button onclick="updateSplit(1)">1*1</button>
-            <button onclick="updateSplit(2)">2*2</button>
-            <button onclick="updateSplit(3)">3*3</button>
-            <button onclick="updateSplit(4)">4*4</button>
-            <button onclick="updateSplitSpecial('3-1')">不规则(3-1)</button>
+            <div style="width: 900px">
+                <span><span style="color: red">TPS:</span> NxN 屏幕实现 需要将jessibuca-pro-demo.js 替换成 jessibuca-pro-multi-demo.js 文件
+            </span>
+            </div>
+        </div>
+
+        <div class="input">
+            <div><input
+                type="checkbox"
+                checked
+                id="useMSE"
+            /><span>MediaSource</span>
+                <input
+                    type="checkbox"
+                    id="useWCS"
+                /><span>Webcodec</span>
+                <input
+                    type="checkbox"
+                    id="useSIMD"
+                /><span>SIMD</span>
+            </div>
+        </div>
+        <div class="input">
+            <div>
+                <span>缓存时长：</span>
+                <input placeholder="单位：秒" type="text" id="videoBuffer" style="width: 50px" value="0.2">秒
+                <span>缓存延迟(延迟超过会触发丢帧)：</span>
+                <input placeholder="单位：秒" type="text" id="videoBufferDelay" style="width: 50px" value="1">秒
+                <button onclick="replay()">重播</button>
+            </div>
+        </div>
+        <div class="input">
+            切换分屏：
+            <button onclick="updateSplit(1)">1*1</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplit(2)">2*2</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplit(3)">3*3</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplit(4)">4*4</button>&nbsp;&nbsp;&nbsp;
+            <button onclick="updateSplitSpecial('3-1')">不规则(3-1)</button>&nbsp;&nbsp;&nbsp;
             <button onclick="updateSplitSpecial('4-1')">不规则(4-1)</button>
         </div>
         <div class="input">
             <div>
-                <span>选择：</span>
-                <select id="windowIndex" style="width: 140px">
-                    <option value="0" selected>第1屏</option>
-                    <option value="1">第2屏</option>
-                    <option value="2">第3屏</option>
-                    <option value="3">第4屏</option>
-                    <option value="4">第5屏</option>
-                    <option value="5">第6屏</option>
-                    <option value="6">第7屏</option>
-                    <option value="7">第8屏</option>
-                    <option value="8">第9屏</option>
-                    <option value="9">第10屏</option>
-                    <option value="10">第11屏</option>
-                    <option value="11">第12屏</option>
-                    <option value="12">第13屏</option>
-                    <option value="13">第14屏</option>
-                    <option value="14">第15屏</option>
-                    <option value="15">第16屏</option>
-                </select>
-                <button onclick="handleSelectWindow()">选中</button>
-                <button onclick="handleGetSelectWindow()">获取当前选择窗口</button>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    checked
+                    id="isFlv"
+                /><span>是否Flv格式</span>
+                <input
+                    onclick="replay()"
+                    type="checkbox"
+                    checked
+                    id="supportDblContainerFullscreen"
+                /><span>支持双击局部放大</span>
             </div>
+
         </div>
         <div class="input">
             <div>输入URL：</div>
@@ -96,7 +197,146 @@
         </div>
     </div>
 </div>
-<script src="./demo.js"></script>
+<script>
+    function getBrowser() {
+        const UserAgent = window.navigator.userAgent.toLowerCase() || '';
+        let browserInfo = {
+            type: '',
+            version: ''
+        };
+        var browserArray = {
+            IE: window.ActiveXObject || "ActiveXObject" in window, // IE
+            Chrome: UserAgent.indexOf('chrome') > -1 && UserAgent.indexOf('safari') > -1, // Chrome浏览器
+            Firefox: UserAgent.indexOf('firefox') > -1, // 火狐浏览器
+            Opera: UserAgent.indexOf('opera') > -1, // Opera浏览器
+            Safari: UserAgent.indexOf('safari') > -1 && UserAgent.indexOf('chrome') == -1, // safari浏览器
+            Edge: UserAgent.indexOf('edge') > -1, // Edge浏览器
+            QQBrowser: /qqbrowser/.test(UserAgent), // qq浏览器
+            WeixinBrowser: /MicroMessenger/i.test(UserAgent) // 微信浏览器
+        };
+        // console.log(browserArray)
+        for (let i in browserArray) {
+            if (browserArray[i]) {
+                let versions = '';
+                if (i === 'IE') {
+                    const versionArray = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)
+                    if (versionArray && versionArray.length > 2) {
+                        versions = UserAgent.match(/(msie\s|trident.*rv:)([\w.]+)/)[2];
+                    }
+                } else if (i === 'Chrome') {
+                    for (let mt in navigator.mimeTypes) {
+                        //检测是否是360浏览器(测试只有pc端的360才起作用)
+                        if (navigator.mimeTypes[mt]['type'] === 'application/360softmgrplugin') {
+                            i = '360';
+                        }
+                    }
+                    const versionArray = UserAgent.match(/chrome\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Firefox') {
+                    const versionArray = UserAgent.match(/firefox\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Opera') {
+                    const versionArray = UserAgent.match(/opera\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Safari') {
+                    const versionArray = UserAgent.match(/version\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'Edge') {
+                    const versionArray = UserAgent.match(/edge\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                } else if (i === 'QQBrowser') {
+                    const versionArray = UserAgent.match(/qqbrowser\/([\d.]+)/);
+                    if (versionArray && versionArray.length > 1) {
+                        versions = versionArray[1];
+                    }
+                }
+                browserInfo.type = i;
+                browserInfo.version = parseInt(versions);
+            }
+        }
+        return browserInfo;
+    }
+
+
+    function checkSupportMSEHevc() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="hev1.1.6.L123.b0"');
+    }
+
+    function checkSupportMSEH264() {
+        return window.MediaSource && window.MediaSource.isTypeSupported('video/mp4; codecs="avc1.64002A"');
+    }
+
+    function checkSupportWCSHevc() {
+        const browserInfo = getBrowser();
+
+        return browserInfo.type.toLowerCase() === 'chrome' && browserInfo.version >= 107 && (location.protocol === 'https:' || location.hostname === 'localhost');
+    }
+
+    function checkSupportWCS() {
+        return "VideoEncoder" in window;
+    }
+
+
+    function checkSupportSIMD() {
+        return WebAssembly && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98, 11]));
+    }
+
+    let support = document.getElementById('mseSupport');
+    let notSupport = document.getElementById('mseNotSupport');
+    if (checkSupportMSEHevc()) {
+        support.style.display = 'inline-block'
+    } else {
+        notSupport.style.display = 'inline-block'
+    }
+
+    let supportH264 = document.getElementById('mseSupport264');
+    let notSupportH264 = document.getElementById('mseNotSupport264');
+    if (checkSupportMSEH264()) {
+        supportH264.style.display = 'inline-block'
+    } else {
+        notSupportH264.style.display = 'inline-block'
+    }
+
+
+    let supportWcsHevc = document.getElementById('wcsSupport');
+    let notSupportWcsHevc = document.getElementById('wcsNotSupport');
+
+    if (checkSupportWCSHevc()) {
+        supportWcsHevc.style.display = 'inline-block';
+    } else {
+        notSupportWcsHevc.style.display = 'inline-block'
+    }
+    let supportWcs = document.getElementById('wcsSupport264');
+    let notSupportWcs = document.getElementById('wcsNotSupport264');
+    if (checkSupportWCS()) {
+        supportWcs.style.display = 'inline-block';
+    } else {
+        notSupportWcs.style.display = 'inline-block'
+    }
+
+
+    let supportSimd = document.getElementById('simdSupport');
+    let notSupportSimd = document.getElementById('simdNotSupport');
+
+    if (checkSupportSIMD()) {
+        supportSimd.style.display = 'inline-block';
+    } else {
+        notSupportSimd.style.display = 'inline-block'
+    }
+
+</script>
+
+
 <script>
     var $container = document.getElementById('container');
     var $player = document.getElementById('play');
@@ -105,7 +345,11 @@
     var $destroy = document.getElementById('destroy');
     var $destroySingle = document.getElementById('destroySingle');
     var $fullscreenMulti = document.getElementById('fullscreenMulti');
-
+    var $useMSE = document.getElementById('useMSE');
+    var $useSIMD = document.getElementById('useSIMD');
+    var $useWCS = document.getElementById('useWCS');
+    var $supportDblContainerFullscreen = document.getElementById('supportDblContainerFullscreen');
+    var $isFlv = document.getElementById('isFlv');
     let jessibucaMulti = null;
     var showOperateBtns = true; // 是否显示按钮
 
@@ -114,10 +358,12 @@
             container: $container,
             split: 2,
             isResize: false,
-            isFlv: true,
+            supportDblclickContainerFullscreen: $supportDblContainerFullscreen.checked === true,
+            isFlv: $isFlv.checked === true,
             debug: true,
-            useMSE: true,
-            useSIMD: true,
+            useMSE: $useMSE.checked === true,
+            useSIMD: $useSIMD.checked === true,
+            useWCS: $useWCS.checked === true,
             debugLevel: "debug",
             hasAudio: false,
             showBandwidth: showOperateBtns, // 显示网速
@@ -224,25 +470,39 @@
         }
     }
 
-    function updateSplitSpecial(type) {
+
+    function updateSplitSpecial(split) {
         if (jessibucaMulti) {
-            jessibucaMulti.arrangeWindow(type);
+            jessibucaMulti.arrangeWindow(split);
         }
     }
 
-    function handleSelectWindow() {
-        if (jessibucaMulti) {
-            const index = document.getElementById('windowIndex').value
-            jessibucaMulti.selectWindow(Number(index));
+    $useMSE.addEventListener('click', function () {
+        const checked = $useMSE.checked;
+        if (checked) {
+            $useSIMD.checked = false
+            $useWCS.checked = false
         }
-    }
+        replay();
+    })
 
-    function handleGetSelectWindow() {
-        if (jessibucaMulti) {
-            const index = jessibucaMulti.getSelectedWindowIndex();
-            console.log('当前选中窗口下标：', index);
+    $useSIMD.addEventListener('click', function () {
+        const checked = $useSIMD.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useWCS.checked = false
         }
-    }
+        replay();
+    })
+
+    $useWCS.addEventListener('click', function () {
+        const checked = $useWCS.checked;
+        if (checked) {
+            $useMSE.checked = false
+            $useSIMD.checked = false
+        }
+        replay();
+    })
 
 </script>
 </body>

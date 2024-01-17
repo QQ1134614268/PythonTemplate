@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>webRtc</title>
+    <title>多屏</title>
 
     <script src="../js/vue.2.6.12.js"></script>
     <script src="../js/element-ui.index.js"></script>
@@ -11,7 +11,7 @@
     <script src="../js/axios.js"></script>
 
     <script src="./vconsole.js"></script>
-    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./jessibuca-pro-multi-demo.js"></script>
     <script src="./util.js"></script>
     <script src="./gb28181.js"></script>
 </head>
@@ -20,7 +20,6 @@
     <div style="width: 70%">
         <div id="container"></div>
         <el-form>
-            <span style="color:red;">注意:将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了</span>即:webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play
             <el-form-item label="播放地址:" style="width: 30rem">
                 <el-input v-model="playUrl">
                     <el-dropdown slot="append" split-button @command="getUrl" @click="getUrl(playUrlConfig[0].value)">
@@ -36,11 +35,26 @@
             <el-button @click="play">播放</el-button>
             <el-button @click="replay">重播</el-button>
             <el-button @click="pause">停止</el-button>
-            <el-button @click="destroy">销毁</el-button>
+            <el-button @click="destroy">销毁(ALL)</el-button>
+            <el-button @click="destroySingle">销毁(选中)</el-button>
+            <el-button @click="fullscreenMulti">全屏(ALL)</el-button>
+
+            <el-button @click="updateSplit(1)">1*1</el-button>
+            <el-button @click="updateSplit(2)">2*2</el-button>
+            <el-button @click="updateSplit(3)">3*3</el-button>
+            <el-button @click="updateSplit(4)">4*4</el-button>
+            <el-button @click="updateSplitSpecial('3-1')">不规则(3-1)</el-button>
+            <el-button @click="updateSplitSpecial('4-1')">不规则(4-1)</el-button>
         </el-form>
         <pre>{{JSON.stringify(videoInfo, null, 2)}}</pre>
     </div>
     <el-form style="width: 30%;">
+        <el-form-item label="缓存时长(秒):" style="width: 30rem">
+            <el-input type="number" v-model="jessiConf.videoBuffer" style="width: 5rem" @change="replay"></el-input>
+        </el-form-item>
+        <el-form-item label="缓存延迟(延迟超过会触发丢帧)(秒):" style="width: 30rem">
+            <el-input type="text" v-model="jessiConf.videoBufferDelay" style="width: 5rem" @change="replay"></el-input>
+        </el-form-item>
         <el-form-item label="解码:" style="width: 30rem">
             <el-radio-group v-model="decodeType" @change="replay">
                 <el-radio label="useMSE">MediaSource</el-radio>
@@ -65,45 +79,28 @@
             data() {
                 return {
                     jessiConf: {
-                        // 基础, 调试
+                        container: document.getElementById('container'),
+                        split: 2,
+                        isResize: false,
+                        supportDblclickContainerFullscreen: true,
+                        isFlv: true,
                         debug: true,
-                        debugLevel: 'debug',
-                        heartTimeout: 10, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
-                        heartTimeoutReplayUseLastFrameShow: true,
-                        // 性能, 解码, useMSE 等 互斥??
-                        // videoBuffer
-                        // decoder
-                        useMSE: false, //是否开启MediaSource硬解码;视频编码只支持H.264视频(Safari on iOS不支持); 不支持 forceNoOffscreen 为 false (开启离屏渲染);优先级高于useWCS:true
-                        useWCS: false, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false (开启离屏渲染)
-                        useWASM: true,
-                        useSIMD: false,
-
-                        useVideoRender: false,
-                        useCanvasRender: true,
-                        wcsUseVideoRender: false, //webcodecs硬解码是否通过video标签渲染;forceNoOffscreen 设置为false之后(通过OffscreenCanvas渲染之)，wcsUseVideoRender不会生效;现在默认 video标签渲染，提升渲染性能。
-
-                        forceNoOffscreen: true,//不离渲染, 是否不使用离屏模式(提升渲染能力)
-                        useWebGPU: checkSupportGpu(), // 使用WebGPU
-
-                        // demuxUseWorker: false, // work 多线程解封装
-                        audioEngine: "worklet", // 多路 ??
-                        isNotMute: false,// 是否开启声音，默认是关闭声音播放的。
-                        isResize: false,//当为true的时候:视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 setScaleMode(1) 当为false的时候:视频画面完全填充canvas区域,画面会被拉伸。等同于 setScaleMode(0)
-                        text: "text 1111",
-                        loadingText: "疯狂加载中...",//加载过程中文案。
+                        useMSE: true,
+                        useSIMD: true,
+                        debugLevel: "debug",
+                        hasAudio: false,
                         showBandwidth: true, // 显示网速
                         showPerformance: true, // 显示性能
                         operateBtns: {
-                            fullscreen: false, //fullscreen 是否显示全屏按钮
-                            screenshot: false, //是否显示截图按钮
-                            play: true,//是否显示播放暂停按钮
-                            audio: false,//是否显示声音按钮
-                            ptz: false,
-                            quality: false,
-                            performance: false,
+                            fullscreen: true,
+                            screenshot: true,
+                            play: true,
+                            audio: true,
+                            record: true,
+                            ptz: true,
+                            quality: true,
+                            performance: true,
                         },
-                        // 其他
-                        isWebrtcForZLM: true
                     },
 
                     jessibuca: null,
@@ -111,6 +108,7 @@
                     videoInfo: {},
                     decodeType: 'useMSE',
                     playUrlConfig: urlList,
+                    windowIndex: 0,
 
                     isSupportMSEH264: checkSupportMSEH264(),
                     isSupportMSEH265: checkSupportMSEHevc(),
@@ -121,7 +119,9 @@
                 };
             },
             mounted() {
-                this.create();
+                setTimeout(() => {
+                    this.create();
+                }, 10)
             },
             unmounted() {
                 this.jessibuca.destroy();
@@ -129,20 +129,31 @@
             methods: {
                 create() {
                     this.jessiConf.container = document.getElementById('container');
-                    this.jessibuca = new JessibucaPro(this.jessiConf);
+                    this.jessibuca = new JessibucaProMulti(this.jessiConf);
 
                     // -----------事件-----------------------
-                    this.jessibuca.on("play", () => {
-                        console.log("listenerEvent", "on play");
-                    });
-                    this.jessibuca.on('streamQualityChange', (value) => {
-                        console.log('streamQualityChange', value);
+                    this.jessibuca.on(JessibucaProMulti.MULTI_EVENTS.selected, (selectedIndex) => {
+                        console.log('selected', selectedIndex);
                     })
-                    this.jessibuca.on('timeUpdate', (value) => {
-                        console.log('timeUpdate', value);
+
+                    this.jessibuca.on(JessibucaProMulti.MULTI_EVENTS.dblSelected, (selectedIndex) => {
+                        console.log('dblSelected', selectedIndex);
                     })
-                    this.jessibuca.on(JessibucaPro.EVENTS.crashLog, (log) => {
-                        console.log('crashLog', log)
+
+                    this.jessibuca.on(JessibucaProMulti.MULTI_EVENTS.mouseOver, (selectedIndex) => {
+                        console.log('mouseOver', selectedIndex);
+                    })
+
+                    this.jessibuca.on(JessibucaProMulti.MULTI_EVENTS.mouseOut, (selectedIndex) => {
+                        console.log('mouseOut', selectedIndex);
+                    })
+
+                    this.jessibuca.on(JessibucaProMulti.MULTI_EVENTS.mouseUp, (selectedIndex) => {
+                        console.log('mouseUp', selectedIndex);
+                    })
+
+                    this.jessibuca.on(JessibucaProMulti.EVENTS.stats, (index, stats) => {
+                        console.log(`stats-${index}`, stats);
                     })
                 },
                 async play() {
@@ -169,10 +180,31 @@
                     }
                     this.create();
                 },
+                destroySingle() {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroySingle();
+                    }
+                },
+                fullscreenMulti() {
+                    if (this.jessibuca) {
+                        this.jessibuca.setFullscreenMulti(true);
+                    }
+                },
+                updateSplit(split) {
+                    if (this.jessibuca) {
+                        split = Number(split);
+                        this.jessibuca.arrangeWindow(split);
+                    }
+                },
+                updateSplitSpecial(type) {
+                    if (this.jessibuca) {
+                        this.jessibuca.arrangeWindow(type);
+                    }
+                },
                 async getUrl(url) {
                     let res = await getGbUrl(url)
                     this.videoInfo = res.data.data
-                    this.playUrl = this.videoInfo.rtc.replace("http", "webrtc") // wss_flv, ws_flv, fmp4
+                    this.playUrl = this.videoInfo.ws_flv // wss_flv, ws_flv, fmp4
                     await this.play();
                 },
             },
@@ -200,8 +232,8 @@
 
     #container {
         background: rgba(13, 14, 27, 0.7);
-        width: 640px;
-        height: 398px;
+        width: 960px;
+        height: 600px;
     }
 </style>
 </html>
