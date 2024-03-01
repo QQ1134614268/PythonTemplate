@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>SocketIo-Vue</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.15.14/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.15.14/theme-chalk/index.css" rel="stylesheet">
+
+    <script src="https://cdn.bootcss.com/axios/1.3.5/axios.js"></script>
+    <script src="https://cdn.bootcss.com/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+<div id="app" style="min-height: 100vh">
+    <el-button @click="sendMsg">emit发送</el-button>
+</div>
+<script>
+    new Vue(
+        {
+            el: '#app',
+            data: {
+                client: null
+            },
+            methods: {
+                init() {
+                    let namespace = "/wechat"; // ??
+                    this.client = io.connect('http://127.0.0.1:5000');
+                    let socket = this.client
+                    this.client.emit('hello', 'this is client')
+                    this.client.on('connect', function (data) {
+                        console.log("链接状态:", socket?.connected)
+                        console.log('server_connect', data)
+                    });
+                    this.client.on('server_response', function (data) {
+                        console.log('server_response', data)
+                    });
+                    this.client.on('client_hello', function () {
+                        console.log('client_hello')
+                    });
+                },
+                sendMsg() {
+                    this.client.emit('hello', 'this is client')
+                    this.client.emit("json", JSON.stringify({"data": "666"}));
+                    this.client.emit("json", 1);
+                }
+            },
+            created() {
+                this.init()
+            }
+        }
+    )
+</script>
+</body>
+<style>
+</style>
+</html>

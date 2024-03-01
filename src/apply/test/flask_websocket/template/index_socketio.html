@@ -3,38 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <!--    <script>-->
-    <!--        window.onload = function () {-->
-    <!--            var socket = io.connect('http://127.0.0.1:5000');-->
-    <!--            socket.on('connect', function () {-->
-    <!--                document.write('连接成功!');-->
-    <!--                socket.emit('my_event', {data: 'I\'m connected!'})-->
-    <!--            });-->
-    <!--        };-->
-    <!--    </script>-->
-
     <script src="https://cdn.bootcss.com/socket.io/4.0.1/socket.io.js"></script>
     <script type="text/javascript" charset="utf-8">
-        let socket = io();
+        let socket = io.connect('http://127.0.0.1:5000');
+        socket.emit("hello","this is client")
         socket.on('connect', function () {
-            socket.emit('my_event', {data: 'I\'m connected!'});
-            // socket.on('server_response',function (data) {
-            //            $('#current_time').text(data);
-            //        })
+            console.log('客户端连接成功!', socket.connected);
         });
-        socket.on('web_event', function () {
-            socket.emit('json', {data: 'I\'m json!'});
+        socket.on('server_response', function (data) {
+            console.log('服务端返回消息!', data);
         });
     </script>
-    <!--    <script type="text/javascript" charset="utf-8">-->
-    <!--        function addScript(src) {//手动添加script标签-->
-    <!--            let script = document.createElement("script");-->
-    <!--            script.type = "text/JavaScript";-->
-    <!--            script.src = src;-->
-    <!--            document.getElementsByTagName('head')[0].appendChild(script);-->
-    <!--        }-->
-    <!--    </script>-->
-
 </head>
 <body>
 <a href="">刷新</a>
