@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native WebSocket with Flask-SocketIO Server</title>
+</head>
+<body>
+    <h1>Native WebSocket Demo</h1>
+    <script>
+        // 替换为您的服务器地址
+        let ws = new WebSocket('ws://localhost:5000/socket.io/?EIO=3&transport=websocket');
+
+        ws.onopen = function() {
+            console.log('WebSocket is open.');
+            // 发送一个自定义的 JSON 消息给服务器
+            ws.send(JSON.stringify({
+                'event': 'my_event',
+                'data': 'Hello, Server!'
+            }));
+        };
+
+        ws.onmessage = function(event) {
+            // 服务器响应通常是一个包含多个事件的字符串，这里我们简单地打印它
+            console.log('Received:', event.data);
+        };
+
+        ws.onclose = function() {
+            console.log('WebSocket is closed.');
+        };
+
+        ws.onerror = function(error) {
+            console.error('WebSocket Error:', error);
+        };
+    </script>
+</body>
+</html>
