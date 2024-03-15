@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import cv2
 
 
-class Test(unittest.TestCase):
+class TestCv(unittest.TestCase):
     def test0(self):
-        onvif = "rtsp://admin:xxx@123@127.39.107.85:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
+        onvif = "rtsp://admin:xxx@127.39.107.85:554/cam/realmonitor?channel=1&subtype=0&unicast=true&proto=Onvif"
         cap = cv2.VideoCapture(onvif)
         end = datetime.now() + timedelta(seconds=30)
         with open(f"opencv_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.mp4", mode='ab') as f:
@@ -46,3 +46,4 @@ class Test(unittest.TestCase):
                 break
         cap.release()
         cv2.destroyAllWiindows()
+        cv2.CAP_INTELPERC_IMAGE

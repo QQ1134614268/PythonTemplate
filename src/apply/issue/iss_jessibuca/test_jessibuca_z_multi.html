@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>多路</title>
+    <script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.6.1/index.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/2.4.5/theme-chalk/index.css" rel="stylesheet">
+    <script src="./vconsole.js"></script>
+    <script src="./jessibuca-pro-demo.js"></script>
+    <script src="./util.js"></script>
+</head>
+<body>
+<div id="app" style="height: 100vh; display: flex">
+    <div id="container" style="width: 50%"></div>
+    <el-form ref="form" :model="form" style="width: 50%">
+        <span style="color:red;">注意：将zlm的webrtc播放地址，https:// 修改为 webrtc:// 就可以了;即：webrtc://127.0.0.1/index/api/webrtc?app=live&stream=test&type=play</span>
+        <el-form-item label="缓冲(秒):" style="width: 30rem">
+            <el-input type="number" v-model="videoBuffer" style="width: 5rem" @change="changeBuffer"></el-input>
+        </el-form-item>
+        <el-form-item label="缓存延迟(延迟超过会触发丢帧):" style="width: 100rem">
+            <el-input placeholder="单位：秒" type="text" v-model="videoBufferDelay" style="width: 50px" value="1"/>
+        </el-form-item>
+        <el-form-item label="解码:" style="width: 100rem">
+            <el-checkbox v-model="useMSE" @change="replay('mse')">MediaSource</el-checkbox>
+            <el-checkbox v-model="useWCS" @change="replay('wcs')">webcodecs</el-checkbox>
+            <el-checkbox v-model="useWASM" @change="replay('wasm')">wasm</el-checkbox>
+            <el-checkbox v-model="useSIMD" @change="replay('simd')">wasm(simd)</el-checkbox>
+        </el-form-item>
+        <el-form-item label="硬解码(MediaSource，Webcodec)worker解封装:" style="width: 100rem">
+            <el-checkbox @click="replay()" v-model="demuxUseWorker">备选项</el-checkbox>
+        </el-form-item>
+        <el-form-item label="渲染标签:" style="width: 100rem">
+            <el-select v-model="renderDom" onchange="replay()">
+                <el-option value="video" selected>video</el-option>
+                <el-option value="canvas">canvas</el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="canvas渲染技术:" style="width: 100rem">
+            <el-select v-model="renderCanvas" onchange="replay()">
+                <el-option value="webgl">webgl</el-option>
+                <el-option value="webgpu" selected>webgpu</el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="切换视频的时候，是否显示上一个流的最后一帧画面:" style="width: 100rem">
+            <el-checkbox @click="replay()" v-model="showLastIframe"/>
+        </el-form-item>
+        <el-form-item label="输入URL:" style="width: 100rem">
+            <el-input autocomplete="on" :value="playUrl1"/>
+            <el-input autocomplete="on" :value="playUrl2"/>
+            <el-input autocomplete="on" :value="playUrl3"/>
+        </el-form-item>
+        <el-button @click="play">播放</el-button>
+        <el-button @click="pause">停止</el-button>
+        <el-button @click="replay">重播</el-button>
+        <el-button @click="destroy">销毁</el-button>
+        <el-form-item label="浏览器配置：" style="width: 30rem">
+            <div>
+                <el-checkbox v-model="isSupportMSEH264" disabled>支持MSE H264解码；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持MSE H265解码；(会自动切换成wasm解码)</el-checkbox>
+                <el-checkbox v-model="isSupportWCS" disabled> 支持Webcodecs H264解码；</el-checkbox>
+                <el-checkbox value="false" disabled> 支持Webcodecs H265解码（不一定准确）；</el-checkbox>
+                <el-checkbox v-model="isSupportWasm" disabled> 支持WASM解码</el-checkbox>
+                <el-checkbox v-model="isSupportSIMD" disabled> 支持WASM SIMD解码;(会自动切换成wasm解码)</el-checkbox>
+            </div>
+        </el-form-item>
+    </el-form>
+</div>
+<script>
+    let t = new Vue(
+        {
+            el: '#app',
+            data() {
+                return {
+                    form: {},
+                    playUrl: '',
+                    playUrl1: "",
+                    playUrl2: "",
+                    playUrl3: "",
+                    demuxUseWorker: '',
+                    showLastIframe: '',
+                    renderDom: '',
+                    renderCanvas: '',
+
+                    isUseFpsRender: 'false',
+                    isCacheBeforeDecodeForFpsRender: 'true',
+                    onlyDecoderIFrame: 4,
+                    playbackFps: 25,
+                    isPlaybackPauseClearCache: 'true',
+                    uiUsePlaybackPause: '',
+                    isUseWebGPU: '',
+                    playbackUseWCS: false,
+                    playTimesArray: [],
+
+                    videoBuffer: 0.2,
+                    videoBufferDelay: 1,
+                    decodeType: '',
+                    jessibuca: null,
+                    loopTimer: null,
+                    index: 0,
+                    version: '',
+                    wasm: false,
+                    vc: "ff",
+                    playing: false,
+                    quieting: true,
+                    loaded: false, // mute
+                    showOperateBtns: false,
+                    showBandwidth: false,
+                    err: "",
+                    speed: 0,
+                    performance: "",
+                    volume: 1,
+                    rotate: 0,
+
+                    useWCS: false,
+                    useMSE: true,
+                    useWASM: false,
+                    useSIMD: false,
+
+                    useOffscreen: false,
+                    recording: false,
+                    recordType: 'webm',
+                    scale: '0',
+
+                    isSupportMSEH264: checkSupportMSEH264(),
+                    isSupportWCS: checkSupportWCS(),
+                    isSupportWasm: checkSupportWasm(),
+                    isSupportSIMD: checkSupportSIMD(),
+                };
+            },
+            mounted() {
+                // this.create();
+                // window.onerror = (msg) => (this.err = msg);
+            },
+            unmounted() {
+                this.jessibuca.destroy();
+            },
+            methods: {
+                create() {
+                    this.stopLoop();
+                    this.jessibuca = new JessibucaPro({
+                        // 基础, 调试
+                        container: document.getElementById('container'),
+                        debug: true,
+                        debugLevel: 'debug',
+                        videoBuffer: this.videoBuffer, // 缓存时长
+                        videoBufferDelay: this.videoBufferDelay, // 1000s
+                        timeout: 10, //设置超时时长, 单位秒,在连接成功之前(loading)和播放中途(heart),如果超过设定时长无数据返回,则回调timeout事件
+                        heartTimeout: 5, //设置超时时长, 单位秒,播放中途,如果超过设定时长无数据返回,则回调timeout事件
+                        heartTimeoutReplayUseLastFrameShow: true,
+                        // 性能, 解码,
+                        useMSE: this.useMSE, //是否开启MediaSource硬解码;视频编码只支持H.264视频（Safari on iOS不支持）,不支持 forceNoOffscreen 为 false (开启离屏渲染),优先级高于useWCS:true
+                        useWCS: this.useWCS, //是否开启Webcodecs硬解码;视频编码只支持H.264视频 (需在chrome 94版本以上，需要https或者localhost环境);支持 forceNoOffscreen 为 false （开启离屏渲染）
+                        useWASM: this.useWASM,
+                        useSIMD: this.useSIMD,
+                        forceNoOffscreen: this.forceNoOffscreen,
+                        useCanvasRender: this.useCanvasRender === 'canvas',
+                        isNotMute: true,//是否开启声音，默认是关闭声音播放的。
+                        useWebGPU: this.isUseWebGPU,
+                        audioEngine: "worklet",
+                        demuxUseWorker: this.demuxUseWorker,
+                        // UI 配置
+                        isResize: false,//当为true的时候：视频画面做等比缩放后,高或宽对齐canvas区域,画面不被拉伸,但有黑边。 等同于 setScaleMode(1) 当为false的时候：视频画面完全填充canvas区域,画面会被拉伸。等同于 setScaleMode(0)
+                        controlAutoHide: true,//只有鼠标聚焦到播放器内部才会显示，移除之后，会消失。
+                        text: "",
+                        loadingText: "加载中",
+                        showBandwidth: this.showOperateBtns, // 显示网速
+                        showPerformance: this.showOperateBtns, // 显示性能
+                        operateBtns: {
+                            fullscreen: this.showOperateBtns,
+                            screenshot: this.showOperateBtns,
+                            play: this.showOperateBtns,
+                            audio: this.showOperateBtns,
+                            ptz: this.showOperateBtns,
+                            quality: this.showOperateBtns,
+                            performance: this.showOperateBtns,
+                        },
+                        qualityConfig: ['普清', '高清', '超清', '4K', '8K'],
+                        ptzClickType: 'mouseDownAndUp',
+                        ptzZoomShow: true,
+                        ptzMoreArrowShow: true,
+                        ptzApertureShow: true,
+                        ptzFocusShow: true,
+                        controlHtml: '<div>我是 <span style="color: red">test</span>文案</div>',
+                        // audioEngine:"worklet",
+                        // isFlv: true
+                    });
+
+                    this.jessibuca.on('ptz', (arrow) => {
+                        console.log('ptz', arrow);
+                    })
+
+                    this.jessibuca.on('streamQualityChange', (value) => {
+                        console.log('streamQualityChange', value);
+                    })
+                    this.jessibuca.on('timeUpdate', (value) => {
+                        console.log('timeUpdate', value);
+                    })
+
+                    this.jessibuca.on('stats', (stats) => {
+                        console.log('stats', stats);
+                    })
+
+                    // $player.style.display = 'inline-block';
+                    // $pause.style.display = 'none';
+                    // $destroy.style.display = 'none';
+                    // $fps.textContent = '';
+                },
+                play() {
+                    this.stopLoop();
+                    const playList = [];
+                    if (this.playUrl1) {
+                        playList.push(this.playUrl1);
+                    }
+                    if (this.playUrl2) {
+                        playList.push(this.playUrl2);
+                    }
+                    if (this.playUrl3) {
+                        playList.push(this.playUrl3);
+                    }
+                    const href = playList[this.index++ % playList.length];
+                    if (href) {
+                        this.jessibuca.play(href);
+                        //  $player.style.display = 'none';
+                        //  $pause.style.display = 'inline-block';
+                        //  $destroy.style.display = 'inline-block';
+                        this.startLoop();
+                    }
+                },
+                replay(type) {
+                    if (this.jessibuca) {
+                        this.jessibuca.destroy()
+                    }
+                    if (type === 'mse') {
+                        this.useWCS = false;
+                        this.useOffscreen = false;
+                    } else if (type === 'wcs') {
+                        this.useMSE = false
+                    } else if (type === 'offscreen') {
+                        this.useMSE = false
+                    }
+                    this.create();
+                    setTimeout(() => {
+                        this.play();
+                    }, 100)
+                },
+                pause() {
+                    // $playbackPause.style.display = 'none';
+                    // $pause.style.display = 'none';
+                    // $playScroll.style.display = 'none';
+                    // $player.style.display = 'inline-block';
+                    this.jessibuca.pause();
+                },
+                destroy() {
+                    if (this.jessibuca) {
+                        this.stopLoop();
+                        this.jessibuca.destroy();
+                    }
+                    this.create();
+                },
+                startLoop() {
+                    this.loopTimer = setTimeout(() => {
+                        if (this.showLastIframe) {
+                            const loadingBg = this.jessibuca.screenshot('', 'png', 0.92, 'base64');
+                            const videoInfo = this.jessibuca.getVideoInfo();
+                            console.log('videoInfo', videoInfo, loadingBg);
+                            //  上一个流的最后一帧画面。
+                            this.loadingBackground = loadingBg;
+                            this.loadingBackgroundWidth = videoInfo.width;
+                            this.loadingBackgroundHeight = videoInfo.height;
+                        }
+                        this.jessibuca.destroy();
+                        this.create();
+                        this.play();
+                    }, 30 * 1000)
+                },
+                stopLoop() {
+                    if (this.loopTimer) {
+                        clearTimeout(this.loopTimer);
+                        this.loopTimer = null;
+                    }
+                },
+            },
+        }
+    );
+</script>
+</body>
+<style>
+    * {
+        -webkit-user-select: text;
+    }
+
+    #container {
+        background: rgba(13, 14, 27, 0.7);
+        width: 960px;
+        height: 597px;
+    }
+</style>
+</html>
