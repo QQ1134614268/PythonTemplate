@@ -1,7 +1,6 @@
 Flask~=2.0.3
 Flask-Cors~=4.0.0
 flask-socketio~=5.1.1
-simple-websocket
 Jinja2~=3.1.3
 schedule~=1.1.0
 APScheduler~=3.9.1
