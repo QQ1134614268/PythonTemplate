@@ -32,7 +32,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination @current-change="init" :current-page="page" :total="total"></el-pagination>
+    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :total="total"></el-pagination>
 
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -147,6 +147,14 @@ export default {
       await postJson2({{tableConst}}_DELETE_API, row.id);
       this.$message.success("删除成功");
       await this.init();
+    },
+    handleCurrentChange(val) {
+      this.page.page = val;
+      this.init();
+    },
+    handleSizeChange(val) {
+      this.page.page_size = val;
+      this.init();
     },
   }
 };
