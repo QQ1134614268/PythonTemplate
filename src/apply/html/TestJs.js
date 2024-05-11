@@ -22,7 +22,7 @@ function filterRepeat(arr) {
     // 2.利用includes去重
     // 3.利用map去重
     // 4.利用indexOf去重
-    // 5. 利用单层for循环去重
+    // 5.利用单层for循环去重
     // 6.利用双层for循环去重
     // 7.利用递归去重
     // 8.利用Array.filter和map对象数组去重 （性能较高）
