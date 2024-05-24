@@ -4,7 +4,7 @@ from apply.issue.issue_js_auto_code.model import MysqlColumns, JsForm
 from config.db_conf import localhost_test_session, localhost_oa_session
 
 
-class TestAutoCode(TestCase):
+class TestAutoCode(TestCase):  # todo
 
     def test_run(self):
         vos = localhost_oa_session.query(MysqlColumns).filter(
