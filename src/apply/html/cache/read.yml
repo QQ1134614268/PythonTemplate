@@ -1,4 +1,3 @@
-
 缓存过程:
     1. 查本地缓存, url和body相同
     2. 命中强缓存,未过期,直接使用;
@@ -8,7 +7,6 @@
     浏览器页面缓存 - Cache【性能篇】: https://blog.csdn.net/weixin_38080573/article/details/130047364
     从chrome源码解读cache缓存策略: https://zhuanlan.zhihu.com/p/265008027
     浏览器缓存看这一篇就够了: https://segmentfault.com/a/1190000018717463
-
 缓存header:
     Vary: HTTP/1.0; 如果response header里有Vary字段，那么Vary里的每个header遍历一遍，要求本次request和cache里上次request的这些header的值一样，否则cache里的资源无效。
     pragma: HTTP/1.0; Request中, 表明不想获取缓存
@@ -46,8 +44,6 @@ chrome 大小字段:
     普通刷新 (F5)：因为 TAB 并没有关闭，因此 memory cache 是可用的，会被优先使用(如果匹配的话)。其次才是 disk cache。
     强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有Cache-control:max-age=0,返回304
     禁用缓存:Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache),服务器直接返回 200 和最新内容。
-
-
 nginx配置:
     - expires 1d;
     - add_header Cache-Control max-age=3600;
@@ -58,7 +54,6 @@ nginx配置:
     - 开启 Last-Modified:
         etag off|on;
     # more_clear_headers 'Content-Type'; 清理header
-
 axios:
     304: 报错, 不能解析;
     max-age=5,must-revalidate:
