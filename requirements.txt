@@ -6,7 +6,7 @@ schedule~=1.1.0
 APScheduler~=3.9.1
 Concurrent_log_handler~=0.9.19
 
-SQLAlchemy~=1.4.25
+SQLAlchemy~=2.0.30
 redis~=4.1.0
 pymysql~=0.9.3
 mysql-connector-python~=8.0.18
