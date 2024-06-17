@@ -44,5 +44,5 @@ zlm:
     metaRTC: 全国产纯c webrtc sdk
 
 QA:
-  1. Your ip is not allowed to access the service.
-    设置: allow_ip_range
+    1. Your ip is not allowed to access the service.:
+        设置: allow_ip_range

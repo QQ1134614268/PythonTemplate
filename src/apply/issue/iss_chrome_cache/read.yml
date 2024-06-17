@@ -1,3 +1,10 @@
+缓存:
+    强制缓存: #memory cache, disk cache
+        Expires
+        Cache-Control
+    协商缓存:
+        last-modified
+        etag
 缓存过程:
     1. 查本地缓存, url和body相同
     2. 命中强缓存,未过期,直接使用;
@@ -40,10 +47,11 @@ chrome 大小字段:
     资源大小数值(200): 从服务器下载最新资源
 
 用户行为对浏览器缓存的影响:
-    打开网页，地址栏输入地址： 查找 disk cache 中是否有匹配。如有则使用；如没有则发送网络请求。
-    普通刷新 (F5)：因为 TAB 并没有关闭，因此 memory cache 是可用的，会被优先使用(如果匹配的话)。其次才是 disk cache。
-    强制刷新 (Ctrl + F5)：浏览器不使用缓存，因此发送的请求头部均带有Cache-control:max-age=0,返回304
-    禁用缓存:Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache),服务器直接返回 200 和最新内容。
+    打开网页，地址栏输入地址: disk cache | 网络请求
+    普通刷新 (F5): memory cache | disk cache | 网络请求 # 页面没有关闭, memory cache可以用
+    强制刷新 (Ctrl + F5): 浏览器不使用缓存，因此发送的请求头部均网络请求带有Cache-control:max-age=0,返回304
+    禁用缓存: Cache-control:no-cache(为了兼容，还带了 Pragma:no-cache),服务器直接返回 200 和最新内容。
+    Ctrl+R: ??
 nginx配置:
     - expires 1d;
     - add_header Cache-Control max-age=3600;
