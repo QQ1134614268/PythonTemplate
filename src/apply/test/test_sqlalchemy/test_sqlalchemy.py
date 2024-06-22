@@ -6,7 +6,7 @@
 """
 from unittest import TestCase
 
-from sqlalchemy import Column, String, Integer, create_engine, Boolean, func, desc, FLOAT, DECIMAL, alias, or_, and_
+from sqlalchemy import Column, String, Integer, create_engine, Boolean, func, desc, Float, DECIMAL, alias, or_, and_
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, aliased
@@ -25,8 +25,8 @@ class TestUser(Base):
     age = Column(Integer)
     uid = Column(String(64), unique=True)
     op_mode = Column(Boolean, default=1)
-    test_float = Column(FLOAT(precision='10,2', decimal_return_scale=12), comment="测试float")
-    test_float2 = Column(FLOAT(precision=10, decimal_return_scale=12), comment="测试float")
+    test_float = Column(Float(precision='10,2', decimal_return_scale=12), comment="测试float")
+    test_float2 = Column(Float(precision=10, asdecimal=True, decimal_return_scale=12), comment="测试float")
     test_decimal = Column(DECIMAL(precision=10, scale=2), comment="测试Decimal")
     # decimal 以字符串存储,存储空间大, 适用价格金额(精度不高,准确度高);
     # float,double 浮点类型,丢失精度
