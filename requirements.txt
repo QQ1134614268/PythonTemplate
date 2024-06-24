@@ -31,12 +31,16 @@ opencv-python~=4.6.0.66
 pytest~=7.2.0
 ddt~=1.6.0
 
-pcapng~=0.1.25 # 抓包
-scapy~=2.5.0 # 抓包
-cryptography # tls解密
+# 抓包
+scapy~=2.5.0
+pcapng~=0.1.25
+# 抓包/tls解密
+cryptography
 
-psutil~=5.9.1 # 系统pid等
-pyinstaller~=5.3 # 打包exe
+# 系统pid等
+psutil~=5.9.1
+# 打包exe
+pyinstaller~=5.3
 
 pandas~=1.3.3
 numpy~=1.21.2
