@@ -1,8 +1,3 @@
-# -*- coding:utf-8 -*-
-"""
-@Time: 2022/8/11
-@Description:
-"""
 import json
 from os import path
 
@@ -17,6 +12,13 @@ def get_data_dir(file_path):
 
 
 class FileUtil:
+    """
+    properties 文件主要用于配置简单的键值对;
+        使用逗号分隔的值 eg: 1,2,3
+        使用多个属性 eg: serve.id.1 = 1
+        使用yml
+    """
+
     @staticmethod
     def to_json(data, file_path):
         content = json.dumps(data, ensure_ascii=False, cls=MyJsonEncoder, indent=2)
@@ -34,53 +36,10 @@ class FileUtil:
             file.write(yaml.dump(dict_value, allow_unicode=True))
 
     @staticmethod
-    def from_yaml(yaml_path):  # 转类
-        with open(yaml_path) as file:
-            dict_value = yaml.load(file.read(), Loader=yaml.FullLoader)
+    def from_yaml(yaml_path) -> dict:  # 转类
+        with open(yaml_path, encoding="utf-8") as file:
+            dict_value = yaml.load(file, Loader=yaml.FullLoader)
             return dict_value
-
-    # TODO 暂不支持list
-    @staticmethod
-    def to_prop(data: dict, file_path):
-        ret_list = FileUtil.__dict_to_prop(data)
-        with open(file_path, encoding="utf-8", mode='w') as f:
-            f.write("\n".join(ret_list))
-
-    @staticmethod
-    def from_prop(file_path):  # 分隔符
-        with open(file_path, encoding="utf-8") as f:
-            lines = f.readlines()
-        new_list = []
-        for line in lines:
-            line = line.replace("\n", "")
-            if line.strip() != "":
-                new_list.append(line)
-        root = {}
-        for line in new_list:
-            pos_num = line.find("=")
-            arr = line[:pos_num].split(".")
-            curr = root
-            # 模拟文件夹, 根据路径,从根目录开始, 切换当前目录. 不存在时就创建
-            for index, name in enumerate(arr):
-                if index == len(arr) - 1:
-                    curr[name] = line[pos_num + 1:]
-                else:
-                    curr = root.setdefault(name, {})
-        return root
-
-    @staticmethod
-    def __dict_to_prop(data: dict, full_path="", ret=None) -> list:
-        if ret is None:
-            ret = []
-        if full_path:
-            full_path += "."
-        #  todo 优化 拼接 .
-        for k, v in data.items():
-            if isinstance(v, dict):
-                FileUtil.__dict_to_prop(v, f"{full_path}{k}", ret)
-            else:
-                ret.append(f"{full_path}{k}={v}")
-        return ret
 
     # 只有值, 类似xmind, 目录结构
     @staticmethod
