@@ -1,31 +1,28 @@
 Flask~=2.0.3
 Flask-Cors~=4.0.0
-flask-socketio~=5.1.1
+Flask-socketio~=5.1.1
 Jinja2~=3.1.3
-schedule~=1.1.0
+Schedule~=1.1.0
 APScheduler~=3.9.1
 Concurrent_log_handler~=0.9.19
 
 SQLAlchemy~=2.0.30
-redis~=4.1.0
-pymysql~=0.9.3
+Redis~=4.1.0
 mysql-connector-python~=8.0.18
-pymongo~=3.12.0
-pymssql~=2.2.0
-cx_Oracle~=8.2.0
+Pymongo~=3.12.0
 Elasticsearch~=7.6.0
-sqlacodegen~=2.3.0
+Sqlacodegen~=2.3.0
 
 Requests~=2.31.0
 Scrapy~=2.6.2
-beautifulsoup4~=4.10.0
+Beautifulsoup4~=4.10.0
 
-pyexecjs~=1.4.1
+Pyexecjs~=1.4.1
 PyYAML~=6.0
 
 # kafka-python~=2.0.2
 confluent-kafka~=2.0.2
-pyspark~=3.3.1
+Pyspark~=3.3.1
 opencv-python~=4.6.0.66
 
 pytest~=7.2.0
