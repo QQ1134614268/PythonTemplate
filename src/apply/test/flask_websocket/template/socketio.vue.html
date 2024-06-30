@@ -13,37 +13,116 @@
     <script src="https://cdn.bootcss.com/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
-<div id="app" style="min-height: 100vh">
-    <el-button @click="sendMsg">emit发送</el-button>
+<div id="app" class="appPage">
+    <el-table :data="tableData" class="table">
+        <el-table-column prop="topic" label="topic"></el-table-column>
+        <el-table-column prop="value" label="value">
+            <template slot-scope="scope">
+                {{ scope.row.value }}
+            </template>
+        </el-table-column>
+        <el-table-column label="操作">
+            <template slot-scope="scope">
+                <el-button @click="sendMsg(scope.row.topic,scope.row.value)">发送</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+    <el-table :data="resList" class="res">
+        <el-table-column prop="time" label="time"></el-table-column>
+        <el-table-column prop="resTopic" label="resTopic"></el-table-column>
+        <el-table-column prop="res" label="res">
+            <template slot-scope="scope">
+                {{ scope.row.res }}
+            </template>
+        </el-table-column>
+    </el-table>
 </div>
 <script>
     new Vue(
         {
             el: '#app',
             data: {
-                client: null
+                client: null,
+                resList: [],
+                tableData: [
+                    {
+                        topic: 'connect',
+                        value: 'hello connect'
+                    },
+                    {
+                        topic: 'message',
+                        value: "hello message"
+                    },
+                    {
+                        topic: 'json',
+                        value: {"data": 123}
+                    },
+                    {
+                        topic: 'hello',
+                        value: 'hello'
+                    },
+                    {
+                        topic: 'add',
+                        value: '1+2'
+                    },
+                    {
+                        topic: 'send',
+                        value: {"data": 666}
+                    },
+                ]
             },
             methods: {
                 init() {
-                    let namespace = "/wechat"; // ??
                     this.client = io.connect('http://127.0.0.1:5000');
+                    console.log("连接状态1:", this.client.connected)
                     let socket = this.client
-                    this.client.emit('hello', 'this is client')
+                    let resHook = this.collectRes
                     this.client.on('connect', function (data) {
-                        console.log("链接状态:", socket?.connected)
-                        console.log('server_connect', data)
+                        console.log("连接状态2:", socket?.connected)
+                        console.log('connect', data)
                     });
-                    this.client.on('server_response', function (data) {
-                        console.log('server_response', data)
+                    this.client.on('message', function (data) {
+                        resHook('message', data)
                     });
-                    this.client.on('client_hello', function () {
-                        console.log('client_hello')
+                    this.client.on('json', function (data) {
+                        resHook('json', data)
+                    });
+                    this.client.on('connectRes', function (data) {
+                        resHook('connectRes', data)
+                    });
+                    this.client.on('messageRes', function (data) {
+                        resHook('messageRes', data)
+                    });
+                    this.client.on('jsonRes', function (data) {
+                        resHook('jsonRes', data)
+                    });
+                    this.client.on('helloRes', function (data) {
+                        resHook('helloRes', data)
+                    });
+                    this.client.on('addRes', function (data) {
+                        resHook('addRes', data)
                     });
                 },
-                sendMsg() {
-                    this.client.emit('hello', 'this is client')
-                    this.client.emit("json", JSON.stringify({"data": "666"}));
-                    this.client.emit("json", 1);
+                sendMsg(topic, data) {
+                    if (topic === 'add') {
+                        this.client.emit(topic, 1, 2)
+                        return
+                    }
+                    this.client.emit(topic, data)
+                },
+                collectRes(resTopic, data) {
+                    let item = {
+                        time: this.date2String(new Date()),
+                        resTopic: resTopic,
+                        res: data,
+                    };
+                    this.resList.unshift(item)
+                },
+                date2String(date) {
+                    let hours = date.getHours();
+                    let minutes = date.getMinutes();
+                    let seconds = date.getSeconds();
+                    return hours + ":" + minutes + ":" + seconds;
                 }
             },
             created() {
@@ -54,5 +133,21 @@
 </script>
 </body>
 <style>
+    .appPage {
+        min-height: 100vh;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .table {
+        width: 50%;
+        margin-right: 10px;
+        border: #0a53be 1px solid;
+    }
+
+    .res {
+        width: 50%;
+        border: #abb8cc 1px solid;
+    }
 </style>
 </html>
