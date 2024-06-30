@@ -51,11 +51,11 @@
                     },
                     {
                         topic: 'message',
-                        value: "hello message"
+                        value: 'hello message'
                     },
                     {
                         topic: 'json',
-                        value: {"data": 123}
+                        value: {'data': 123}
                     },
                     {
                         topic: 'hello',
@@ -67,18 +67,18 @@
                     },
                     {
                         topic: 'send',
-                        value: {"data": 666}
+                        value: {'data': 666}
                     },
                 ]
             },
             methods: {
                 init() {
                     this.client = io.connect('http://127.0.0.1:5000');
-                    console.log("连接状态1:", this.client.connected)
+                    console.log('连接状态1:', this.client.connected)
                     let socket = this.client
                     let resHook = this.collectRes
                     this.client.on('connect', function (data) {
-                        console.log("连接状态2:", socket?.connected)
+                        console.log('连接状态2:', socket?.connected)
                         console.log('connect', data)
                     });
                     this.client.on('message', function (data) {
@@ -122,7 +122,7 @@
                     let hours = date.getHours();
                     let minutes = date.getMinutes();
                     let seconds = date.getSeconds();
-                    return hours + ":" + minutes + ":" + seconds;
+                    return hours + ':' + minutes + ':' + seconds;
                 }
             },
             created() {

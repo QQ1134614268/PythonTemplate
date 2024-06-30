@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
-"""
-@Time: 2022/3/4
-@Description:
-
-"""
 from flask import Flask, send_file
 from flask_socketio import SocketIO, emit, send
 
+"""
+Python: # https://blog.csdn.net/xietansheng/article/details/115558069
+websocket: flask_socketio, Flask 本身并不直接支持 WebSocket,使用第三方库
+异步服务器: eventlet | gevent; 避免阻塞,可以支持更多链接
+"""
 app = Flask(__name__, template_folder='./template')
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')  # async_mode='eventlet' 或者 'gevent'
 
