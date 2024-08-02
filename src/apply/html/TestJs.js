@@ -1,4 +1,30 @@
-function isObjectEqual(obj1, obj2) {
+test()
+
+function test() {
+    // 测试lambda
+    testBianli(["a", "b"])
+
+    const arr = [{"sql": "ff"}, {"sql": "ff"}, {"sql": "ff"}];
+    // 测试lambda
+    console.log(filterRepeat(arr));
+    console.log(Array.from(new Set(arr)));
+
+    testSetTimeout()
+    testInterval()
+
+    const obj1 = {a: 1};
+    const obj2 = {a: 1};
+    const obj3 = obj1;
+
+    console.log(Object.is(obj1, obj2)); // false
+    console.log(Object.is(obj1, obj3)); // true
+    console.log(obj1 === obj2); // false
+    console.log(obj1 === obj3); // true
+
+    console.log(equals(obj1, obj2)); // true
+}
+
+function equals(obj1, obj2) {
     const obj1Keys = Object.keys(obj1);
     const obj2Keys = Object.keys(obj2);
 
@@ -7,7 +33,7 @@ function isObjectEqual(obj1, obj2) {
     }
 
     for (let key of obj1Keys) {
-        if (obj1[key] !== obj2[key]) {
+        if (obj1[key] === obj2[key]) {
             return false;
         }
     }
@@ -32,7 +58,7 @@ function filterRepeat(arr) {
     for (let a of arr) {
         let flag = false
         for (let b of newArr) {
-            if (isObjectEqual(a, b)) {
+            if (equals(a, b)) {
                 flag = true
             }
         }
@@ -43,25 +69,10 @@ function filterRepeat(arr) {
     return newArr;
 }
 
-const obj1 = {a: 1};
-const obj2 = {a: 1};
-const obj3 = obj1;
-
-console.log(Object.is(obj1, obj2)); // false
-console.log(Object.is(obj1, obj3)); // true
-console.log(obj1 === obj2); // false
-console.log(obj1 === obj3); // true
-
-const arr = [{"sql": "ff"}, {"sql": "ff"}, {"sql": "ff"}];
-
-console.log(Array.from(new Set(arr)));
-console.log(filterRepeat(arr));
-
 // testJs 测试js
-function bianli() {
+function testBianli(arr) {
     // 测试 遍历js
 
-    let arr = ["a", "b"]
     // 1. for遍历
     // 2. for in
     // 3. for of
@@ -92,4 +103,37 @@ function bianli() {
     })
 }
 
-bianli()
+function testSetTimeout() {
+    // 测试定时
+    setTimeout((arg1, arg2) => {
+        console.log(arg1, arg2)
+    }, 5000, "tom", "cat")
+}
+
+function testInterval() {
+    // 测试循环
+    let interval = setInterval((arg1, arg2, endTime) => {
+        if (new Date().getTime() > endTime) {
+            console.log('end')
+            clearInterval(interval)
+        }
+        console.log(arg1, arg2, new Date())
+    }, 1000, "tom", "cat", new Date().getTime() + 5000)
+}
+
+class User {
+    static tableName = "user_t"
+
+    constructor(name, age) {
+        this.name = name
+        this.age = age
+    }
+
+    getName() {
+        return this.name
+    }
+
+    static of(name, age) {
+        return new User(name, age)
+    }
+}
