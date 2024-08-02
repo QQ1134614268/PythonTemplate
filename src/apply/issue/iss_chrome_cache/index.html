@@ -89,17 +89,10 @@
                     row.res = res
                 },
                 get(url, params = {}, headers = {}) {
-                    try {
-                        return axios.get(url, {params: params, headers: headers});
-                    } catch (e) {
-                        console.log(e);
-                        return {
-                            data: {}
-                        }
-                    }
+                    return axios.get(url, {params: params, headers: headers});
                 },
                 post(url, params = {}, data = {}, headers = {}) {
-                    return axios.get(url, {params: params, headers: headers, data: data});
+                    return axios.post(url, data, {params: params, headers: headers});
                 },
             },
         }
