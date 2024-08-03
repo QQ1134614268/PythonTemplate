@@ -56,7 +56,7 @@ class TestKafkaConsumer(unittest.TestCase):
         # consumer.seek_to_beginning(tp)
         # consumer.seek_to_end(tp)
         # consumer.seek(tp, 100)
-        # timestamp = datetime.strptime('2024-07-23 08:00:00', '%Y-%m-%d %H:%M:%i').timestamp() * 1000
+        # timestamp = datetime.strptime('2024-07-23 08:00:00', '%Y-%m-%d %H:%M:%S').timestamp() * 1000
         timestamp = int(datetime.now().replace(hour=8, minute=0, second=0, microsecond=0).timestamp() * 1000)
         timestamps = {tp: timestamp for tp in partitions}
         tp_offset_dic = consumer.offsets_for_times(timestamps)
