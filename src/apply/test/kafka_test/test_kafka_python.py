@@ -24,7 +24,9 @@ class TestKafkaProduce(unittest.TestCase):
 
         for i in range(0, 2):
             # type(value_bytes) in (bytes, bytearray, memoryview, type(None)
-            producer.send(MY_TOPIC1, value=b'hello kafka')
+            data = {'name': f'name-{i}', 'createTime': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+            value = json.dumps(data).encode(encoding='utf-8')
+            producer.send(MY_TOPIC1, value=value)
         producer.flush()
         producer.close()
 
@@ -61,6 +63,6 @@ class TestKafkaConsumer(unittest.TestCase):
         print(tp_offset_dic)
         for tp, offset_and_timestamp in tp_offset_dic.items():
             consumer.seek(tp, offset_and_timestamp.offset)
-            for message in consumer:
-                data = json.loads(message.value)
-                print(data)
+        for message in consumer:
+            data = json.loads(message.value)
+            print(data, message.offset, message.partition)
