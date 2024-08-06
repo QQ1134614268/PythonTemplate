@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body id="body">
+
+</body>
+<script>
+    // script 放在后面,可以先加载html元素
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // 创建立方体形的几何体
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    // 创建红色的材质
+    const material = new THREE.MeshBasicMaterial({color: 0xff0000});
+    // 将立方体和红色材质组合成网格模型
+    const mesh = new THREE.Mesh(geometry, material);
+    // 将网格模型添加进场景
+    scene.add(mesh);
+
+    camera.position.set(1, 0, 3);
+    renderer.render(scene, camera); // 渲染一次
+
+    // setTimeout(() => {
+    //     console.log("111")
+    //     mesh.position.y = mesh.position.y + 0.1;
+    //     camera.position.z = 3;
+    // }, 1000);
+
+    // 删除
+    // renderer.render(scene, camera);
+
+    // 添加
+    function render() { // 循环任务
+        requestAnimationFrame(render);
+        camera.position.z = camera.position.z + 0.001; // camera 类似往Z轴移动, 场景变小
+        mesh.position.y = mesh.position.y + 0.001; // 场景移动
+        renderer.render(scene, camera);
+    }
+
+    render();
+
+</script>
+</html>
