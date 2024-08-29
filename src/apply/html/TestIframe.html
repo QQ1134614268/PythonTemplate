@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>iframe</title>
+    <script src="https://cdn.staticfile.net/vue/2.6.12/vue.js"></script>
+    <link rel="stylesheet" href="https://cdn.staticfile.net/twitter-bootstrap/5.1.1/css/bootstrap.min.css">
+</head>
+<body>
+<div id="app">
+    <div>{{ deviceWidth }}</div>
+    <div>{{ deviceHeight }}</div>
+    <div class="container row bg-info" style="height: 10rem;"></div>
+    <iframe src="TestIframe.html"></iframe>
+</div>
+</body>
+<script>
+    let v = new Vue(
+        {
+            el: '#app',
+            data: {},
+            methods: {},
+            computed: {
+                deviceWidth() {
+                    return window.innerWidth;
+                },
+                deviceHeight() {
+                    return window.innerHeight;
+                }
+            }
+        }
+    );
+</script>
+<style>
+</style>
+</html>
